@@ -3,18 +3,20 @@ import Navbar from '../../components/Navbar';
 import { supabase } from '../../supabaseClient';
 import Table from '../../components/Table';
 import { Button } from 'primereact/button';
-import { useNavigate } from 'react-router-dom';
 import CRUDProducts from './CRUDProducts';
+import Loading from '../../components/Loading';  // Importa Loading
 
 export default function Productos() {
   const [data, setData] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
   const [selected, setSelected] = useState([]);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   
   const getInfo = async () => {
+    setLoading(true);
     const { data, error } = await supabase.from('Products').select('*');
     if (!error) setData(data);
+    setLoading(false);
   };
 
   const columns = [
@@ -53,6 +55,19 @@ export default function Productos() {
       filterMatchMode: 'contains',
       format: 'text',
     },
+    {
+      field: 'actions',
+      Header: 'Acciones',
+      isIconColumn: true,
+      icon: 'pi pi-pencil',
+      center: true,
+      className: 'Xsmall',
+      filter: false,
+      onClick: (rowData) => {
+        setSelected([rowData]);
+        setShowDialog(true);
+      }
+    }
   ];
 
   useEffect(() => {
@@ -62,9 +77,16 @@ export default function Productos() {
   return (
     <>
       <Navbar />
-      <div className="dashboard-container" style={{ paddingTop: '80px' }}>
+      <div className="dashboard-container" style={{ paddingTop: '50px' }}>
         <h2 style={{ textAlign: 'center' }}>Productos</h2>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem', gap: '0.5rem' }}>
+          <Button
+            icon="pi pi-refresh"
+            className="p-button-success"
+            onClick={getInfo} 
+          />
+
           <Button
             label="Agregar Producto"
             icon="pi pi-plus"
@@ -72,7 +94,10 @@ export default function Productos() {
             onClick={() => setShowDialog(true)} 
           />
         </div>
+
         <Table columns={columns} data={data} />
+
+        {loading && <Loading message="Cargando productos..." />}
       </div>
 
       {showDialog && (

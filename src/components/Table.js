@@ -7,7 +7,21 @@ import '../base.css';
 export default function Table({ columns, data }) {
   const [globalFilter, setGlobalFilter] = useState('');
 
-  const globalFilterFields = columns.map(col => col.field);
+  const globalFilterFields = columns.filter(col => !col.isIconColumn).map(col => col.field);
+  
+  const renderIconBody = (iconClass, onClickHandler, rowData) => {
+    return (
+      <i
+        className={iconClass}
+        style={{ fontSize: '1.2rem', cursor: onClickHandler ? 'pointer' : 'default' }}
+        onClick={onClickHandler ? () => onClickHandler(rowData) : undefined}
+        role={onClickHandler ? 'button' : undefined}
+        tabIndex={onClickHandler ? 0 : undefined}
+        onKeyDown={onClickHandler ? (e) => { if(e.key === 'Enter') onClickHandler(rowData); } : undefined}
+      ></i>
+    );
+  };
+
 
   return (
     <div className="card table-wrapper">
@@ -45,12 +59,17 @@ export default function Table({ columns, data }) {
             }}
             align={col.center ? 'center' : 'start'}
             frozen={col.frozen || false}
-            body={(rowData) => formatValue(rowData[col.field], col.format)}
-            filter={true}
+            body={rowData =>
+              col.isIconColumn
+                ? renderIconBody(col.icon, col.onClick, rowData)
+                : formatValue(rowData[col.field], col.format)
+            }
+            filter={col.filter !== false}
             filterMatchMode={col.filterMatchMode || 'contains'}
           />
         ))}
       </DataTable>
+
     </div>
   );
 }
