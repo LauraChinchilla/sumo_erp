@@ -1,0 +1,196 @@
+/* src/base.css */
+
+/* ======= GLOBAL ======= */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f1f3f4;
+}
+
+/* ======= LOGIN ======= */
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-logo {
+  width: 40px;
+}
+
+.login-title {
+  margin-top: 1rem;
+}
+
+.login-label {
+  display: block;
+  margin-bottom: 4px;
+  color: #333;
+  font-weight: 500;
+}
+
+.login-input {
+  width: 100%;
+}
+
+.login-error {
+  color: red;
+  margin-bottom: 1rem;
+  font-size: 14px;
+}
+
+.dashboard-container {
+  padding: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* exactamente 2 columnas */
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr; /* en móviles, una por fila */
+  }
+}
+
+.dashboard-card {
+  display: flex;
+  align-items: flex-start;
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* 🔲 Card seleccionada */
+.card-selected {
+  background-color: #f3f4f6;
+  border: 2px solid #d0d7de;
+  box-shadow: none;
+}
+
+
+
+.card-icon {
+  font-size: 2rem;
+  color: #2f80ed;
+  margin-right: 1rem;
+}
+
+
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.navbar-menu-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #333;
+}
+
+/* Tamaños personalizados para columnas */
+/* Anchura por clase */
+
+.p-column-header.XxxSmall,
+.p-cell.XxxSmall {
+  min-width: 40px;
+  max-width: 40px;
+}
+
+.p-column-header.XxSmall,
+.p-cell.XxSmall {
+  min-width: 60px;
+  max-width: 60px;
+}
+
+.p-column-header.Xsmall,
+.p-cell.Xsmall {
+  min-width: 90px;
+  max-width: 90px;
+}
+
+.p-column-header.Small,
+.p-cell.Small {
+  min-width: 120px;
+  max-width: 120px;
+}
+
+.p-column-header.Medium,
+.p-cell.Medium {
+  min-width: 150px;
+  max-width: 150px;
+}
+
+.p-column-header.Large,
+.p-cell.Large {
+  min-width: 180px;
+  max-width: 180px;
+}
+
+.p-column-header.Xlarge,
+.p-cell.Xlarge {
+  min-width: 220px;
+  max-width: 220px;
+}
+
+.p-column-header.Xxlarge,
+.p-cell.Xxlarge {
+  min-width: 280px;
+  max-width: 280px;
+}
+
+.p-column-header.Xxxlarge,
+.p-cell.Xxxlarge {
+  min-width: 350px;
+  max-width: 350px;
+}
