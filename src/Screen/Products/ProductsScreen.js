@@ -1,17 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import { supabase } from '../../supabaseClient';
 import Table from '../../components/Table';
 import { Button } from 'primereact/button';
 import CRUDProducts from './CRUDProducts';
-import Loading from '../../components/Loading';  // Importa Loading
+import Loading from '../../components/Loading';
+import { InputText } from 'primereact/inputtext';
 
 export default function Productos() {
   const [data, setData] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+  const [globalFilter, setGlobalFilter] = useState('');
+  const inputRef = useRef(null);
+
   const getInfo = async () => {
     setLoading(true);
     const { data, error } = await supabase.from('Products').select('*');
@@ -56,6 +59,31 @@ export default function Productos() {
       format: 'text',
     },
     {
+      field: 'PrecioCompra',
+      Header: 'PrecioCompra',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'XxSmall',
+      filterMatchMode: 'equals',
+    },
+    {
+      field: 'PrecioVenta',
+      Header: 'PrecioVenta',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'XxSmall',
+      filterMatchMode: 'equals',
+    },
+    {
+      field: 'StatusName',
+      Header: 'Estado',
+      format: 'badge',
+      center: true,
+      className: 'Small',
+    },
+    {
       field: 'actions',
       Header: 'Acciones',
       isIconColumn: true,
@@ -74,28 +102,57 @@ export default function Productos() {
     getInfo();
   }, []);
 
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.focus();
+  }, [data]);
+
   return (
     <>
       <Navbar />
       <div className="dashboard-container" style={{ paddingTop: '50px' }}>
         <h2 style={{ textAlign: 'center' }}>Productos</h2>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem', gap: '0.5rem' }}>
-          <Button
-            icon="pi pi-refresh"
-            className="p-button-success"
-            onClick={getInfo} 
+        {/* Buscador y botones */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <InputText
+            inputRef={inputRef}
+            type="search"
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Buscar por código (lector)"
+            className="p-inputtext-sm"
+            style={{ width: '300px' }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const match = data.find(p => p.Code?.toString().trim() === globalFilter.trim());
+                if (match) {
+                  setSelected([match]);
+                  setShowDialog(true);
+                }
+              }
+            }}
           />
 
-          <Button
-            label="Agregar Producto"
-            icon="pi pi-plus"
-            className="p-button-success"
-            onClick={() => setShowDialog(true)} 
-          />
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Button
+              icon="pi pi-refresh"
+              className="p-button-success"
+              onClick={getInfo}
+              disabled={loading}
+            />
+            <Button
+              label="Agregar Producto"
+              icon="pi pi-plus"
+              className="p-button-success"
+              onClick={() => {
+                setSelected([]);
+                setShowDialog(true);
+              }}
+            />
+          </div>
         </div>
 
-        <Table columns={columns} data={data} />
+        <Table columns={columns} data={data} globalFilter={globalFilter} />
 
         {loading && <Loading message="Cargando productos..." />}
       </div>

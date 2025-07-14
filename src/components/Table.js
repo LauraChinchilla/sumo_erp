@@ -17,11 +17,10 @@ export default function Table({ columns, data }) {
         onClick={onClickHandler ? () => onClickHandler(rowData) : undefined}
         role={onClickHandler ? 'button' : undefined}
         tabIndex={onClickHandler ? 0 : undefined}
-        onKeyDown={onClickHandler ? (e) => { if(e.key === 'Enter') onClickHandler(rowData); } : undefined}
+        onKeyDown={onClickHandler ? (e) => { if (e.key === 'Enter') onClickHandler(rowData); } : undefined}
       ></i>
     );
   };
-
 
   return (
     <div className="card table-wrapper">
@@ -47,29 +46,31 @@ export default function Table({ columns, data }) {
         globalFilter={globalFilter}
         globalFilterFields={globalFilterFields}
       >
-        {columns.map((col, index) => (
-          <Column
-            key={index}
-            field={col.field}
-            header={col.Header}
-            style={{
-              textAlign: col.center ? 'center' : 'left',
-              whiteSpace: 'nowrap',
-              width: getColumnWidth(col.className),
-            }}
-            align={col.center ? 'center' : 'start'}
-            frozen={col.frozen || false}
-            body={rowData =>
-              col.isIconColumn
-                ? renderIconBody(col.icon, col.onClick, rowData)
-                : formatValue(rowData[col.field], col.format)
-            }
-            filter={col.filter !== false}
-            filterMatchMode={col.filterMatchMode || 'contains'}
-          />
-        ))}
+        {columns.map((col, index) => {
+          const isNumber = col.format === 'number';
+          return (
+            <Column
+              key={index}
+              field={col.field}
+              header={col.Header}
+              style={{
+                textAlign: isNumber ? 'right' : (col.center ? 'center' : 'left'),
+                whiteSpace: 'nowrap',
+                width: getColumnWidth(col.className),
+              }}
+              align={isNumber ? 'end' : (col.center ? 'center' : 'start')}
+              frozen={col.frozen || false}
+              body={rowData =>
+                col.isIconColumn
+                  ? renderIconBody(col.icon, col.onClick, rowData)
+                  : formatValue(rowData[col.field], col.format, rowData)
+              }
+              filter={col.filter !== false}
+              filterMatchMode={col.filterMatchMode || 'contains'}
+            />
+          );
+        })}
       </DataTable>
-
     </div>
   );
 }
@@ -86,14 +87,36 @@ function getColumnWidth(size) {
     Xxlarge: '280px',
     Xxxlarge: '350px',
   };
-
   return widths[size] || 'auto';
 }
 
-function formatValue(value, format) {
+
+function formatValue(value, format, rowData) {
   switch (format) {
     case 'number':
-      return new Intl.NumberFormat().format(value);
+      const num = parseFloat(value);
+      return isNaN(num) ? value : num.toFixed(2);
+    case 'badge':
+      const statusName = rowData.StatusName || '';
+      const isActive = rowData.IdStatus === 1 || statusName.toLowerCase() === 'activo';
+      const bgColor = isActive ? '#28a745' : '#dc3545'; // verde o rojo
+      const text = statusName || (isActive ? 'Activo' : 'Inactivo');
+      return (
+        <span
+          style={{
+            backgroundColor: bgColor,
+            color: 'white',
+            padding: '0.2rem 0.6rem',
+            borderRadius: '1rem',
+            fontSize: '0.75rem',
+            display: 'inline-block',
+            minWidth: 60,
+            textAlign: 'center'
+          }}
+        >
+          {text}
+        </span>
+      );
     case 'text':
     default:
       return value;
