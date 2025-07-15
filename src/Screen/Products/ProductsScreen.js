@@ -8,6 +8,8 @@ import Loading from '../../components/Loading';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
+import { useUser } from '../../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function Productos() {
@@ -19,12 +21,20 @@ export default function Productos() {
   const [globalFilter, setGlobalFilter] = useState('');
   const inputRef = useRef(null);
   const toast = useRef(null);
+  const { logout } = useUser();
+  const navigate = useNavigate();
 
   const getInfo = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('Products').select('*');
+    const { data, error } = await supabase.from('vta_products').select('*');
     if (!error) setData(data);
     setLoading(false);
+  };
+
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   const cambiarEstadoProducto = async () => {
@@ -67,7 +77,6 @@ export default function Productos() {
       Header: 'ID',
       center: true,
       frozen: true,
-      // format: 'number',
       className: 'XxSmall',
       filterMatchMode: 'equals',
     },
@@ -77,7 +86,7 @@ export default function Productos() {
       center: true,
       frozen: true,
       format: 'text',
-      className: 'Xxlarge',
+      className: 'Large',
       filterMatchMode: 'equals',
     },
     {
@@ -86,7 +95,7 @@ export default function Productos() {
       center: false,
       frozen: false,
       format: 'text',
-      className: 'Xxlarge',
+      className: 'Xxxxlarge',
       filterMatchMode: 'contains',
     },
     {
@@ -96,6 +105,32 @@ export default function Productos() {
       frozen: false,
       filterMatchMode: 'contains',
       format: 'text',
+    },
+    {
+      field: 'categoryname',
+      Header: 'Categoria',
+      center: false,
+      frozen: false,
+      filterMatchMode: 'contains',
+      format: 'text',
+    },
+    {
+      field: 'Stock',
+      Header: 'Stock',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'XxSmall',
+      filterMatchMode: 'equals',
+    },
+    {
+      field: 'UnitName',
+      Header: 'Unidad',
+      center: false,
+      frozen: false,
+      format: 'text',
+      className: 'XxSmall',
+      filterMatchMode: 'contains',
     },
     {
       field: 'PrecioCompra',
@@ -151,7 +186,7 @@ export default function Productos() {
 
   return (
     <>
-      <Navbar />
+      <Navbar onLogout={handleLogout} />
       <div className="dashboard-container" style={{ paddingTop: '50px' }}>
         <h2 style={{ textAlign: 'center' }}>Productos</h2>
 
@@ -182,11 +217,13 @@ export default function Productos() {
               className="p-button-success"
               onClick={getInfo}
               disabled={loading}
+              severity="primary"
             />
             <Button
               label="Agregar Producto"
               icon="pi pi-plus"
               className="p-button-success"
+              severity="primary"
               onClick={() => {
                 setSelected([]);
                 setShowDialog(true);

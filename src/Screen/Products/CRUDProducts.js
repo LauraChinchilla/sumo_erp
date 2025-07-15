@@ -10,7 +10,7 @@ import { InputNumber } from 'primereact/inputnumber';
 import { supabase } from '../../supabaseClient';
 import { Toast } from 'primereact/toast';
 
-const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo}) => {
+const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
     const [categorias, setCategorias] = useState([]);
     const toast = useRef(null);
     const [loading, setLoading] = useState(false);
@@ -147,6 +147,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                         required
                         style={{ width: '100%' }}
                         className={errors.Code ? 'p-invalid' : ''}
+                        disabled={!editable}
                     />
                     <label htmlFor="Code">Código</label>
                 </FloatLabel>
@@ -161,6 +162,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                         required
                         style={{ width: '100%' }}
                         className={errors.Name ? 'p-invalid' : ''}
+                        disabled={!editable}
                     />
                     <label htmlFor="Name">Nombre</label>
                 </FloatLabel>
@@ -176,6 +178,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                             value={values.Description}
                             onChange={(e) => handleChange('Description', e.target.value)}
                             style={{ width: '100%' }}
+                            disabled={!editable}
                         />
                         <label htmlFor="Description">Descripción</label>
                     </FloatLabel>
@@ -194,6 +197,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                             optionValue="IdCategory"
                             className={errors.IdCategory ? 'p-invalid' : ''}
                             style={{ width: '100%' }}
+                            disabled={!editable}
                         />
 
                         <label htmlFor="IdCategory">Categoría</label>
@@ -209,6 +213,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                         inputId="Excento"
                         checked={values.Excento || false}
                         onChange={(e) => handleChange('Excento', e.checked)}
+                        disabled={!editable}
                     />
                     <label htmlFor="Excento" className="p-checkbox-label" style={{ marginLeft: '0.5rem' }}>
                     Exento
@@ -218,7 +223,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                 <FloatLabel>
                     <InputNumber
                         id="ISV"
-                        disabled={values?.Excento}
+                        disabled={values?.Excento || !editable}
                         value={values.ISV}
                         onChange={(e) => handleChange('ISV', e.value)}
                         style={{ width: '90%' }}
@@ -237,6 +242,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                         onChange={(e) => handleChange('PorcentajeGanancia', e.value)}
                         style={{ width: '100%' }}
                         suffix=' %'
+                        disabled={!editable}
                         className={errors.PorcentajeGanancia ? 'p-invalid' : ''}
                     />
                     <label htmlFor="PorcentajeGanancia">Porcentaje Ganancia</label>
@@ -256,6 +262,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                         style={{ width: '100%' }}
                         minFractionDigits={3}
                         maxFractionDigits={3}
+                        disabled={!editable}
                         className={errors.PrecioCompra ? 'p-invalid' : ''}
                     />
                     <label htmlFor="PrecioCompra">Precio Compra</label>
@@ -263,17 +270,18 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                 </div>
 
                 <div style={{ flex: 1 }}>
-                <FloatLabel>
-                    <InputNumber
-                        id="PrecioVenta"
-                        value={values.PrecioVenta}
-                        onChange={(e) => handleChange('PrecioVenta', e.value)}
-                        required
-                        style={{ width: '100%' }}
-                        className={errors.PrecioVenta ? 'p-invalid' : ''}
-                    />
-                    <label htmlFor="PrecioVenta">Precio Venta</label>
-                </FloatLabel>
+                    <FloatLabel>
+                        <InputNumber
+                            id="PrecioVenta"
+                            value={values.PrecioVenta}
+                            onChange={(e) => handleChange('PrecioVenta', e.value)}
+                            required
+                            style={{ width: '100%' }}
+                            disabled={!editable}
+                            className={errors.PrecioVenta ? 'p-invalid' : ''}
+                        />
+                        <label htmlFor="PrecioVenta">Precio Venta</label>
+                    </FloatLabel>
                 </div>
             </div>
 

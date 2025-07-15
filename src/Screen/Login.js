@@ -29,7 +29,7 @@ export default function Login() {
       setError('Credenciales incorrectas');
     } else {
       login(data); // Guardamos el usuario en el contexto
-      navigate('/dashboard');
+      navigate('/Dashboard');
     }
   };
 
@@ -80,6 +80,7 @@ export default function Login() {
           onClick={handleLogin}
           className="p-button-primary"
           style={{ width: '100%' }}
+          severity="primary"
         />
       </Card>
     </div>

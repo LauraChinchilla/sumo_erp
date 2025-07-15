@@ -4,6 +4,7 @@ import Login from './Screen/Login';
 import Dashboard from './Screen/Dashboard';
 import { UserProvider } from './context/UserContext';
 import ProductsScreen from './Screen/Products/ProductsScreen';
+import InventarioScreen from './Screen/InventarioScreen';
 
 function App() {
   return (
@@ -11,8 +12,9 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/products" element={<ProductsScreen />} />
+          <Route path="/inventory" element={<InventarioScreen />} />
         </Routes>
       </Router>
     </UserProvider>

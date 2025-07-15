@@ -39,12 +39,11 @@ export default function Table({ columns, data }) {
         value={data}
         scrollable
         scrollHeight="400px"
-        paginator
-        rows={10}
         removableSort
         filterDisplay="menu"
         globalFilter={globalFilter}
         globalFilterFields={globalFilterFields}
+        className="custom-table" 
       >
         {columns.map((col, index) => {
           const isNumber = col.format === 'number';
@@ -86,6 +85,7 @@ function getColumnWidth(size) {
     Xlarge: '220px',
     Xxlarge: '280px',
     Xxxlarge: '350px',
+    Xxxxlarge: '450px',
   };
   return widths[size] || 'auto';
 }

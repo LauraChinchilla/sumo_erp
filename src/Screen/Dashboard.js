@@ -5,21 +5,24 @@ import 'primeicons/primeicons.css';
 import { useUser } from '../context/UserContext';
 
 export default function Dashboard() {
-  const { user, logout } = useUser();
+  const { user, logout, loading } = useUser();
   const navigate = useNavigate();
   const [selectedIndex, setSelectedIndex] = useState(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate('/');
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
+
+  if (loading) return null; 
 
   const cards = [
     {
       icon: 'pi pi-box',
       title: 'Inventario',
       description: 'Consulta general del inventario disponible en el sistema.',
+      ruta: '/inventory',
     },
     {
       icon: 'pi pi-tags',
@@ -39,11 +42,15 @@ export default function Dashboard() {
     },
   ];
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  }
+
   return (
     <>
-      <Navbar onLogout={logout} />
-
-      <div className="dashboard-container" style={{ paddingTop: '80px' }}>
+      <Navbar onLogout={handleLogout} />
+      <div className="dashboard-container" style={{ paddingTop: '100px' }}>
         <h2>Bienvenido, {user?.UserName}</h2>
         <div className="card-grid">
           {cards.map((card, index) => (
