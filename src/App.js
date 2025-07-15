@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './Screen/Login';
-// import Users from './components/Users'; 
 import Dashboard from './Screen/Dashboard';
 import { UserProvider } from './context/UserContext';
 import ProductsScreen from './Screen/Products/ProductsScreen';
 import InventarioScreen from './Screen/InventarioScreen';
+import EntradasScreen from './Screen/Entradas/EntradasScreen';
 
 function App() {
   return (
@@ -15,6 +15,7 @@ function App() {
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/products" element={<ProductsScreen />} />
           <Route path="/inventory" element={<InventarioScreen />} />
+          <Route path="/entradas" element={<EntradasScreen />} />
         </Routes>
       </Router>
     </UserProvider>

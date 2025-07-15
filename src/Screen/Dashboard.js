@@ -34,6 +34,7 @@ export default function Dashboard() {
       icon: 'pi pi-sign-in',
       title: 'Entradas',
       description: 'Registro de ingreso de productos al inventario.',
+      ruta: '/entradas',
     },
     {
       icon: 'pi pi-sign-out',
