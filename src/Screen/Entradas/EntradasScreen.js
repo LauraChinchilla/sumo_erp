@@ -9,6 +9,7 @@ import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
+import CRUDEntradas from './CRUDEntradas';
 
 export default function EntradasScreen() {
   const [data, setData] = useState([]);
@@ -35,6 +36,29 @@ export default function EntradasScreen() {
       });
     setLoading(false);
   };
+
+  const buscarProductoPorCodigo = async (codigo) => {
+    const { data: producto, error } = await supabase
+      .from('vta_products')
+      .select('*')
+      .eq('Code', codigo.trim())
+      .eq('IdStatus', 1) 
+      .single();
+      
+    if (error || !producto) {
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'No encontrado',
+        detail: `No se encontró el producto con código: ${codigo}`,
+        life: 3000,
+      });
+      return;
+    }
+
+    setSelected([producto]);
+    setShowDialog(true);
+  };
+
 
   const handleLogout = () => {
     logout();
@@ -89,9 +113,18 @@ export default function EntradasScreen() {
       Header: 'Fecha',
       center: true,
       frozen: false,
-      format: 'text',
-      className: 'Small',
+      format: 'Date',
+      className: 'Medium',
       filterMatchMode: 'contains',
+    },
+    {
+      field: 'Code',
+      Header: 'Codigo',
+      center: true,
+      frozen: true,
+      format: 'text',
+      className: 'Large',
+      filterMatchMode: 'equals',
     },
     {
       field: 'ProductName',
@@ -100,15 +133,6 @@ export default function EntradasScreen() {
       frozen: false,
       format: 'text',
       filterMatchMode: 'contains',
-    },
-    {
-      field: 'Cantidad',
-      Header: 'Cantidad',
-      center: false,
-      frozen: false,
-      format: 'number',
-      className: 'Small',
-      filterMatchMode: 'equals',
     },
     {
       field: 'VendorName',
@@ -127,6 +151,33 @@ export default function EntradasScreen() {
       filterMatchMode: 'contains',
     },
     {
+      field: 'UserNameCreate',
+      Header: 'Usuario Creacion',
+      center: false,
+      frozen: false,
+      format: 'text',
+      className: 'Small',
+      filterMatchMode: 'contains',
+    },
+    {
+      field: 'Cantidad',
+      Header: 'Cantidad',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      filterMatchMode: 'equals',
+    },
+    {
+      field: 'UnitName',
+      Header: 'Unidad',
+      center: false,
+      frozen: false,
+      format: 'text',
+      className: 'XxSmall',
+      filterMatchMode: 'contains',
+    },
+    {
       field: 'StatusName',
       Header: 'Estado',
       format: 'badge',
@@ -135,20 +186,6 @@ export default function EntradasScreen() {
       onClick: (rowData) => {
         setSelected([rowData]);
         setShowDialogStatus(true);
-      },
-    },
-    {
-      field: 'actions',
-      Header: 'Acciones',
-      isIconColumn: true,
-      icon: 'pi pi-pencil',
-      center: true,
-      className: 'Xsmall',
-      filter: false,
-      onClick: (rowData) => {
-        // Aquí puedes implementar la edición futura
-        setSelected([rowData]);
-        setShowDialog(true);
       },
     },
   ];
@@ -166,7 +203,7 @@ export default function EntradasScreen() {
       <Navbar onLogout={handleLogout} />
       <div className="dashboard-container" style={{ paddingTop: '50px' }}>
         <h2 style={{ textAlign: 'center' }}>Entradas</h2>
-
+        <Toast ref={toast} />
         <div
           style={{
             display: 'flex',
@@ -174,14 +211,21 @@ export default function EntradasScreen() {
             marginBottom: '1rem',
           }}
         >
+
           <InputText
             inputRef={inputRef}
             type="search"
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="Buscar por producto, proveedor, etc."
+            placeholder="Buscar por código (lector)"
             className="p-inputtext-sm"
             style={{ width: '300px' }}
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                buscarProductoPorCodigo(globalFilter);
+              }
+            }}
           />
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -253,28 +297,13 @@ export default function EntradasScreen() {
       )}
 
       {showDialog && (
-        <Dialog
-          visible={showDialog}
-          onHide={() => {
-            setShowDialog(false);
-            setSelected([]);
-          }}
-          header={selected.length ? 'Editar Entrada' : 'Nueva Entrada'}
-          footer={
-            <Button
-              label="Cerrar"
-              icon="pi pi-times"
-              onClick={() => {
-                setShowDialog(false);
-                setSelected([]);
-              }}
-              className="p-button-text"
-            />
-          }
-        >
-          {/* Aquí podrías poner tu componente CRUD de Entradas */}
-          <p>Funcionalidad de edición/creación pendiente.</p>
-        </Dialog>
+        <CRUDEntradas
+          setShowDialog={setShowDialog}
+          showDialog={showDialog}
+          setSelected={setSelected}
+          selected={selected}
+          getInfo={getInfo}
+        />
       )}
     </>
   );

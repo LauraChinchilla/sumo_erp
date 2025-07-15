@@ -90,7 +90,6 @@ function getColumnWidth(size) {
   return widths[size] || 'auto';
 }
 
-
 function formatValue(value, format, rowData, column = {}) {
   switch (format) {
     case 'number':
@@ -104,7 +103,7 @@ function formatValue(value, format, rowData, column = {}) {
       const text = statusName || (isActive ? 'Activo' : 'Inactivo');
 
       const handleClick = (e) => {
-        e.stopPropagation(); // Previene conflictos con selección de fila
+        e.stopPropagation();
         if (typeof column.onClick === 'function') {
           column.onClick(rowData);
         }
@@ -129,9 +128,23 @@ function formatValue(value, format, rowData, column = {}) {
         </span>
       );
 
+    case 'Date':
+      if (!value) return '';
+      const date = new Date(value);
+      const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      };
+      return date.toLocaleString('es-HN', options); // Cambia a 'es-ES' si lo prefieres
+
     case 'text':
     default:
       return value;
   }
 }
+
 

@@ -26,7 +26,7 @@ export default function Productos() {
 
   const getInfo = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('vta_products').select('*');
+    const { data, error } = await supabase.from('vta_products').select('*').order('IdProduct', { ascending: true });
     if (!error) setData(data);
     setLoading(false);
   };
