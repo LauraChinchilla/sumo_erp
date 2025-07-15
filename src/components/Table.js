@@ -63,7 +63,7 @@ export default function Table({ columns, data }) {
               body={rowData =>
                 col.isIconColumn
                   ? renderIconBody(col.icon, col.onClick, rowData)
-                  : formatValue(rowData[col.field], col.format, rowData)
+                  : formatValue(rowData[col.field], col.format, rowData, col)
               }
               filter={col.filter !== false}
               filterMatchMode={col.filterMatchMode || 'contains'}
@@ -91,18 +91,28 @@ function getColumnWidth(size) {
 }
 
 
-function formatValue(value, format, rowData) {
+function formatValue(value, format, rowData, column = {}) {
   switch (format) {
     case 'number':
       const num = parseFloat(value);
       return isNaN(num) ? value : num.toFixed(2);
+
     case 'badge':
       const statusName = rowData.StatusName || '';
       const isActive = rowData.IdStatus === 1 || statusName.toLowerCase() === 'activo';
-      const bgColor = isActive ? '#28a745' : '#dc3545'; // verde o rojo
+      const bgColor = isActive ? '#28a745' : '#dc3545';
       const text = statusName || (isActive ? 'Activo' : 'Inactivo');
+
+      const handleClick = (e) => {
+        e.stopPropagation(); // Previene conflictos con selección de fila
+        if (typeof column.onClick === 'function') {
+          column.onClick(rowData);
+        }
+      };
+
       return (
         <span
+          onClick={handleClick}
           style={{
             backgroundColor: bgColor,
             color: 'white',
@@ -111,14 +121,17 @@ function formatValue(value, format, rowData) {
             fontSize: '0.75rem',
             display: 'inline-block',
             minWidth: 60,
-            textAlign: 'center'
+            textAlign: 'center',
+            cursor: column.onClick ? 'pointer' : 'default'
           }}
         >
           {text}
         </span>
       );
+
     case 'text':
     default:
       return value;
   }
 }
+

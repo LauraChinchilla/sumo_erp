@@ -6,14 +6,19 @@ import { Button } from 'primereact/button';
 import CRUDProducts from './CRUDProducts';
 import Loading from '../../components/Loading';
 import { InputText } from 'primereact/inputtext';
+import { Dialog } from 'primereact/dialog';
+import { Toast } from 'primereact/toast';
+
 
 export default function Productos() {
   const [data, setData] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
+  const [showDialogStatus, setShowDialogStatus] = useState(false);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [globalFilter, setGlobalFilter] = useState('');
   const inputRef = useRef(null);
+  const toast = useRef(null);
 
   const getInfo = async () => {
     setLoading(true);
@@ -22,13 +27,47 @@ export default function Productos() {
     setLoading(false);
   };
 
+  const cambiarEstadoProducto = async () => {
+    if (!selected[0]?.IdProduct) return;
+
+    const nuevoEstado = selected[0].IdStatus === 1 ? 2 : 1;
+    const estadoTexto = nuevoEstado === 1 ? 'activado' : 'inactivado';
+
+    const { error } = await supabase
+      .from('Products')
+      .update({ IdStatus: nuevoEstado })
+      .eq('IdProduct', selected[0].IdProduct);
+
+    if (error) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.message,
+        life: 3000,
+      });
+    } else {
+      toast.current?.show({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: `Producto ${selected[0].Name} ${estadoTexto} correctamente`,
+        life: 3000,
+      });
+
+      setTimeout(() => {
+        getInfo();
+        setShowDialogStatus(false);
+        setSelected([]);
+      }, 800);
+    }
+  };
+
   const columns = [
     {
       field: 'IdProduct',
       Header: 'ID',
       center: true,
       frozen: true,
-      format: 'number',
+      // format: 'number',
       className: 'XxSmall',
       filterMatchMode: 'equals',
     },
@@ -82,6 +121,10 @@ export default function Productos() {
       format: 'badge',
       center: true,
       className: 'Small',
+      onClick: (rowData) => {
+        setSelected([rowData])
+        setShowDialogStatus(true)
+      }
     },
     {
       field: 'actions',
@@ -165,6 +208,47 @@ export default function Productos() {
           selected={selected}
           getInfo={getInfo}
         />
+      )}
+
+      {showDialogStatus && (
+        <>
+        <Toast ref={toast} />
+          <Dialog
+            visible={showDialogStatus}
+            onHide={() => {
+              setShowDialogStatus(false);
+              setSelected([]);
+            }}
+            header="Cambiar Estado"
+            footer={
+              <>
+                <Button
+                  label="Aceptar"
+                  icon="pi pi-check"
+                  className="p-button-danger"
+                  onClick={() => {
+                    cambiarEstadoProducto()
+                  }}
+                />
+                <Button
+                  label="Cancelar"
+                  icon="pi pi-times"
+                  className="p-button-text"
+                  onClick={() => {
+                    setShowDialogStatus(false);
+                    setSelected([]);
+                  }}
+                />
+              </>
+            }
+          >
+            <h4>
+              {selected[0]?.IdStatus === 1
+                ? `¿Está seguro de pasar a inactivo el producto: ${selected[0]?.Name}?`
+                : `¿Está seguro de activar nuevamente el producto: ${selected[0]?.Name}?`}
+            </h4>
+          </Dialog>
+        </>
       )}
     </>
   );
