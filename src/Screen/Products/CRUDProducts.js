@@ -9,10 +9,13 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { supabase } from '../../supabaseClient';
 import { Toast } from 'primereact/toast';
+import { FileUpload } from 'primereact/fileupload';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
 const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
     const [categorias, setCategorias] = useState([]);
     const toast = useRef(null);
+    const fileUploadRef = useRef(null);
     const [loading, setLoading] = useState(false);
 
     const initialValues = {
@@ -66,6 +69,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
             PrecioCompra: values.PrecioCompra,
             PrecioVenta: values.PrecioVenta,
             IdStatus: values?.IdStatus ? values?.IdStatus : 1,
+            ImageURL: values.ImageURL || null,
         };
 
         let data, error;
@@ -96,6 +100,85 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
         setSelected([]);
     };
 
+    // Función para confirmar la eliminación
+    const confirmarEliminarImagen = () => {
+      confirmDialog({
+        message: '¿Estás seguro que quieres eliminar la imagen?',
+        header: 'Confirmar eliminación',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Aceptar',
+        rejectLabel: 'Cancelar',
+        accept: eliminarImagen,
+      });
+    };
+
+    const eliminarImagen = async () => {
+        if (!values.ImageURL || !values?.IdProduct) {
+            toast.current.show({
+            severity: 'warn',
+            summary: 'No hay imagen para eliminar',
+            life: 3000,
+            });
+            return;
+        }
+
+        try {
+            const urlParts = values.ImageURL.split('/');
+            const fileName = urlParts[urlParts.length - 1];
+
+            const { error: deleteError } = await supabase.storage
+            .from('product-images')
+            .remove([fileName]);
+
+            if (deleteError) {
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error al eliminar imagen',
+                detail: deleteError.message,
+                life: 4000,
+            });
+            return;
+            }
+
+            const { error: updateError } = await supabase
+            .from('Products')
+            .update({ ImageURL: null })
+            .eq('IdProduct', values.IdProduct);
+
+            if (updateError) {
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error al actualizar producto',
+                detail: updateError.message,
+                life: 4000,
+            });
+            return;
+            }
+
+            setValues((prev) => ({
+            ...prev,
+            ImageURL: null,
+            }));
+
+            toast.current.show({
+            severity: 'success',
+            summary: 'Imagen eliminada',
+            detail: 'Imagen eliminada y producto actualizado correctamente',
+            life: 3000,
+            });
+
+            getInfo();
+
+        } catch (err) {
+            toast.current.show({
+            severity: 'error',
+            summary: 'Error inesperado',
+            detail: err.message || 'Algo salió mal',
+            life: 4000,
+            });
+        }
+    };
+
     const calcularPrecioVenta = () => {
         const precioCompra = parseFloat(values.PrecioCompra) || 0;
         const isv = parseFloat(values.ISV) || 0;
@@ -109,11 +192,87 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
         setValues(prev => ({ ...prev, PrecioVenta: precioVenta.toFixed(2) }));
     };
 
+    const handleUpload = async ({ files }) => {
+        const file = files[0];
+        if (!file) return;
+
+        const code = selected[0]?.Code || values.Code || 'producto';
+        const extension = file.name.split('.').pop().toLowerCase();
+        const fileName = `${code}.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('product-images')
+            .upload(fileName, file, { upsert: true });
+
+        if (uploadError) {
+            toast.current.show({
+            severity: 'error',
+            summary: 'Error al subir imagen',
+            detail: uploadError.message,
+            });
+            return;
+        }
+
+        const { data: urlData, error: urlError } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(fileName);
+
+        if (urlError) {
+            toast.current.show({
+            severity: 'error',
+            summary: 'Error al obtener URL pública',
+            detail: urlError.message,
+            });
+            return;
+        }
+
+        const imageUrl = urlData?.publicUrl;
+
+        setValues((prev) => ({
+            ...prev,
+            ImageURL: imageUrl,
+        }));
+
+        if (fileUploadRef.current) {
+            fileUploadRef.current.clear();
+        }
+
+        if (values?.IdProduct > 0) {
+            const { error: updateError } = await supabase
+            .from('Products')
+            .update({ ImageURL: imageUrl })
+            .eq('IdProduct', values.IdProduct);
+
+            if (updateError) {
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error al actualizar producto',
+                detail: updateError.message,
+            });
+            return;
+            }
+
+            toast.current.show({
+            severity: 'success',
+            summary: 'Imagen subida y producto actualizado',
+            detail: 'Imagen asignada correctamente al producto.',
+            });
+
+            getInfo();
+        } else {
+            toast.current.show({
+            severity: 'warn',
+            summary: 'Producto aún no guardado',
+            detail: 'Guarda el producto antes de subir la imagen.',
+            });
+        }
+    };
+
+
     useEffect(() => {
         if(values?.PrecioCompra && values?.ISV && values?.PorcentajeGanancia){
             calcularPrecioVenta();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values?.Excento, values?.PrecioCompra, values?.ISV, values?.PorcentajeGanancia]);
 
     useEffect(() => {
@@ -124,7 +283,6 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
             });
             calcularPrecioVenta();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values.Excento]);
 
     useEffect(() => {
@@ -134,163 +292,234 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
     }, [showDialog]);
 
     return (
-        <Dialog visible={showDialog} onHide={onHide} style={{ width: '60%' }} header={selected.length > 0 ? 'Editar Producto' : 'Agregar Producto'}>
+        <>
+        <Dialog visible={showDialog} onHide={onHide} style={{ width: values?.IdProduct > 0 ?'80%' : '60%' }} header={selected.length > 0 ? 'Editar Producto' : 'Agregar Producto'}>
             <Toast ref={toast} />
-            {/* Código y Nombre */}
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <div style={{ flex: 1 }}>
-                <FloatLabel>
-                    <InputText
-                        id="Code"
-                        value={values.Code}
-                        onChange={(e) => handleChange('Code', e.target.value)}
-                        required
-                        style={{ width: '100%' }}
-                        className={errors.Code ? 'p-invalid' : ''}
-                        disabled={!editable}
-                    />
-                    <label htmlFor="Code">Código</label>
-                </FloatLabel>
+
+            <div style={{ display: 'flex', gap: '2rem' }}>
+                <div  style={{ flex: 2 }}>
+                    {/* Código y Nombre */}
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                        <div style={{ flex: 1 }}>
+                        <FloatLabel>
+                            <InputText
+                                id="Code"
+                                value={values.Code}
+                                onChange={(e) => handleChange('Code', e.target.value)}
+                                required
+                                style={{ width: '100%' }}
+                                className={errors.Code ? 'p-invalid' : ''}
+                                disabled={!editable}
+                            />
+                            <label htmlFor="Code">Código</label>
+                        </FloatLabel>
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                        <FloatLabel>
+                            <InputText
+                                id="Name"
+                                value={values.Name}
+                                onChange={(e) => handleChange('Name', e.target.value)}
+                                required
+                                style={{ width: '100%' }}
+                                className={errors.Name ? 'p-invalid' : ''}
+                                disabled={!editable}
+                            />
+                            <label htmlFor="Name">Nombre</label>
+                        </FloatLabel>
+                        </div>
+                    </div>
+
+                    {/* Descripción y Categoría */}
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <InputText
+                                    id="Description"
+                                    value={values.Description}
+                                    onChange={(e) => handleChange('Description', e.target.value)}
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                />
+                                <label htmlFor="Description">Descripción</label>
+                            </FloatLabel>
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <Dropdown
+                                    id="IdCategory"
+                                    value={values.IdCategory}
+                                    options={categorias}
+                                    onChange={(e) => handleChange('IdCategory', e.value)}
+                                    placeholder="Seleccione una categoría"
+                                    required
+                                    optionLabel="Name"
+                                    optionValue="IdCategory"
+                                    className={errors.IdCategory ? 'p-invalid' : ''}
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                />
+
+                                <label htmlFor="IdCategory">Categoría</label>
+                            </FloatLabel>
+                        </div>
+                    </div>
+
+                    {/* ISV y Porcentaje Ganancia */}
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                        {/* Exento Checkbox (alineado a la izquierda) */}
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Checkbox
+                                inputId="Excento"
+                                checked={values.Excento || false}
+                                onChange={(e) => handleChange('Excento', e.checked)}
+                                disabled={!editable}
+                            />
+                            <label htmlFor="Excento" className="p-checkbox-label" style={{ marginLeft: '0.5rem' }}>
+                            Exento
+                            </label>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                        <FloatLabel>
+                            <InputNumber
+                                id="ISV"
+                                disabled={values?.Excento || !editable}
+                                value={values.ISV}
+                                onChange={(e) => handleChange('ISV', e.value)}
+                                style={{ width: '90%' }}
+                                suffix=' %'
+                                className={errors.ISV ? 'p-invalid' : ''}
+                            />
+                            <label htmlFor="ISV">ISV</label>
+                        </FloatLabel>
+                        </div>
+
+                        <div style={{ flex: 1, marginLeft: '-0.5rem' }}>
+                        <FloatLabel>
+                            <InputNumber
+                                id="PorcentajeGanancia"
+                                value={values.PorcentajeGanancia}
+                                onChange={(e) => handleChange('PorcentajeGanancia', e.value)}
+                                style={{ width: '100%' }}
+                                suffix=' %'
+                                disabled={!editable}
+                                className={errors.PorcentajeGanancia ? 'p-invalid' : ''}
+                            />
+                            <label htmlFor="PorcentajeGanancia">Porcentaje Ganancia</label>
+                        </FloatLabel>
+                        </div>
+                    </div>
+
+                    {/* Precio Compra y Precio Venta */}
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                        <div style={{ flex: 1 }}>
+                        <FloatLabel>
+                            <InputNumber
+                                id="PrecioCompra"
+                                value={values.PrecioCompra}
+                                onChange={(e) => handleChange('PrecioCompra', e.value)}
+                                required
+                                style={{ width: '100%' }}
+                                minFractionDigits={3}
+                                maxFractionDigits={3}
+                                disabled={!editable}
+                                className={errors.PrecioCompra ? 'p-invalid' : ''}
+                            />
+                            <label htmlFor="PrecioCompra">Precio Compra</label>
+                        </FloatLabel>
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <InputNumber
+                                    id="PrecioVenta"
+                                    value={values.PrecioVenta}
+                                    onChange={(e) => handleChange('PrecioVenta', e.value)}
+                                    required
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                    className={errors.PrecioVenta ? 'p-invalid' : ''}
+                                />
+                                <label htmlFor="PrecioVenta">Precio Venta</label>
+                            </FloatLabel>
+                        </div>
+                    </div>
                 </div>
 
-                <div style={{ flex: 1 }}>
-                <FloatLabel>
-                    <InputText
-                        id="Name"
-                        value={values.Name}
-                        onChange={(e) => handleChange('Name', e.target.value)}
-                        required
-                        style={{ width: '100%' }}
-                        className={errors.Name ? 'p-invalid' : ''}
-                        disabled={!editable}
-                    />
-                    <label htmlFor="Name">Nombre</label>
-                </FloatLabel>
-                </div>
-            </div>
-
-            {/* Descripción y Categoría */}
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <div style={{ flex: 1 }}>
-                    <FloatLabel>
-                        <InputText
-                            id="Description"
-                            value={values.Description}
-                            onChange={(e) => handleChange('Description', e.target.value)}
-                            style={{ width: '100%' }}
-                            disabled={!editable}
+                {values?.IdProduct > 0 && (
+                    <div style={{ flex: 1, marginTop: '2rem' }}>
+                        <FileUpload
+                            ref={fileUploadRef}
+                            mode="basic"
+                            name="file"
+                            accept="image/*"
+                            maxFileSize={1000000}
+                            customUpload
+                            uploadHandler={handleUpload}
+                            chooseLabel="Agregar Imagen"
+                            disabled={values?.ImageURL}
                         />
-                        <label htmlFor="Description">Descripción</label>
-                    </FloatLabel>
-                </div>
 
-                <div style={{ flex: 1 }}>
-                    <FloatLabel>
-                        <Dropdown
-                            id="IdCategory"
-                            value={values.IdCategory}
-                            options={categorias}
-                            onChange={(e) => handleChange('IdCategory', e.value)}
-                            placeholder="Seleccione una categoría"
-                            required
-                            optionLabel="Name"
-                            optionValue="IdCategory"
-                            className={errors.IdCategory ? 'p-invalid' : ''}
-                            style={{ width: '100%' }}
-                            disabled={!editable}
-                        />
+                        <div
+                            className="p-card"
+                            style={{
+                                marginTop: '2rem',
+                                padding: '1rem',
+                                border: '1px solid #ccc',
+                                borderRadius: '10px',
+                                width: 500,
+                                position: 'relative',
+                            }}
+                        >
+                            {/* Botón X */}
+                            {values.ImageURL && (
+                                <Button
+                                icon="pi pi-times"
+                                className="p-button-rounded p-button-danger p-button-sm"
+                                style={{
+                                    position: 'absolute',
+                                    top: '0.5rem',
+                                    right: '0.5rem',
+                                    zIndex: 1,
+                                }}
+                                onClick={confirmarEliminarImagen}
+                                tooltip="Eliminar imagen"
+                                />
+                            )}
 
-                        <label htmlFor="IdCategory">Categoría</label>
-                    </FloatLabel>
-                </div>
-            </div>
+                            <h5>Imagen del Producto</h5>
 
-            {/* ISV y Porcentaje Ganancia */}
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                {/* Exento Checkbox (alineado a la izquierda) */}
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Checkbox
-                        inputId="Excento"
-                        checked={values.Excento || false}
-                        onChange={(e) => handleChange('Excento', e.checked)}
-                        disabled={!editable}
-                    />
-                    <label htmlFor="Excento" className="p-checkbox-label" style={{ marginLeft: '0.5rem' }}>
-                    Exento
-                    </label>
-                </div>
-                <div style={{ flex: 1 }}>
-                <FloatLabel>
-                    <InputNumber
-                        id="ISV"
-                        disabled={values?.Excento || !editable}
-                        value={values.ISV}
-                        onChange={(e) => handleChange('ISV', e.value)}
-                        style={{ width: '90%' }}
-                        suffix=' %'
-                        className={errors.ISV ? 'p-invalid' : ''}
-                    />
-                    <label htmlFor="ISV">ISV</label>
-                </FloatLabel>
-                </div>
+                            {values.ImageURL ? (
+                                <img
+                                src={values.ImageURL}
+                                alt="Imagen del producto"
+                                style={{
+                                    width: '100%',
+                                    borderRadius: '10px',
+                                    objectFit: 'contain',
+                                    maxHeight: 300,
+                                }}
+                                />
+                            ) : (
+                                <h4 style={{ height: 200 }}>No se encontró la imagen</h4>
+                            )}
+                        </div>
+                    </div>
+                )}
 
-                <div style={{ flex: 1, marginLeft: '-0.5rem' }}>
-                <FloatLabel>
-                    <InputNumber
-                        id="PorcentajeGanancia"
-                        value={values.PorcentajeGanancia}
-                        onChange={(e) => handleChange('PorcentajeGanancia', e.value)}
-                        style={{ width: '100%' }}
-                        suffix=' %'
-                        disabled={!editable}
-                        className={errors.PorcentajeGanancia ? 'p-invalid' : ''}
-                    />
-                    <label htmlFor="PorcentajeGanancia">Porcentaje Ganancia</label>
-                </FloatLabel>
-                </div>
-            </div>
-
-            {/* Precio Compra y Precio Venta */}
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <div style={{ flex: 1 }}>
-                <FloatLabel>
-                    <InputNumber
-                        id="PrecioCompra"
-                        value={values.PrecioCompra}
-                        onChange={(e) => handleChange('PrecioCompra', e.value)}
-                        required
-                        style={{ width: '100%' }}
-                        minFractionDigits={3}
-                        maxFractionDigits={3}
-                        disabled={!editable}
-                        className={errors.PrecioCompra ? 'p-invalid' : ''}
-                    />
-                    <label htmlFor="PrecioCompra">Precio Compra</label>
-                </FloatLabel>
-                </div>
-
-                <div style={{ flex: 1 }}>
-                    <FloatLabel>
-                        <InputNumber
-                            id="PrecioVenta"
-                            value={values.PrecioVenta}
-                            onChange={(e) => handleChange('PrecioVenta', e.value)}
-                            required
-                            style={{ width: '100%' }}
-                            disabled={!editable}
-                            className={errors.PrecioVenta ? 'p-invalid' : ''}
-                        />
-                        <label htmlFor="PrecioVenta">Precio Venta</label>
-                    </FloatLabel>
-                </div>
             </div>
 
             {/* Botones */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '3rem' }}>
                 <Button label="Cancelar" className="p-button-secondary" onClick={onHide} disabled={loading} />
                 <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />
             </div>
         </Dialog>
+
+        <ConfirmDialog />
+        </>
     );
 }
 

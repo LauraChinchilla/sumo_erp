@@ -10,16 +10,14 @@ import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import CRUDEntradas from './CRUDEntradas';
-import { Calendar } from 'primereact/calendar';
-import { Dropdown } from 'primereact/dropdown';
 import getLocalDateTimeString from '../../utils/funciones';
 import CalendarMonth from '../../components/CalendarMonth';
 
 export default function EntradasScreen() {
   const [data, setData] = useState([]);
   const { user } = useUser();
-  const [showDialog, setShowDialog] = useState(false); // Para edición/creación futura
-  const [showDialogStatus, setShowDialogStatus] = useState(false); // Para cambio de estado
+  const [showDialog, setShowDialog] = useState(false);
+  const [showDialogStatus, setShowDialogStatus] = useState(false);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [rangeDates, setRangeDates] = useState(() => {
@@ -38,7 +36,7 @@ export default function EntradasScreen() {
   const getInfo = async () => {
     setLoading(true);
 
-    let query = supabase.from('vta_entradas').select('*');
+    let query = supabase.from('vta_entradas').select('*').eq('IdStatus', 3);
 
     // Si hay fechas seleccionadas, agregamos el filtro
     if (rangeDates && rangeDates[0] && rangeDates[1]) {
@@ -92,15 +90,60 @@ export default function EntradasScreen() {
     navigate('/');
   };
 
+
   const cambiarEstadoEntrada = async () => {
     if (!selected[0]?.IdEntrada) return;
-    const estadoTexto =  'Eliminado';
+
+    const IdProduct = selected[0]?.IdProduct;
+    const cantidadEliminar = selected[0]?.Cantidad;
+    const fechaEntrada = new Date(selected[0]?.Date);
+    const hoy = new Date();
+    const limite = new Date(hoy);
+    limite.setDate(hoy.getDate() - 3);
+
+    if (fechaEntrada < limite) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se puede eliminar una entrada mayor a 3 días',
+        life: 4000,
+      });
+      return;
+    }
+
+    const { data: productData, error: errorStock } = await supabase
+      .from('vta_products')
+      .select('Stock')
+      .eq('IdProduct', IdProduct)
+      .single();
+
+    if (errorStock) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error al consultar stock del producto',
+        life: 4000,
+      });
+      return;
+    }
+
+    if (productData?.Stock < cantidadEliminar) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No hay suficiente cantidad en stock. No se puede eliminar.',
+        life: 4000,
+      });
+      return;
+    }
 
     const { error } = await supabase
       .from('Entradas')
-      .update({ IdStatus: 4 })
-      .update({ IdUserEdit: user?.IdUser })
-      .update({ Date: getLocalDateTimeString() })
+      .update({
+        IdStatus: 4,
+        IdUserCreate: user?.IdUser,
+        Date: getLocalDateTimeString(),
+      })
       .eq('IdEntrada', selected[0].IdEntrada);
 
     if (error) {
@@ -110,21 +153,43 @@ export default function EntradasScreen() {
         detail: error.message,
         life: 3000,
       });
+      return;
+    }
+
+    const nuevoStock = productData.Stock - cantidadEliminar;
+
+    const { error: errorUpdateStock } = await supabase
+      .from('Products')
+      .update({
+        Stock: nuevoStock,
+        DateEdit: new Date(),
+        IdUserEdit: user?.IdUser,
+      })
+      .eq('IdProduct', IdProduct);
+
+    if (errorUpdateStock) {
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'La entrada se eliminó, pero no se pudo actualizar el stock del producto.',
+        life: 4000,
+      });
     } else {
       toast.current?.show({
         severity: 'success',
         summary: 'Éxito',
-        detail: `Entrada de ${selected[0].Name} ${estadoTexto} correctamente`,
+        detail: `Entrada de ${selected[0].Name} eliminada correctamente y stock actualizado.`,
         life: 3000,
       });
-
-      setTimeout(() => {
-        getInfo();
-        setShowDialogStatus(false);
-        setSelected([]);
-      }, 800);
     }
+
+    setTimeout(() => {
+      getInfo();
+      setShowDialogStatus(false);
+      setSelected([]);
+    }, 800);
   };
+
 
   const columns = [
     {
@@ -212,17 +277,18 @@ export default function EntradasScreen() {
       className: 'Small',
       valueField: 'StatusName',
       onClick: (rowData) => {
-        setSelected([rowData]);
-        setShowDialogStatus(true);
+        if(rowData?.IdStatus === 3){
+          setSelected([rowData]);
+          setShowDialogStatus(true);
+        }
       },
     }
 
   ];
 
-
-
   useEffect(() => {
     getInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rangeDates]);
 
   useEffect(() => {
