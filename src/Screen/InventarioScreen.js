@@ -10,6 +10,7 @@ import Loading from '../components/Loading';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import CRUDProducts from './Products/CRUDProducts';
+import ModalImage from '../components/ModalImage';
 
 export default function InventarioScreen() {
   const [data, setData] = useState([]);
@@ -19,6 +20,7 @@ export default function InventarioScreen() {
   const inputRef = useRef(null);
   const [globalFilter, setGlobalFilter] = useState('');
   const [selected, setSelected] = useState([]);
+  const [showDialogImage, setShowDialogImage] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
 
   const getInventario = async () => {
@@ -62,6 +64,20 @@ export default function InventarioScreen() {
       format: 'text',
       className: 'XxxSmall',
     },
+    {
+      field: 'actions',
+      // Header: 'Acciones',
+      isIconColumn: true,
+      icon: 'pi pi-image',
+      center: true,
+      className: 'XxxSmall',
+      tooltip: 'Ver imagen',
+      filter: false,
+      onClick: (rowData) => {
+        setSelected([rowData]);
+        setShowDialogImage(true);
+      }
+    }
   ];
 
   const handleLogout = () => {
@@ -123,6 +139,15 @@ export default function InventarioScreen() {
           selected={selected}
           getInfo={getInventario}
           editable={false}
+        />
+      )}
+
+      {showDialogImage && (
+        <ModalImage
+          selected={selected}
+          setSelected={setSelected}
+          showDialogImage={showDialogImage}
+          setShowDialogImage={setShowDialogImage}
         />
       )}
     </>

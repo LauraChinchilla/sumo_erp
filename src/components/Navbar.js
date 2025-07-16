@@ -17,7 +17,7 @@ export default function Navbar({ onLogout }) {
     {
       label: 'Inventario',
       icon: 'pi pi-box',
-      command: () => navigate('/inventario'),
+      command: () => navigate('/inventory'),
     },
     {
       label: 'Productos',

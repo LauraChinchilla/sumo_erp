@@ -9,11 +9,11 @@ export default function Table({ columns, data }) {
 
   const globalFilterFields = columns.filter(col => !col.isIconColumn).map(col => col.field);
   
-  const renderIconBody = (iconClass, onClickHandler, rowData) => {
+  const renderIconBody = (iconClass, onClickHandler, rowData, tooltip) => {
     return (
       <i
         className={iconClass}
-        style={{ fontSize: '1.2rem', cursor: onClickHandler ? 'pointer' : 'default' }}
+        style={{ fontSize: '1rem', cursor: onClickHandler ? 'pointer' : 'default' }}
         onClick={onClickHandler ? () => onClickHandler(rowData) : undefined}
         role={onClickHandler ? 'button' : undefined}
         tabIndex={onClickHandler ? 0 : undefined}
@@ -61,7 +61,7 @@ export default function Table({ columns, data }) {
               frozen={col.frozen || false}
               body={rowData =>
                 col.isIconColumn
-                  ? renderIconBody(col.icon, col.onClick, rowData)
+                  ? renderIconBody(col.icon, col.onClick, rowData, col.tooltip)
                   : formatValue(rowData[col.field], col.format, rowData, col)
               }
               filter={col.filter !== false}

@@ -10,11 +10,13 @@ import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
+import ModalImage from '../../components/ModalImage';
 
 
 export default function Productos() {
   const [data, setData] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
+  const [showDialogImage, setShowDialogImage] = useState(false);
   const [showDialogStatus, setShowDialogStatus] = useState(false);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -113,6 +115,7 @@ export default function Productos() {
       frozen: false,
       filterMatchMode: 'contains',
       format: 'text',
+      className: 'XxSmall'
     },
     {
       field: 'Stock',
@@ -163,15 +166,30 @@ export default function Productos() {
     },
     {
       field: 'actions',
-      Header: 'Acciones',
+      // Header: 'Acciones',
       isIconColumn: true,
       icon: 'pi pi-pencil',
       center: true,
-      className: 'Xsmall',
+      className: 'XxxSmall',
+      tooltip: 'Editar',
       filter: false,
       onClick: (rowData) => {
         setSelected([rowData]);
         setShowDialog(true);
+      }
+    },
+    {
+      field: 'actions',
+      // Header: 'Acciones',
+      isIconColumn: true,
+      icon: 'pi pi-image',
+      center: true,
+      className: 'XxxSmall',
+      tooltip: 'Ver imagen',
+      filter: false,
+      onClick: (rowData) => {
+        setSelected([rowData]);
+        setShowDialogImage(true);
       }
     }
   ];
@@ -286,6 +304,16 @@ export default function Productos() {
             </h4>
           </Dialog>
         </>
+      )}
+
+
+      {showDialogImage && (
+        <ModalImage
+          selected={selected}
+          setSelected={setSelected}
+          showDialogImage={showDialogImage}
+          setShowDialogImage={setShowDialogImage}
+        />
       )}
     </>
   );

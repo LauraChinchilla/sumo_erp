@@ -14,6 +14,7 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
 const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
     const [categorias, setCategorias] = useState([]);
+    const [unidades, setUnidades] = useState([]);
     const toast = useRef(null);
     const fileUploadRef = useRef(null);
     const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
         Code: { required: true, message: 'El código es obligatorio' },
         Name: { required: true, message: 'El nombre es obligatorio' },
         IdCategory: { required: true, message: 'Debe seleccionar una categoría' },
+        IdUnit: { required: true, message: 'Debe seleccionar una unidad' },
         PrecioCompra: { required: true, message: 'Precio de compra requerido' },
         PrecioVenta: { required: true, message: 'Precio de venta requerido' },
         PorcentajeGanancia: { required: true, message: 'Porcentaje requerido' },
@@ -38,8 +40,11 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
     };
 
     const getValoresIniciales = async () => {
-        const { data, error } = await supabase.from('Categories').select('*');
+        const { data, error } = await supabase.from('Categories').select('*').eq('IdStatus',1);
         if (!error) setCategorias(data);
+
+        const { unitsTempo  } = await supabase.from('Units').select('*').eq('IdStatus',1);
+        setUnidades(unitsTempo);
 
         if(selected.length > 0){
             setValues(selected[0]);
@@ -70,6 +75,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
             PrecioVenta: values.PrecioVenta,
             IdStatus: values?.IdStatus ? values?.IdStatus : 1,
             ImageURL: values.ImageURL || null,
+            Stock: 0
         };
 
         let data, error;
@@ -360,6 +366,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                     className={errors.IdCategory ? 'p-invalid' : ''}
                                     style={{ width: '100%' }}
                                     disabled={!editable}
+                                    showClear
                                 />
 
                                 <label htmlFor="IdCategory">Categoría</label>
@@ -444,6 +451,34 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                 />
                                 <label htmlFor="PrecioVenta">Precio Venta</label>
                             </FloatLabel>
+                        </div>
+                    </div>
+
+                    {/* Unidad */}
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <Dropdown
+                                    id="IdUnit"
+                                    value={values.IdUnit}
+                                    options={unidades}
+                                    onChange={(e) => handleChange('IdUnit', e.value)}
+                                    placeholder="Seleccione una unidad"
+                                    required
+                                    optionLabel="UnitName"
+                                    optionValue="IdUnit"
+                                    className={errors.IdUnit ? 'p-invalid' : ''}
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                    showClear
+                                />
+
+                                <label htmlFor="IdUnit">Unidad</label>
+                            </FloatLabel>
+                        </div>
+
+                        <div style={{ flex: 1 }}>
                         </div>
                     </div>
                 </div>
