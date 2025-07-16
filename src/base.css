@@ -248,3 +248,34 @@ body {
   margin-right: 8px;
   vertical-align: middle;
 }
+
+
+/* COLORES DE ESTADOS */
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  color: white;
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Colores según estado o categoría */
+.badge-activo {
+  background-color: #28a745;
+}
+
+.badge-inactivo {
+  background-color: #dc3545;
+}
+
+.badge-ingresado {
+  background-color: #09c0e0;
+  color: black;
+}
+
+.badge-eliminado {
+  background-color: #dc3545;
+}

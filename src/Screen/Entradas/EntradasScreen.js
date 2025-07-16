@@ -10,13 +10,25 @@ import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import CRUDEntradas from './CRUDEntradas';
+import { Calendar } from 'primereact/calendar';
+import { Dropdown } from 'primereact/dropdown';
+import getLocalDateTimeString from '../../utils/funciones';
+import CalendarMonth from '../../components/CalendarMonth';
 
 export default function EntradasScreen() {
   const [data, setData] = useState([]);
+  const { user } = useUser();
   const [showDialog, setShowDialog] = useState(false); // Para edición/creación futura
   const [showDialogStatus, setShowDialogStatus] = useState(false); // Para cambio de estado
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [rangeDates, setRangeDates] = useState(() => {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return [firstDay, lastDay];
+  });
+  const [selectedMonth, setSelectedMonth] = useState(null);
   const [globalFilter, setGlobalFilter] = useState('');
   const inputRef = useRef(null);
   const toast = useRef(null);
@@ -25,15 +37,31 @@ export default function EntradasScreen() {
 
   const getInfo = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('vta_entradas').select('*');
+
+    let query = supabase.from('vta_entradas').select('*');
+
+    // Si hay fechas seleccionadas, agregamos el filtro
+    if (rangeDates && rangeDates[0] && rangeDates[1]) {
+      const from = new Date(rangeDates[0]);
+      const to = new Date(rangeDates[1]);
+
+      to.setHours(23, 59, 59, 999);
+
+      query = query.gte('Date', from.toISOString()).lte('Date', to.toISOString());
+    }
+
+    const { data, error } = await query;
+
     if (!error) setData(data);
-    else
+    else {
       toast.current?.show({
         severity: 'error',
         summary: 'Error',
         detail: error.message,
         life: 3000,
       });
+    }
+
     setLoading(false);
   };
 
@@ -59,7 +87,6 @@ export default function EntradasScreen() {
     setShowDialog(true);
   };
 
-
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -67,13 +94,13 @@ export default function EntradasScreen() {
 
   const cambiarEstadoEntrada = async () => {
     if (!selected[0]?.IdEntrada) return;
-
-    const nuevoEstado = selected[0].IdStatus === 3 ? 4 : 3;
-    const estadoTexto = nuevoEstado === 1 ? 'Ingresado' : 'Eliminado';
+    const estadoTexto =  'Eliminado';
 
     const { error } = await supabase
       .from('Entradas')
-      .update({ IdStatus: nuevoEstado })
+      .update({ IdStatus: 4 })
+      .update({ IdUserEdit: user?.IdUser })
+      .update({ Date: getLocalDateTimeString() })
       .eq('IdEntrada', selected[0].IdEntrada);
 
     if (error) {
@@ -87,7 +114,7 @@ export default function EntradasScreen() {
       toast.current?.show({
         severity: 'success',
         summary: 'Éxito',
-        detail: `Entrada ${selected[0].IdEntrada} ${estadoTexto} correctamente`,
+        detail: `Entrada de ${selected[0].Name} ${estadoTexto} correctamente`,
         life: 3000,
       });
 
@@ -183,16 +210,20 @@ export default function EntradasScreen() {
       format: 'badge',
       center: true,
       className: 'Small',
+      valueField: 'StatusName',
       onClick: (rowData) => {
         setSelected([rowData]);
         setShowDialogStatus(true);
       },
-    },
+    }
+
   ];
+
+
 
   useEffect(() => {
     getInfo();
-  }, []);
+  }, [rangeDates]);
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -226,6 +257,13 @@ export default function EntradasScreen() {
                 buscarProductoPorCodigo(globalFilter);
               }
             }}
+          />
+
+          <CalendarMonth
+            rangeDates={rangeDates}
+            setRangeDates={setRangeDates}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
           />
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -288,9 +326,7 @@ export default function EntradasScreen() {
             }
           >
             <h4>
-              {selected[0]?.IdStatus === 1
-                ? `¿Está seguro de inactivar la entrada ID: ${selected[0]?.IdEntrada}?`
-                : `¿Está seguro de activar nuevamente la entrada ID: ${selected[0]?.IdEntrada}?`}
+              {`¿Está seguro de eliminar la entrada de: ${selected[0]?.ProductName}?`}
             </h4>
           </Dialog>
         </>

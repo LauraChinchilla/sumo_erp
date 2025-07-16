@@ -96,37 +96,28 @@ function formatValue(value, format, rowData, column = {}) {
       const num = parseFloat(value);
       return isNaN(num) ? value : num.toFixed(2);
 
-    case 'badge':
-      const statusName = rowData.StatusName || '';
-      const isActive = rowData.IdStatus === 1 || statusName.toLowerCase() === 'activo';
-      const bgColor = isActive ? '#28a745' : '#dc3545';
-      const text = statusName || (isActive ? 'Activo' : 'Inactivo');
 
-      const handleClick = (e) => {
-        e.stopPropagation();
-        if (typeof column.onClick === 'function') {
-          column.onClick(rowData);
-        }
-      };
+      case 'badge': {
+        const valueField = column.valueField || column.field;
+        const value = rowData[valueField] || '';
+        const safeValue = value.toString().toLowerCase().replace(/\s+/g, '-');
 
-      return (
-        <span
-          onClick={handleClick}
-          style={{
-            backgroundColor: bgColor,
-            color: 'white',
-            padding: '0.2rem 0.6rem',
-            borderRadius: '1rem',
-            fontSize: '0.75rem',
-            display: 'inline-block',
-            minWidth: 60,
-            textAlign: 'center',
-            cursor: column.onClick ? 'pointer' : 'default'
-          }}
-        >
-          {text}
-        </span>
-      );
+        const handleClick = (e) => {
+          e.stopPropagation();
+          if (typeof column.onClick === 'function') {
+            column.onClick(rowData);
+          }
+        };
+
+        return (
+          <span
+            onClick={handleClick}
+            className={`badge badge-${safeValue}`}
+          >
+            {value}
+          </span>
+        );
+      }
 
     case 'Date':
       if (!value) return '';
@@ -146,5 +137,3 @@ function formatValue(value, format, rowData, column = {}) {
       return value;
   }
 }
-
-
