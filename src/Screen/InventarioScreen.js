@@ -14,7 +14,7 @@ import { Toast } from 'primereact/toast';
 export default function InventarioScreen() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { logout } = useUser();
+  const { user, logout } = useUser();
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const toast = useRef(null);
@@ -38,67 +38,63 @@ export default function InventarioScreen() {
   const columns = [
     {
       field: 'Code',
-      Header: 'Codigo',
+      Header: 'Código',
       center: true,
       frozen: true,
       format: 'text',
       className: 'XxxSmall',
       filterMatchMode: 'equals',
     },
-    { field: 'Name', Header: 'Producto', format: 'text', className: 'Xxlarge' },
     {
-      field: 'TotalUnidades',
-      Header: 'Stock',
-      format: 'number',
-      className: 'Small',
-      styleEvaluator: (row) =>
-        row.TotalUnidades < 5
-          ? { backgroundColor: '#ffe0e0', color: 'red' }
-          : undefined,
+      field: 'Name',
+      Header: 'Producto',
+      format: 'text',
+      className: 'Xxlarge',
     },
-    { field: 'UnitName', Header: 'Unidad', format: 'text', className: 'Small' },
     {
       field: 'categoryname',
-      Header: 'Categoria',
+      Header: 'Categoría',
       center: false,
       frozen: false,
-      filterMatchMode: 'contains',
       format: 'text',
       className: 'XxxSmall',
+      filterMatchMode: 'contains',
     },
     {
       field: 'CostoPromedio',
       Header: 'Costo Promedio',
       format: 'number',
       className: 'Small',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
     },
     {
       field: 'UltimoPrecioCompra',
       Header: 'Últ. Precio Compra',
       format: 'number',
       className: 'Small',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
     },
     {
-      field: 'PrecioVentaUltimoPrecioCompra',
-      Header: 'Precio Venta (Últ. Precio Compra)',
+      field: 'PrecioVenta',
+      Header: 'Precio Venta',
       format: 'number',
       className: 'Small',
     },
     {
-      field: 'PrecioVentaCostoPromedio',
-      Header: 'Precio Venta (Costo Promedio)',
+      field: 'TotalUnidades',
+      Header: 'Stock',
       format: 'number',
-      className: 'Small',
-    },
-    {
-      field: 'GananciaEstimada',
-      Header: 'Ganancia Estimada',
-      format: 'number',
-      className: 'Small',
+      className: 'XxSmall',
       styleEvaluator: (row) =>
-        row.GananciaEstimada < 0
+        row.TotalUnidades < 5
           ? { backgroundColor: '#ffe0e0', color: 'red' }
-          : { backgroundColor: '#e6ffe6', color: 'green' },
+          : undefined,
+    },
+    {
+      field: 'UnitName',
+      Header: 'Unidad',
+      format: 'text',
+      className: 'XxxSmall',
     },
     {
       field: 'actions',
@@ -114,7 +110,6 @@ export default function InventarioScreen() {
       },
     },
   ];
-
 
   const handleLogout = () => {
     logout();

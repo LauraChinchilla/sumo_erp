@@ -137,6 +137,18 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showDialog]);
 
+    useEffect(() => {
+        const { ISV, PrecioCompra, PorcentajeGanancia } = values;
+
+        const tieneValores = (parseFloat(ISV) > 0 || parseFloat(PrecioCompra) > 0 || parseFloat(PorcentajeGanancia) > 0);
+
+        if (tieneValores && values.Excento) {
+            setValues(prev => ({ ...prev, Excento: false }));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [values.ISV, values.PrecioCompra, values.PorcentajeGanancia]);
+
+
     return (
         <Dialog visible={showDialog} onHide={onHide} style={{ width: '60%' }} header={'Nueva Entrada'}>
             <Toast ref={toast} />

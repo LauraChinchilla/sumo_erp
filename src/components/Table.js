@@ -45,7 +45,7 @@ export default function Table({ columns, data }) {
         globalFilterFields={globalFilterFields}
         className="custom-table" 
       >
-        {columns.map((col, index) => {
+        {columns.filter(col => !col.hidden).map((col, index) => {
           const isNumber = col.format === 'number';
           return (
             <Column

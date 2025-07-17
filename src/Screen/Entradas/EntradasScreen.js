@@ -38,7 +38,6 @@ export default function EntradasScreen() {
 
     let query = supabase.from('vta_entradas').select('*').eq('IdStatus', 3);
 
-    // Si hay fechas seleccionadas, agregamos el filtro
     if (rangeDates && rangeDates[0] && rangeDates[1]) {
       const from = new Date(rangeDates[0]);
       const to = new Date(rangeDates[1]);
@@ -49,7 +48,6 @@ export default function EntradasScreen() {
     }
 
     const { data, error } = await query;
-
     if (!error) setData(data);
     else {
       toast.current?.show({
@@ -213,6 +211,36 @@ export default function EntradasScreen() {
       frozen: false,
       format: 'text',
       filterMatchMode: 'contains',
+    },
+    {
+      field: 'PrecioCompra',
+      Header: 'Precio Compra',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+    },
+    {
+      field: 'ISV',
+      Header: 'ISV',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+    },
+    {
+      field: 'PorcentajeGanancia',
+      Header: 'Porcentaje Ganancia',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
     },
     {
       field: 'UserNameCreate',

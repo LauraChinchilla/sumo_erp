@@ -40,6 +40,7 @@ export default function Dashboard() {
       icon: 'pi pi-sign-out',
       title: 'Salidas',
       description: 'Registro de salidas de productos por ventas o bajas.',
+      ruta: '/salidas',
     },
   ];
 

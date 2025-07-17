@@ -25,6 +25,7 @@ export default function Login() {
       .eq('Password', password)
       .single();
 
+      
     if (queryError || !data) {
       setError('Credenciales incorrectas');
     } else {

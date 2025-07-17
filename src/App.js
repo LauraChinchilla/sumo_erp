@@ -6,6 +6,7 @@ import ProductsScreen from './Screen/Products/ProductsScreen';
 import InventarioScreen from './Screen/InventarioScreen';
 import EntradasScreen from './Screen/Entradas/EntradasScreen';
 import Configuraciones from './Screen/Configuraciones/Configuraciones';
+import SalidasScreen from './Screen/Salidas/SalidasScreen';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/products" element={<ProductsScreen />} />
           <Route path="/inventory" element={<InventarioScreen />} />
           <Route path="/entradas" element={<EntradasScreen />} />
+          <Route path="/salidas" element={<SalidasScreen />} />
           <Route path="/config" element={<Configuraciones />} />
         </Routes>
       </Router>

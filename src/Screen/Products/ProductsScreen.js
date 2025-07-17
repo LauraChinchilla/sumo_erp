@@ -23,7 +23,7 @@ export default function Productos() {
   const [globalFilter, setGlobalFilter] = useState('');
   const inputRef = useRef(null);
   const toast = useRef(null);
-  const { logout } = useUser();
+  const { user, logout } = useUser();
   const navigate = useNavigate();
 
   const getInfo = async () => {
@@ -81,6 +81,7 @@ export default function Productos() {
       frozen: true,
       className: 'XxSmall',
       filterMatchMode: 'equals',
+      hidden: user?.IdRol !==1
     },
     {
       field: 'Code',
