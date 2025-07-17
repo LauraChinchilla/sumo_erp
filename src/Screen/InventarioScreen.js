@@ -1,5 +1,3 @@
-// InventarioScreen.js
-
 import React, { useEffect, useRef, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Table from '../components/Table';
@@ -11,6 +9,7 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import CRUDProducts from './Products/CRUDProducts';
 import ModalImage from '../components/ModalImage';
+import { Toast } from 'primereact/toast';
 
 export default function InventarioScreen() {
   const [data, setData] = useState([]);
@@ -18,18 +17,20 @@ export default function InventarioScreen() {
   const { logout } = useUser();
   const navigate = useNavigate();
   const inputRef = useRef(null);
+  const toast = useRef(null);
   const [globalFilter, setGlobalFilter] = useState('');
   const [selected, setSelected] = useState([]);
   const [showDialogImage, setShowDialogImage] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [filteredData, setFilteredData] = useState([]);
 
   const getInventario = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('vta_products') // o 'Inventario' si tienes una vista
-      .select('*');
-    
-    if (!error) setData(data);
+    const { data, error } = await supabase.from('vta_products').select('*');
+    if (!error) {
+      setData(data);
+      setFilteredData(data); // <- esto
+    }
     setLoading(false);
   };
 
@@ -89,9 +90,22 @@ export default function InventarioScreen() {
     getInventario();
   }, []);
 
+  useEffect(() => {
+    if (!globalFilter.trim()) {
+      setFilteredData(data); // Mostrar todo si el filtro está vacío
+    } else {
+      const filtered = data.filter(p =>
+        p.Code?.toString().toLowerCase().includes(globalFilter.toLowerCase())
+      );
+      setFilteredData(filtered);
+    }
+  }, [globalFilter, data]);
+
+
   return (
     <>
       <Navbar onLogaut={handleLogout} />
+      <Toast ref={toast} />
       <div className="dashboard-container" style={{ paddingTop: '50px' }}>
         <h2 style={{ textAlign: 'center' }}>Inventario</h2>
 
@@ -103,19 +117,9 @@ export default function InventarioScreen() {
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder="Buscar por código (lector)"
-              className="p-inputtext-sm"
               style={{ width: '300px' }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const match = data.find(p => p.Code?.toString().trim() === globalFilter.trim());
-                  if (match) {
-                    setSelected([match]);
-                    setShowDialog(true);
-                  }
-                }
-              }}
             />
-  
+
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <Button
                 icon="pi pi-refresh"
@@ -126,7 +130,7 @@ export default function InventarioScreen() {
               />
             </div>
           </div>
-        <Table columns={columns} data={data} />
+        <Table columns={columns} data={filteredData} />
         {loading && <Loading message="Cargando inventario..." />}
       </div>
 

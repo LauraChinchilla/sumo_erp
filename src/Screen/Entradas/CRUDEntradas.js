@@ -17,6 +17,7 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
     const { user } = useUser();
     const [loading, setLoading] = useState(false);
     const [proveedores, setProveedores] = useState([]);
+    const [productos, setProductos] = useState([]);
 
     const initialValues = {
         IdEntrada: -1,
@@ -35,12 +36,13 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
     const getValoresIniciales = async () => {
         const { data, error } = await supabase.from('Vendors').select('*');
         if (!error) setProveedores(data);
-        if(selected){
+        const { data: data2 } = await supabase.from('vta_products').select('*').eq('IdStatus',1);
+        setProductos(data2)
+        if(selected?.length > 0){
             setValues({
                 ...selected[0],
             })
         }
-
     };
 
     const guardarDatos = async (e) => {
@@ -80,7 +82,7 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
         };
 
         // Paso 1: Insertar entrada
-        const { data: entradaGuardada, error: errorEntrada } = await supabase
+        const { error: errorEntrada } = await supabase
             .from('Entradas')
             .insert([entrada]);
 
@@ -173,37 +175,83 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
         <Dialog visible={showDialog} onHide={onHide} style={{ width: '60%' }} header={'Nueva Entrada'}>
             <Toast ref={toast} />
             {/* Código y Nombre */}
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <div style={{ flex: 1 }}>
-                <FloatLabel>
-                    <InputText
-                        id="Code"
-                        value={values.Code}
-                        onChange={(e) => handleChange('Code', e.target.value)}
-                        required
-                        style={{ width: '100%' }}
-                        className={errors.Code ? 'p-invalid' : ''}
-                        disabled
-                    />
-                    <label htmlFor="Code">Código</label>
-                </FloatLabel>
-                </div>
 
-                <div style={{ flex: 1 }}>
-                <FloatLabel>
-                    <InputText
-                        id="Name"
-                        value={values.Name}
-                        onChange={(e) => handleChange('Name', e.target.value)}
-                        required
-                        style={{ width: '100%' }}
-                        className={errors.Name ? 'p-invalid' : ''}
-                        disabled
-                    />
-                    <label htmlFor="Name">Nombre</label>
-                </FloatLabel>
+
+            {selected?.length > 0 ? (
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                    <div style={{ flex: 1 }}>
+                        <FloatLabel>
+                            <InputText
+                                id="Code"
+                                value={values.Code}
+                                onChange={(e) => handleChange('Code', e.target.value)}
+                                required
+                                style={{ width: '100%' }}
+                                className={errors.Code ? 'p-invalid' : ''}
+                                disabled
+                            />
+                            <label htmlFor="Code">Código</label>
+                        </FloatLabel>
+                    </div>
+
+                    <div style={{ flex: 1 }}>
+                        <FloatLabel>
+                            <InputText
+                                id="Name"
+                                value={values.Name}
+                                onChange={(e) => handleChange('Name', e.target.value)}
+                                required
+                                style={{ width: '100%' }}
+                                className={errors.Name ? 'p-invalid' : ''}
+                                disabled
+                            />
+                            <label htmlFor="Name">Nombre</label>
+                        </FloatLabel>
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                    <div style={{ flex: 1 }}>
+                        <FloatLabel>
+                            <Dropdown
+                                id="IdProduct"
+                                value={values.IdProduct}
+                                options={productos}
+                                // onChange={(e) => handleChange('IdProduct', e.value)}
+                                onChange={(e) => {
+                                const selectedProduct = productos.find(p => p.IdProduct === e.value);
+                                    if (selectedProduct) {
+                                        setValues(prev => ({
+                                            ...prev,
+                                            IdProduct: selectedProduct.IdProduct,
+                                            Code: selectedProduct.Code,
+                                            Name: selectedProduct.Name,
+                                            categoryname: selectedProduct.categoryname,
+                                            ISV: selectedProduct.ISV,
+                                            Excento: selectedProduct.Excento,
+                                            PorcentajeGanancia: selectedProduct.PorcentajeGanancia,
+                                            PrecioCompra: selectedProduct.PrecioCompra,
+                                            PrecioVenta: selectedProduct.PrecioVenta,
+                                            UnitName: selectedProduct.UnitName,
+                                            Stock: selectedProduct.Stock
+                                        }));
+                                    } else {
+                                        setValues(prev => ({ ...prev, IdProduct: null }));
+                                    }
+                                }}
+                                placeholder="Seleccione un producto"
+                                required
+                                optionLabel="productoconcat"
+                                optionValue="IdProduct"
+                                className={errors.IdProduct ? 'p-invalid' : ''}
+                                style={{ width: '100%' }}
+                                disabled={!editable}
+                            />
+                            <label htmlFor="IdProduct">Producto</label>
+                        </FloatLabel>
+                    </div>
+                </div>
+            )}
 
             {/* Descripción y Proveedor */}
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>

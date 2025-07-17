@@ -44,7 +44,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
         const { data, error } = await supabase.from('Categories').select('*').eq('IdStatus',1);
         if (!error) setCategorias(data);
 
-        const { unitsTempo  } = await supabase.from('Units').select('*').eq('IdStatus',1);
+        const { data: unitsTempo  } = await supabase.from('Units').select('*').eq('IdStatus',1);
         setUnidades(unitsTempo);
 
         if(selected.length > 0){
@@ -77,7 +77,8 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
             PrecioVenta: values.PrecioVenta,
             IdStatus: values?.IdStatus ? values?.IdStatus : 1,
             ImageURL: values.ImageURL || null,
-            Stock: 0
+            Stock: 0,
+            IdUnit: values?.IdUnit,
         };
 
         let error;
