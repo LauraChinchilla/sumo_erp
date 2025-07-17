@@ -70,17 +70,6 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
             Cantidad: values?.Cantidad
         };
 
-        const productoActualizado = {
-            Excento: values.Excento,
-            ISV: values.ISV,
-            PorcentajeGanancia: values.PorcentajeGanancia,
-            PrecioCompra: values.PrecioCompra,
-            PrecioVenta: values.PrecioVenta,
-            IdUserEdit: user?.IdUser,
-            DateEdit: new Date(),
-            Stock: values?.Stock + values?.Cantidad
-        };
-
         // Paso 1: Insertar entrada
         const { error: errorEntrada } = await supabase
             .from('Entradas')
@@ -96,29 +85,6 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
             });
             setLoading(false);
             return;
-        }
-
-        // Paso 2: Actualizar producto
-        const { error: errorProducto } = await supabase
-            .from('Products')
-            .update(productoActualizado)
-            .eq('IdProduct', values.IdProduct);
-
-        if (errorProducto) {
-            console.error('Error al actualizar producto:', errorProducto.message);
-            toast.current?.show({
-                severity: 'warn',
-                summary: 'Advertencia',
-                detail: 'La entrada se guardó, pero hubo un problema al actualizar el producto.',
-                life: 4000
-            });
-        } else {
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Éxito',
-                detail: 'Entrada guardada y producto actualizado correctamente',
-                life: 3000
-            });
         }
 
         setTimeout(() => {
@@ -217,7 +183,6 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                 id="IdProduct"
                                 value={values.IdProduct}
                                 options={productos}
-                                // onChange={(e) => handleChange('IdProduct', e.value)}
                                 onChange={(e) => {
                                 const selectedProduct = productos.find(p => p.IdProduct === e.value);
                                     if (selectedProduct) {
@@ -227,13 +192,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                             Code: selectedProduct.Code,
                                             Name: selectedProduct.Name,
                                             categoryname: selectedProduct.categoryname,
-                                            ISV: selectedProduct.ISV,
-                                            Excento: selectedProduct.Excento,
                                             PorcentajeGanancia: selectedProduct.PorcentajeGanancia,
-                                            PrecioCompra: selectedProduct.PrecioCompra,
-                                            PrecioVenta: selectedProduct.PrecioVenta,
                                             UnitName: selectedProduct.UnitName,
-                                            Stock: selectedProduct.Stock
                                         }));
                                     } else {
                                         setValues(prev => ({ ...prev, IdProduct: null }));

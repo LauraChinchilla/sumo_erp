@@ -118,15 +118,6 @@ export default function Productos() {
       className: 'XxSmall'
     },
     {
-      field: 'Stock',
-      Header: 'Stock',
-      center: false,
-      frozen: false,
-      format: 'number',
-      className: 'XxSmall',
-      filterMatchMode: 'equals',
-    },
-    {
       field: 'UnitName',
       Header: 'Unidad',
       center: false,
@@ -134,24 +125,6 @@ export default function Productos() {
       format: 'text',
       className: 'XxSmall',
       filterMatchMode: 'contains',
-    },
-    {
-      field: 'PrecioCompra',
-      Header: 'PrecioCompra',
-      center: false,
-      frozen: false,
-      format: 'number',
-      className: 'XxSmall',
-      filterMatchMode: 'equals',
-    },
-    {
-      field: 'PrecioVenta',
-      Header: 'PrecioVenta',
-      center: false,
-      frozen: false,
-      format: 'number',
-      className: 'XxSmall',
-      filterMatchMode: 'equals',
     },
     {
       field: 'StatusName',
@@ -201,6 +174,10 @@ export default function Productos() {
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
   }, [data]);
+
+  useEffect(() => {
+    document.title = 'Sumo - Productos';
+  }, []);
 
   return (
     <>

@@ -26,13 +26,14 @@ export default function InventarioScreen() {
 
   const getInventario = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('vta_products').select('*');
+    const { data, error } = await supabase.from('vta_inventario').select('*');
     if (!error) {
       setData(data);
       setFilteredData(data); // <- esto
     }
     setLoading(false);
   };
+
 
   const columns = [
     {
@@ -46,12 +47,12 @@ export default function InventarioScreen() {
     },
     { field: 'Name', Header: 'Producto', format: 'text', className: 'Xxlarge' },
     {
-      field: 'Stock',
-      Header: 'Disponible',
+      field: 'TotalUnidades',
+      Header: 'Stock',
       format: 'number',
       className: 'Small',
       styleEvaluator: (row) =>
-        row.Stock < 5
+        row.TotalUnidades < 5
           ? { backgroundColor: '#ffe0e0', color: 'red' }
           : undefined,
     },
@@ -66,8 +67,41 @@ export default function InventarioScreen() {
       className: 'XxxSmall',
     },
     {
+      field: 'CostoPromedio',
+      Header: 'Costo Promedio',
+      format: 'number',
+      className: 'Small',
+    },
+    {
+      field: 'UltimoPrecioCompra',
+      Header: 'Últ. Precio Compra',
+      format: 'number',
+      className: 'Small',
+    },
+    {
+      field: 'PrecioVentaUltimoPrecioCompra',
+      Header: 'Precio Venta (Últ. Precio Compra)',
+      format: 'number',
+      className: 'Small',
+    },
+    {
+      field: 'PrecioVentaCostoPromedio',
+      Header: 'Precio Venta (Costo Promedio)',
+      format: 'number',
+      className: 'Small',
+    },
+    {
+      field: 'GananciaEstimada',
+      Header: 'Ganancia Estimada',
+      format: 'number',
+      className: 'Small',
+      styleEvaluator: (row) =>
+        row.GananciaEstimada < 0
+          ? { backgroundColor: '#ffe0e0', color: 'red' }
+          : { backgroundColor: '#e6ffe6', color: 'green' },
+    },
+    {
       field: 'actions',
-      // Header: 'Acciones',
       isIconColumn: true,
       icon: 'pi pi-image',
       center: true,
@@ -77,9 +111,10 @@ export default function InventarioScreen() {
       onClick: (rowData) => {
         setSelected([rowData]);
         setShowDialogImage(true);
-      }
-    }
+      },
+    },
   ];
+
 
   const handleLogout = () => {
     logout();
@@ -101,6 +136,10 @@ export default function InventarioScreen() {
     }
   }, [globalFilter, data]);
 
+
+  useEffect(() => {
+    document.title = 'Sumo - Inventario';
+  }, []);
 
   return (
     <>

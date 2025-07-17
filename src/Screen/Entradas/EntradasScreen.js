@@ -112,8 +112,8 @@ export default function EntradasScreen() {
     }
 
     const { data: productData, error: errorStock } = await supabase
-      .from('vta_products')
-      .select('Stock')
+      .from('vta_inventario')
+      .select('TotalUnidades')
       .eq('IdProduct', IdProduct)
       .single();
 
@@ -155,34 +155,6 @@ export default function EntradasScreen() {
       });
       return;
     }
-
-    const nuevoStock = productData.Stock - cantidadEliminar;
-
-    const { error: errorUpdateStock } = await supabase
-      .from('Products')
-      .update({
-        Stock: nuevoStock,
-        DateEdit: new Date(),
-        IdUserEdit: user?.IdUser,
-      })
-      .eq('IdProduct', IdProduct);
-
-    if (errorUpdateStock) {
-      toast.current?.show({
-        severity: 'warn',
-        summary: 'Advertencia',
-        detail: 'La entrada se eliminó, pero no se pudo actualizar el stock del producto.',
-        life: 4000,
-      });
-    } else {
-      toast.current?.show({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: `Entrada de ${selected[0].Name} eliminada correctamente y stock actualizado.`,
-        life: 3000,
-      });
-    }
-
     setTimeout(() => {
       getInfo();
       setShowDialogStatus(false);
@@ -294,6 +266,10 @@ export default function EntradasScreen() {
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
   }, [data]);
+
+  useEffect(() => {
+    document.title = 'Sumo - Entradas';
+  }, []);
 
   return (
     <>

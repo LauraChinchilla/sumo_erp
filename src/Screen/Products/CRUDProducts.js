@@ -3,10 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import useForm from '../../components/useForm';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
-import { Checkbox } from 'primereact/checkbox';
 import { FloatLabel } from 'primereact/floatlabel';
 import { Dropdown } from 'primereact/dropdown';
-import { InputNumber } from 'primereact/inputnumber';
 import { supabase } from '../../supabaseClient';
 import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
@@ -33,10 +31,6 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
         Name: { required: true, message: 'El nombre es obligatorio' },
         IdCategory: { required: true, message: 'Debe seleccionar una categoría' },
         IdUnit: { required: true, message: 'Debe seleccionar una unidad' },
-        PrecioCompra: { required: true, message: 'Precio de compra requerido' },
-        PrecioVenta: { required: true, message: 'Precio de venta requerido' },
-        PorcentajeGanancia: { required: true, message: 'Porcentaje requerido' },
-        ISV: { required: values?.Excento ? false : true, message: 'Porcentaje requerido' },
     };
 
     const getValoresIniciales = async () => {
@@ -70,14 +64,8 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
             Name: values.Name,
             Description: values.Description,
             IdCategory: values.IdCategory,
-            Excento: values.Excento,
-            ISV: values.ISV,
-            PorcentajeGanancia: values.PorcentajeGanancia,
-            PrecioCompra: values.PrecioCompra,
-            PrecioVenta: values.PrecioVenta,
             IdStatus: values?.IdStatus ? values?.IdStatus : 1,
             ImageURL: values.ImageURL || null,
-            Stock: 0,
             IdUnit: values?.IdUnit,
         };
 
@@ -188,22 +176,24 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
         }
     };
 
-    const calcularPrecioVenta = () => {
-        const precioCompra = parseFloat(values.PrecioCompra) || 0;
-        const isv = parseFloat(values.ISV) || 0;
-        const ganancia = parseFloat(values.PorcentajeGanancia) || 0;
-
-        const montoGanancia = precioCompra * (ganancia / 100);
-        const montoISV = values.Excento ? 0 : precioCompra * (isv / 100);
-
-        const precioVenta = precioCompra + montoGanancia + montoISV;
-
-        setValues(prev => ({ ...prev, PrecioVenta: precioVenta.toFixed(2) }));
-    };
-
     const handleUpload = async ({ files }) => {
         const file = files[0];
         if (!file) return;
+
+        // Validar tamaño máximo (ej: 1 MB = 1_000_000 bytes)
+        const maxSize = 1000000; // 1 MB
+        if (file.size > maxSize) {
+            toast.current.show({
+                severity: 'warn',
+                summary: 'Archivo demasiado grande',
+                detail: 'El tamaño máximo permitido es 1 MB.',
+                life: 4000,
+            });
+
+            // Limpiar el FileUpload para que permita volver a seleccionar
+            if (fileUploadRef.current) fileUploadRef.current.clear();
+            return;
+        }
 
         const code = selected[0]?.Code || values.Code || 'producto';
         const extension = file.name.split('.').pop().toLowerCase();
@@ -215,9 +205,9 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
 
         if (uploadError) {
             toast.current.show({
-            severity: 'error',
-            summary: 'Error al subir imagen',
-            detail: uploadError.message,
+                severity: 'error',
+                summary: 'Error al subir imagen',
+                detail: uploadError.message,
             });
             return;
         }
@@ -228,9 +218,9 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
 
         if (urlError) {
             toast.current.show({
-            severity: 'error',
-            summary: 'Error al obtener URL pública',
-            detail: urlError.message,
+                severity: 'error',
+                summary: 'Error al obtener URL pública',
+                detail: urlError.message,
             });
             return;
         }
@@ -242,59 +232,40 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
             ImageURL: imageUrl,
         }));
 
-        if (fileUploadRef.current) {
-            fileUploadRef.current.clear();
-        }
+        if (fileUploadRef.current) fileUploadRef.current.clear();
 
         if (values?.IdProduct > 0) {
             const { error: updateError } = await supabase
-            .from('Products')
-            .update({ ImageURL: imageUrl })
-            .eq('IdProduct', values.IdProduct);
+                .from('Products')
+                .update({ ImageURL: imageUrl })
+                .eq('IdProduct', values.IdProduct);
 
             if (updateError) {
-            toast.current.show({
-                severity: 'error',
-                summary: 'Error al actualizar producto',
-                detail: updateError.message,
-            });
-            return;
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Error al actualizar producto',
+                    detail: updateError.message,
+                });
+                return;
             }
 
             toast.current.show({
-            severity: 'success',
-            summary: 'Imagen subida y producto actualizado',
-            detail: 'Imagen asignada correctamente al producto.',
+                severity: 'success',
+                summary: 'Imagen subida',
+                detail: 'Imagen asignada correctamente al producto.',
             });
 
             getInfo();
         } else {
             toast.current.show({
-            severity: 'warn',
-            summary: 'Producto aún no guardado',
-            detail: 'Guarda el producto antes de subir la imagen.',
+                severity: 'warn',
+                summary: 'Producto aún no guardado',
+                detail: 'Guarda el producto antes de subir la imagen.',
             });
         }
     };
 
 
-    useEffect(() => {
-        if(values?.PrecioCompra && values?.ISV && values?.PorcentajeGanancia){
-            calcularPrecioVenta();
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [values?.Excento, values?.PrecioCompra, values?.ISV, values?.PorcentajeGanancia]);
-
-    useEffect(() => {
-        if(values?.Excento){
-            setValues({
-                ...values,
-                ISV: 0,
-            });
-            calcularPrecioVenta();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [values.Excento]);
 
     useEffect(() => {
         if(showDialog){
@@ -322,6 +293,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                 style={{ width: '100%' }}
                                 className={errors.Code ? 'p-invalid' : ''}
                                 disabled={!editable}
+                                autoFocus
                             />
                             <label htmlFor="Code">Código</label>
                         </FloatLabel>
@@ -380,86 +352,6 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                         </div>
                     </div>
 
-                    {/* ISV y Porcentaje Ganancia */}
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                        {/* Exento Checkbox (alineado a la izquierda) */}
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Checkbox
-                                inputId="Excento"
-                                checked={values.Excento || false}
-                                onChange={(e) => handleChange('Excento', e.checked)}
-                                disabled={!editable}
-                            />
-                            <label htmlFor="Excento" className="p-checkbox-label" style={{ marginLeft: '0.5rem' }}>
-                            Exento
-                            </label>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                        <FloatLabel>
-                            <InputNumber
-                                id="ISV"
-                                disabled={values?.Excento || !editable}
-                                value={values.ISV}
-                                onChange={(e) => handleChange('ISV', e.value)}
-                                style={{ width: '90%' }}
-                                suffix=' %'
-                                className={errors.ISV ? 'p-invalid' : ''}
-                            />
-                            <label htmlFor="ISV">ISV</label>
-                        </FloatLabel>
-                        </div>
-
-                        <div style={{ flex: 1, marginLeft: '-0.5rem' }}>
-                        <FloatLabel>
-                            <InputNumber
-                                id="PorcentajeGanancia"
-                                value={values.PorcentajeGanancia}
-                                onChange={(e) => handleChange('PorcentajeGanancia', e.value)}
-                                style={{ width: '100%' }}
-                                suffix=' %'
-                                disabled={!editable}
-                                className={errors.PorcentajeGanancia ? 'p-invalid' : ''}
-                            />
-                            <label htmlFor="PorcentajeGanancia">Porcentaje Ganancia</label>
-                        </FloatLabel>
-                        </div>
-                    </div>
-
-                    {/* Precio Compra y Precio Venta */}
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                        <div style={{ flex: 1 }}>
-                        <FloatLabel>
-                            <InputNumber
-                                id="PrecioCompra"
-                                value={values.PrecioCompra}
-                                onChange={(e) => handleChange('PrecioCompra', e.value)}
-                                required
-                                style={{ width: '100%' }}
-                                minFractionDigits={3}
-                                maxFractionDigits={3}
-                                disabled={!editable}
-                                className={errors.PrecioCompra ? 'p-invalid' : ''}
-                            />
-                            <label htmlFor="PrecioCompra">Precio Compra</label>
-                        </FloatLabel>
-                        </div>
-
-                        <div style={{ flex: 1 }}>
-                            <FloatLabel>
-                                <InputNumber
-                                    id="PrecioVenta"
-                                    value={values.PrecioVenta}
-                                    onChange={(e) => handleChange('PrecioVenta', e.value)}
-                                    required
-                                    style={{ width: '100%' }}
-                                    disabled={!editable}
-                                    className={errors.PrecioVenta ? 'p-invalid' : ''}
-                                />
-                                <label htmlFor="PrecioVenta">Precio Venta</label>
-                            </FloatLabel>
-                        </div>
-                    </div>
-
                     {/* Unidad */}
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
 
@@ -496,10 +388,11 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                             mode="basic"
                             name="file"
                             accept="image/*"
-                            maxFileSize={1000000}
+                            // maxFileSize={1000000}
                             customUpload
                             uploadHandler={handleUpload}
                             chooseLabel="Agregar Imagen"
+                            auto
                             disabled={values?.ImageURL}
                         />
 
