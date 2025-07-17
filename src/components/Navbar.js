@@ -40,7 +40,7 @@ export default function Navbar({ onLogout }) {
     {
       label: 'Configuraciones',
       icon: 'pi pi-cog',
-      command: () => alert('Ir a configuraciones... (puedes personalizarlo)'),
+      command: () => navigate('/config'),
     },
     {
       label: 'Cerrar sesión',

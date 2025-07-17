@@ -5,6 +5,7 @@ import { UserProvider } from './context/UserContext';
 import ProductsScreen from './Screen/Products/ProductsScreen';
 import InventarioScreen from './Screen/InventarioScreen';
 import EntradasScreen from './Screen/Entradas/EntradasScreen';
+import Configuraciones from './Screen/Configuraciones/Configuraciones';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/products" element={<ProductsScreen />} />
           <Route path="/inventory" element={<InventarioScreen />} />
           <Route path="/entradas" element={<EntradasScreen />} />
+          <Route path="/config" element={<Configuraciones />} />
         </Routes>
       </Router>
     </UserProvider>

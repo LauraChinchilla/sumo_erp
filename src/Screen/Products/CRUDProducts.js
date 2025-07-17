@@ -40,6 +40,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
     };
 
     const getValoresIniciales = async () => {
+        setLoading(true)
         const { data, error } = await supabase.from('Categories').select('*').eq('IdStatus',1);
         if (!error) setCategorias(data);
 
@@ -51,6 +52,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
         } else {
             setValues(initialValues);
         }
+        setLoading(false)
     };
 
     const guardarDatos = async (e) => {
@@ -279,6 +281,7 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
         if(values?.PrecioCompra && values?.ISV && values?.PorcentajeGanancia){
             calcularPrecioVenta();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values?.Excento, values?.PrecioCompra, values?.ISV, values?.PorcentajeGanancia]);
 
     useEffect(() => {
@@ -289,12 +292,14 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
             });
             calcularPrecioVenta();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values.Excento]);
 
     useEffect(() => {
         if(showDialog){
             getValoresIniciales();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showDialog]);
 
     return (
