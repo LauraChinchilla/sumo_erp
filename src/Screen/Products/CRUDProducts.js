@@ -80,12 +80,12 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
             Stock: 0
         };
 
-        let data, error;
+        let error;
 
         if (values?.IdProduct > 0) {
-            ({ data, error } = await supabase.from('Products').update(Datos).eq('IdProduct', values.IdProduct));
+            ({ error } = await supabase.from('Products').update(Datos).eq('IdProduct', values.IdProduct));
         } else {
-            ({ data, error } = await supabase.from('Products').insert([Datos]));
+            ({ error } = await supabase.from('Products').insert([Datos]));
         }
 
         setLoading(false);
