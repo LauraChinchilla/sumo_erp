@@ -318,6 +318,7 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                         style={{ width: '100%' }}
                         minFractionDigits={3}
                         maxFractionDigits={3}
+                        prefix='L '
                         disabled={!editable}
                         className={errors.PrecioCompra ? 'p-invalid' : ''}
                     />
@@ -332,6 +333,7 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                             value={values.PrecioVenta}
                             onChange={(e) => handleChange('PrecioVenta', e.value)}
                             required
+                            prefix='L '
                             style={{ width: '100%' }}
                             disabled={!editable}
                             className={errors.PrecioVenta ? 'p-invalid' : ''}

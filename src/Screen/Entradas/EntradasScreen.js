@@ -252,6 +252,15 @@ export default function EntradasScreen() {
       hidden: user?.IdRol === 1 && user?.IdRol === 2,
     },
     {
+      field: 'PrecioVenta',
+      Header: 'Precio Venta',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      filterMatchMode: 'equals',
+    },
+    {
       field: 'UserNameCreate',
       Header: 'Usuario Creacion',
       center: false,
@@ -284,6 +293,8 @@ export default function EntradasScreen() {
       format: 'badge',
       center: true,
       className: 'Small',
+      frozen: true,
+      alignFrozen: 'right',
       valueField: 'StatusName',
       onClick: (rowData) => {
         if(rowData?.IdStatus === 3){
@@ -292,7 +303,6 @@ export default function EntradasScreen() {
         }
       },
     }
-
   ];
 
   useEffect(() => {
@@ -359,7 +369,6 @@ export default function EntradasScreen() {
               className="p-button-success"
               severity="primary"
               onClick={() => {
-                // Aquí podrías abrir un modal para crear entrada
                 setSelected([]);
                 setShowDialog(true);
               }}

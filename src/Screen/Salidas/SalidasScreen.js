@@ -9,6 +9,7 @@ import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import CalendarMonth from '../../components/CalendarMonth';
+import CRUDSalidas from './CRUDSalidas';
 
 export default function SalidasScreen() {
   const [data, setData] = useState([]);
@@ -61,14 +62,14 @@ export default function SalidasScreen() {
       .from('vta_products')
       .select('*')
       .eq('Code', codigo.trim())
-      .eq('IdStatus', 1)
+      .eq('IdStatus', 1) 
       .single();
 
     if (error || !producto) {
       toast.current?.show({
         severity: 'warn',
         summary: 'No encontrado',
-        detail: `No se encontró el producto con código: ${codigo}`,
+        detail: `No se encontró un producto con código: ${codigo}`,
         life: 3000,
       });
       return;
@@ -77,6 +78,7 @@ export default function SalidasScreen() {
     setSelected([producto]);
     setShowDialog(true);
   };
+
 
   const handleLogout = () => {
     logout();
@@ -93,7 +95,6 @@ export default function SalidasScreen() {
     { field: 'Descripcion', Header: 'Descripción', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals' },
     { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'money', className: 'Small', filterMatchMode: 'equals' },
-    // { field: 'PrecioVentaEntrada', Header: 'Precio Entrada', center: true, format: 'money', className: 'Small', filterMatchMode: 'equals' },
   ];
 
   useEffect(() => {
@@ -158,19 +159,14 @@ export default function SalidasScreen() {
         {loading && <Loading message="Cargando salidas..." />}
       </div>
 
-      {/* Dialogo para CRUD de salidas (comentado) */}
       {showDialog && (
-        <>
-          {/* 
-          <CRUDSalidas
-            setShowDialog={setShowDialog}
-            showDialog={showDialog}
-            setSelected={setSelected}
-            selected={selected}
-            getInfo={getInfo}
-          /> 
-          */}
-        </>
+        <CRUDSalidas
+          setShowDialog={setShowDialog}
+          showDialog={showDialog}
+          setSelected={setSelected}
+          selected={selected}
+          getInfo={getInfo}
+        /> 
       )}
     </>
   );

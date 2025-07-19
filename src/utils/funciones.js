@@ -10,5 +10,4 @@ function getLocalDateTimeString() {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-
 export default getLocalDateTimeString

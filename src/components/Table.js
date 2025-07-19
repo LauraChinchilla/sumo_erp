@@ -58,7 +58,6 @@ export default function Table({ columns, data }) {
                 width: getColumnWidth(col.className),
               }}
               align={isNumber ? 'end' : (col.center ? 'center' : 'start')}
-              frozen={col.frozen || false}
               body={rowData =>
                 col.isIconColumn
                   ? renderIconBody(col.icon, col.onClick, rowData, col.tooltip)
@@ -66,6 +65,8 @@ export default function Table({ columns, data }) {
               }
               filter={col.filter !== false}
               filterMatchMode={col.filterMatchMode || 'contains'}
+              frozen={col.frozen || false}
+              alignFrozen={col.alignFrozen || 'left'} // <-- Añadir esto
             />
           );
         })}
