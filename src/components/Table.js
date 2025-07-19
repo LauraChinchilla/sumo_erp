@@ -90,34 +90,37 @@ function getColumnWidth(size) {
   return widths[size] || 'auto';
 }
 
+
 function formatValue(value, format, rowData, column = {}) {
+  let formattedValue;
+
   switch (format) {
     case 'number':
       const num = parseFloat(value);
-      return isNaN(num) ? value : num.toFixed(2);
+      formattedValue = isNaN(num) ? value : num.toFixed(2);
+      break;
 
+    case 'badge': {
+      const valueField = column.valueField || column.field;
+      const val = rowData[valueField] || '';
+      const safeValue = val.toString().toLowerCase().replace(/\s+/g, '-');
 
-      case 'badge': {
-        const valueField = column.valueField || column.field;
-        const value = rowData[valueField] || '';
-        const safeValue = value.toString().toLowerCase().replace(/\s+/g, '-');
+      const handleClick = (e) => {
+        e.stopPropagation();
+        if (typeof column.onClick === 'function') {
+          column.onClick(rowData);
+        }
+      };
 
-        const handleClick = (e) => {
-          e.stopPropagation();
-          if (typeof column.onClick === 'function') {
-            column.onClick(rowData);
-          }
-        };
-
-        return (
-          <span
-            onClick={handleClick}
-            className={`badge badge-${safeValue}`}
-          >
-            {value}
-          </span>
-        );
-      }
+      return (
+        <span
+          onClick={handleClick}
+          className={`badge badge-${safeValue}`}
+        >
+          {val}
+        </span>
+      );
+    }
 
     case 'Date':
       if (!value) return '';
@@ -130,10 +133,20 @@ function formatValue(value, format, rowData, column = {}) {
         minute: '2-digit',
         hour12: true,
       };
-      return date.toLocaleString('es-HN', options); // Cambia a 'es-ES' si lo prefieres
+      formattedValue = date.toLocaleString('es-HN', options);
+      break;
 
     case 'text':
     default:
-      return value;
+      formattedValue = value;
   }
+
+  // Agregar prefix y suffix si existen (y no es badge que retorna JSX)
+  const prefix = column.prefix || '';
+  const suffix = column.suffix || '';
+
+  // Si formattedValue es null o undefined convertir a string vacía para evitar errores
+  if (formattedValue === null || formattedValue === undefined) formattedValue = '';
+
+  return prefix + formattedValue + suffix;
 }

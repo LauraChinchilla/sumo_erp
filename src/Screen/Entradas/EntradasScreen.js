@@ -160,7 +160,6 @@ export default function EntradasScreen() {
     }, 800);
   };
 
-
   const columns = [
     {
       field: 'IdEntrada',
@@ -213,6 +212,14 @@ export default function EntradasScreen() {
       filterMatchMode: 'contains',
     },
     {
+      field: 'Currency',
+      Header: 'Moneda',
+      center: false,
+      frozen: false,
+      format: 'text',
+      filterMatchMode: 'contains',
+    },
+    {
       field: 'PrecioCompra',
       Header: 'Precio Compra',
       center: false,
@@ -231,6 +238,7 @@ export default function EntradasScreen() {
       className: 'Small',
       filterMatchMode: 'equals',
       hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      suffix: ' %',
     },
     {
       field: 'PorcentajeGanancia',
@@ -238,6 +246,7 @@ export default function EntradasScreen() {
       center: false,
       frozen: false,
       format: 'number',
+      suffix: ' %',
       className: 'Small',
       filterMatchMode: 'equals',
       hidden: user?.IdRol === 1 && user?.IdRol === 2,
