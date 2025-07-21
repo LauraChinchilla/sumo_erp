@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Navbar from '../../components/Navbar';
 import Table from '../../components/Table';
 import { supabase } from '../../supabaseClient';
-import { useUser } from '../../context/UserContext';
-import { useNavigate } from 'react-router-dom';
 import Loading from '../../components/Loading';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -12,8 +9,6 @@ import { Toast } from 'primereact/toast';
 export default function MovimientosScreen() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { user, logout } = useUser();
-  const navigate = useNavigate();
   const inputRef = useRef(null);
   const toast = useRef(null);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -92,12 +87,6 @@ export default function MovimientosScreen() {
     },
   ];
 
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   useEffect(() => {
     getInventario();
   }, []);
@@ -120,10 +109,9 @@ export default function MovimientosScreen() {
 
   return (
     <>
-      <Navbar onLogaut={handleLogout} />
       <Toast ref={toast} />
-      <div className="dashboard-container" style={{ paddingTop: '50px' }}>
-        <h2 style={{ textAlign: 'center' }}>Inventario</h2>
+      <div className="dashboard-container">
+        <h2 style={{ textAlign: 'center' }}>Movimientos</h2>
 
           {/* Buscador y botones */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -149,8 +137,6 @@ export default function MovimientosScreen() {
         <Table columns={columns} data={filteredData} />
         {loading && <Loading message="Cargando..." />}
       </div>
-
-
     </>
   );
 }

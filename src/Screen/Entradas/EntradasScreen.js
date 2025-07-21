@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Navbar from '../../components/Navbar';
 import { supabase } from '../../supabaseClient';
 import Table from '../../components/Table';
 import { Button } from 'primereact/button';
@@ -8,7 +7,6 @@ import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
-import { useNavigate } from 'react-router-dom';
 import CRUDEntradas from './CRUDEntradas';
 import getLocalDateTimeString from '../../utils/funciones';
 import CalendarMonth from '../../components/CalendarMonth';
@@ -30,8 +28,6 @@ export default function EntradasScreen() {
   const [globalFilter, setGlobalFilter] = useState('');
   const inputRef = useRef(null);
   const toast = useRef(null);
-  const { logout } = useUser();
-  const navigate = useNavigate();
 
   const getInfo = async () => {
     setLoading(true);
@@ -81,11 +77,6 @@ export default function EntradasScreen() {
 
     setSelected([producto]);
     setShowDialog(true);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
   };
 
 
@@ -324,8 +315,7 @@ export default function EntradasScreen() {
 
   return (
     <>
-      <Navbar onLogout={handleLogout} />
-      <div className="dashboard-container" style={{ paddingTop: '50px' }}>
+      <div className="dashboard-container">
         <h2 style={{ textAlign: 'center' }}>Entradas</h2>
         <Toast ref={toast} />
         <div

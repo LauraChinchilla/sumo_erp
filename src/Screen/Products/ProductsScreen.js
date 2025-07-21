@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Navbar from '../../components/Navbar';
 import { supabase } from '../../supabaseClient';
 import Table from '../../components/Table';
 import { Button } from 'primereact/button';
@@ -9,7 +8,6 @@ import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
-import { useNavigate } from 'react-router-dom';
 import ModalImage from '../../components/ModalImage';
 
 
@@ -23,20 +21,13 @@ export default function Productos() {
   const [globalFilter, setGlobalFilter] = useState('');
   const inputRef = useRef(null);
   const toast = useRef(null);
-  const { user, logout } = useUser();
-  const navigate = useNavigate();
+  const { user } = useUser();
 
   const getInfo = async () => {
     setLoading(true);
     const { data, error } = await supabase.from('vta_products').select('*').order('IdProduct', { ascending: true });
     if (!error) setData(data);
     setLoading(false);
-  };
-
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
   };
 
   const cambiarEstadoProducto = async () => {
@@ -201,7 +192,6 @@ export default function Productos() {
 
   return (
     <>
-      <Navbar onLogout={handleLogout} />
       <div className="dashboard-container" style={{ paddingTop: '50px' }}>
         <h2 style={{ textAlign: 'center' }}>Productos</h2>
 

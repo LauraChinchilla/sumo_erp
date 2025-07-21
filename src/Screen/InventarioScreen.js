@@ -141,7 +141,6 @@ export default function InventarioScreen() {
 
   return (
     <>
-      <Navbar onLogaut={handleLogout} />
       <Toast ref={toast} />
       <div className="dashboard-container" style={{ paddingTop: '50px' }}>
         <h2 style={{ textAlign: 'center' }}>Inventario</h2>

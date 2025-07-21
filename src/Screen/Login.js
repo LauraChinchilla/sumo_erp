@@ -19,7 +19,7 @@ export default function Login() {
     setError('');
 
     const { data, error: queryError } = await supabase
-      .from('Users')
+      .from('vta_users')
       .select('*')
       .eq('Usuario', usuario)
       .eq('Password', password)

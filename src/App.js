@@ -10,23 +10,96 @@ import SalidasScreen from './Screen/Salidas/SalidasScreen';
 import StockBajoScreen from './Screen/StockBajo/StockBajoScreen';
 import FlujoCajaScreen from './Screen/FlujoCaja/FlijoCajaScreen';
 import MovimientosScreen from './Screen/Movimientos/MovimientosScreen';
+import MainLayout from './components/MainLayout';
+import { useUser } from './context/UserContext';
+
+function AppContent() {
+  const { logout } = useUser();
+
+  return (
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route
+        path="/Dashboard"
+        element={
+          <MainLayout onLogout={logout}>
+            <Dashboard />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/products"
+        element={
+          <MainLayout onLogout={logout}>
+            <ProductsScreen />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/inventory"
+        element={
+          <MainLayout onLogout={logout}>
+            <InventarioScreen />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/entradas"
+        element={
+          <MainLayout onLogout={logout}>
+            <EntradasScreen />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/salidas"
+        element={
+          <MainLayout onLogout={logout}>
+            <SalidasScreen />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/config"
+        element={
+          <MainLayout onLogout={logout}>
+            <Configuraciones />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/stockBajo"
+        element={
+          <MainLayout onLogout={logout}>
+            <StockBajoScreen />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/caja"
+        element={
+          <MainLayout onLogout={logout}>
+            <FlujoCajaScreen />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/movimientos"
+        element={
+          <MainLayout onLogout={logout}>
+            <MovimientosScreen />
+          </MainLayout>
+        }
+      />
+    </Routes>
+  );
+}
 
 function App() {
   return (
     <UserProvider>
       <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/Dashboard" element={<Dashboard />} />
-          <Route path="/products" element={<ProductsScreen />} />
-          <Route path="/inventory" element={<InventarioScreen />} />
-          <Route path="/entradas" element={<EntradasScreen />} />
-          <Route path="/salidas" element={<SalidasScreen />} />
-          <Route path="/config" element={<Configuraciones />} />
-          <Route path="/stockBajo" element={<StockBajoScreen />} />
-          <Route path="/caja" element={<FlujoCajaScreen />} />
-          <Route path="/movimientos" element={<MovimientosScreen />} />
-        </Routes>
+        <AppContent />
       </Router>
     </UserProvider>
   );

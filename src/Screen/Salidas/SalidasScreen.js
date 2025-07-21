@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Navbar from '../../components/Navbar';
 import { supabase } from '../../supabaseClient';
 import Table from '../../components/Table';
 import { Button } from 'primereact/button';
@@ -7,7 +6,6 @@ import Loading from '../../components/Loading';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
-import { useNavigate } from 'react-router-dom';
 import CalendarMonth from '../../components/CalendarMonth';
 import CRUDSalidas from './CRUDSalidas';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
@@ -15,7 +13,7 @@ import getLocalDateTimeString from '../../utils/funciones';
 
 export default function SalidasScreen() {
   const [data, setData] = useState([]);
-  const { user, logout } = useUser();
+  const { user } = useUser();
   const [showDialog, setShowDialog] = useState(false);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -29,7 +27,6 @@ export default function SalidasScreen() {
   const [globalFilter, setGlobalFilter] = useState('');
   const inputRef = useRef(null);
   const toast = useRef(null);
-  const navigate = useNavigate();
 
   const getInfo = async () => {
     setLoading(true);
@@ -79,12 +76,6 @@ export default function SalidasScreen() {
 
     setSelected([producto]);
     setShowDialog(true);
-  };
-
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
   };
 
   const columns = [
@@ -179,9 +170,8 @@ export default function SalidasScreen() {
 
   return (
     <>
-      <Navbar onLogout={handleLogout} />
       <ConfirmDialog/>
-      <div className="dashboard-container" style={{ paddingTop: '50px' }}>
+      <div className="dashboard-container">
         <h2 style={{ textAlign: 'center' }}>Salidas</h2>
         <Toast ref={toast} />
 
