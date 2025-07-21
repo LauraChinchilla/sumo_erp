@@ -129,6 +129,24 @@ export default function Productos() {
       filterMatchMode: 'contains',
     },
     {
+      field: 'StockMinimo',
+      Header: 'Stock Minimo',
+      center: false,
+      frozen: false,
+      filterMatchMode: 'contains',
+      format: 'number',
+      className: 'XxSmall'
+    },
+    {
+      field: 'StockMaximo',
+      Header: 'Stock Maximo',
+      center: false,
+      frozen: false,
+      filterMatchMode: 'contains',
+      format: 'number',
+      className: 'XxSmall'
+    },
+    {
       field: 'StatusName',
       Header: 'Estado',
       format: 'badge',

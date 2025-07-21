@@ -7,6 +7,9 @@ import InventarioScreen from './Screen/InventarioScreen';
 import EntradasScreen from './Screen/Entradas/EntradasScreen';
 import Configuraciones from './Screen/Configuraciones/Configuraciones';
 import SalidasScreen from './Screen/Salidas/SalidasScreen';
+import StockBajoScreen from './Screen/StockBajo/StockBajoScreen';
+import FlujoCajaScreen from './Screen/FlujoCaja/FlijoCajaScreen';
+import MovimientosScreen from './Screen/Movimientos/MovimientosScreen';
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
           <Route path="/entradas" element={<EntradasScreen />} />
           <Route path="/salidas" element={<SalidasScreen />} />
           <Route path="/config" element={<Configuraciones />} />
+          <Route path="/stockBajo" element={<StockBajoScreen />} />
+          <Route path="/caja" element={<FlujoCajaScreen />} />
+          <Route path="/movimientos" element={<MovimientosScreen />} />
         </Routes>
       </Router>
     </UserProvider>

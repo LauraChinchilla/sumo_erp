@@ -9,6 +9,7 @@ import { supabase } from '../../supabaseClient';
 import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { InputNumber } from 'primereact/inputnumber';
 
 const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
     const [categorias, setCategorias] = useState([]);
@@ -59,6 +60,11 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
 
         setLoading(true);
 
+        if(values?.StockMinimo >= values?.StockMaximo){
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'El stock maximo debe ser mayor al stock minimo', life: 4000 });
+            return;
+        }
+
         const Datos = {
             Code: values.Code,
             Name: values.Name,
@@ -67,6 +73,8 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
             IdStatus: values?.IdStatus ? values?.IdStatus : 1,
             ImageURL: values.ImageURL || null,
             IdUnit: values?.IdUnit,
+            StockMaximo: values?.StockMaximo,
+            StockMinimo: values?.StockMinimo,
         };
 
         let error;
@@ -348,6 +356,35 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                 />
 
                                 <label htmlFor="IdCategory">Categoría</label>
+                            </FloatLabel>
+                        </div>
+                    </div>
+
+                    {/* Minimo y Maximo */}
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <InputNumber
+                                    id="StockMinimo"
+                                    value={values.StockMinimo}
+                                    onChange={(e) => handleChange('StockMinimo', e.value)}
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                />
+                                <label htmlFor="StockMinimo">Stock Minimo</label>
+                            </FloatLabel>
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <InputNumber
+                                    id="StockMaximo"
+                                    value={values.StockMaximo}
+                                    onChange={(e) => handleChange('StockMaximo', e.value)}
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                />
+                                <label htmlFor="StockMaximo">Stock Maximo</label>
                             </FloatLabel>
                         </div>
                     </div>

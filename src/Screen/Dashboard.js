@@ -13,6 +13,7 @@ export default function Dashboard() {
     if (!loading && !user) {
       navigate('/');
     }
+    document.title = 'Sumo - Dashboard';
   }, [user, loading, navigate]);
 
   if (loading) return null; 
@@ -42,6 +43,24 @@ export default function Dashboard() {
       description: 'Registro de salidas de productos por ventas o bajas.',
       ruta: '/salidas',
     },
+    {
+      icon: 'pi pi-money-bill',
+      title: 'Flujo de Caja',
+      description: 'Control de ingresos y gastos del negocio.',
+      ruta: '/caja',
+    },
+    {
+      icon: 'pi pi-exclamation-triangle',
+      title: 'Stock Bajo',
+      description: 'Productos con inventario crítico o en cero.',
+      ruta: '/stockBajo',
+    },
+    {
+      icon: 'pi pi-history',
+      title: 'Movimientos',
+      description: 'Historial completo de entradas, salidas y ajustes.',
+      ruta: '/movimientos',
+    }
   ];
 
   const handleLogout = () => {
@@ -55,24 +74,31 @@ export default function Dashboard() {
       <div className="dashboard-container" style={{ paddingTop: '100px' }}>
         <h2>Bienvenido, {user?.UserName}</h2>
         <div className="card-grid">
-          {cards.map((card, index) => (
-            <div
-              key={index}
-              className={`dashboard-card ${selectedIndex === index ? 'card-selected' : ''}`}
-              onClick={() => {
-                setSelectedIndex(index);
-                navigate(card.ruta);
-              }}
-            >
-              <i className={`card-icon ${card.icon}`} />
-              <div>
-                <h3 style={{ margin: 0 }}>{card.title}</h3>
-                <p style={{ marginTop: '0.5rem', fontSize: '14px', color: '#555' }}>
-                  {card.description}
-                </p>
+          {cards
+            .filter(card => {
+              if (card.title === 'Movimientos') {
+                return user?.IdRol === 1 || user?.IdRol === 2;
+              }
+              return true;
+            })
+            .map((card, index) => (
+              <div
+                key={index}
+                className={`dashboard-card ${selectedIndex === index ? 'card-selected' : ''}`}
+                onClick={() => {
+                  setSelectedIndex(index);
+                  navigate(card.ruta);
+                }}
+              >
+                <i className={`card-icon ${card.icon}`} />
+                <div>
+                  <h3 style={{ margin: 0 }}>{card.title}</h3>
+                  <p style={{ marginTop: '0.5rem', fontSize: '14px', color: '#555' }}>
+                    {card.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </>
