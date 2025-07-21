@@ -44,6 +44,7 @@ export default function InventarioScreen() {
       format: 'text',
       className: 'XxxSmall',
       filterMatchMode: 'equals',
+      count: true,
     },
     {
       field: 'Name',
@@ -60,13 +61,14 @@ export default function InventarioScreen() {
       className: 'XxxSmall',
       filterMatchMode: 'contains',
     },
-    {
-      field: 'CostoPromedio',
-      Header: 'Costo Promedio',
-      format: 'number',
-      className: 'Small',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
-    },
+    // {
+    //   field: 'CostoPromedio',
+    //   Header: 'Costo Promedio',
+    //   format: 'number',
+    //   className: 'Small',
+    //   hidden: user?.IdRol === 1 && user?.IdRol === 2,
+    //   summary: true,
+    // },
     {
       field: 'UltimoPrecioCompra',
       Header: 'Últ. Precio Compra',
@@ -89,6 +91,7 @@ export default function InventarioScreen() {
         row.TotalUnidades < 5
           ? { backgroundColor: '#ffe0e0', color: 'red' }
           : undefined,
+      summary: true,
     },
     {
       field: 'UnitName',

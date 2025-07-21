@@ -186,6 +186,7 @@ export default function EntradasScreen() {
       format: 'text',
       className: 'Large',
       filterMatchMode: 'equals',
+      count: true
     },
     {
       field: 'ProductName',
@@ -277,6 +278,7 @@ export default function EntradasScreen() {
       format: 'number',
       className: 'Small',
       filterMatchMode: 'equals',
+      summary: true,
     },
     {
       field: 'UnitName',

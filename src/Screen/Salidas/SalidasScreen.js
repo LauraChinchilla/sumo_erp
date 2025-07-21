@@ -17,7 +17,6 @@ export default function SalidasScreen() {
   const [data, setData] = useState([]);
   const { user, logout } = useUser();
   const [showDialog, setShowDialog] = useState(false);
-  const [showDialogEliminar, setShowDialogEliminar] = useState(false);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [rangeDates, setRangeDates] = useState(() => {
@@ -91,12 +90,12 @@ export default function SalidasScreen() {
   const columns = [
     { field: 'IdSalida', Header: 'ID', center: true, className: 'XxSmall', filterMatchMode: 'equals',  hidden: user?.IdRol !==1 },
     { field: 'Date', Header: 'Fecha', center: true, format: 'Date', className: 'Medium', filterMatchMode: 'contains' },
-    { field: 'Code', Header: 'Código', center: true, format: 'text', className: 'Large', filterMatchMode: 'equals' },
+    { field: 'Code', Header: 'Código', center: true, format: 'text', className: 'Large', filterMatchMode: 'equals', count: true },
     { field: 'Name', Header: 'Producto', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'NombreCompleto', Header: 'Cliente', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'Descripcion', Header: 'Descripción', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'UserName', Header: 'Usuario', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxSmall' },
-    { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals' },
+    { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true, },
     { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'money', className: 'Small', filterMatchMode: 'equals' },
     {
       field: 'actions',
@@ -219,9 +218,7 @@ export default function SalidasScreen() {
             />
           </div>
         </div>
-
         <Table columns={columns} data={data} globalFilter={globalFilter} />
-
         {loading && <Loading message="Cargando salidas..." />}
       </div>
 

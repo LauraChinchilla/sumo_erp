@@ -91,6 +91,7 @@ export default function Productos() {
       format: 'text',
       className: 'Large',
       filterMatchMode: 'equals',
+      count: true,
     },
     {
       field: 'Name',
