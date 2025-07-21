@@ -12,6 +12,7 @@ import { useUser } from '../../context/UserContext';
 import { Dropdown } from 'primereact/dropdown';
 import getLocalDateTimeString from '../../utils/funciones';
 import formatNumber from '../../utils/funcionesFormatNumber';
+import { ConfirmDialog } from 'primereact/confirmdialog';
 
 const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo, editable = true }) => {
     const toast = useRef(null);
@@ -19,7 +20,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
     const [loading, setLoading] = useState(false);
     const [productos, setProductos] = useState([]);
     const [tiposSalida, setTiposSalida] = useState([]);
-
+    const [clientes, setClientes] = useState([]);
 
     const initialValues = {
         IdSalida: -1,
@@ -40,6 +41,9 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
         const { data: salidasTempo } = await supabase.from('TipoSalidas').select('*');
         setTiposSalida(salidasTempo);
 
+        const { data: clientesTempo } = await supabase.from('Clientes').select('*');
+        setClientes(clientesTempo);
+
         if (selected?.length > 0) {
             const producto = selected[0];
 
@@ -51,6 +55,11 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
                 .order('Date', { ascending: false })
                 .limit(1)
                 .maybeSingle();
+            const { data: inventario } = await supabase
+                .from('vta_inventario')
+                .select('*')
+                .eq('IdProduct', producto.IdProduct)
+
 
             setValues({
                 ...producto,
@@ -59,6 +68,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
                 PrecioCompra: entrada?.PrecioCompra || 0,
                 ISV: entrada?.ISV || 0,
                 PorcentajeGanancia: entrada?.PorcentajeGanancia || 0,
+                Stock: inventario[0]?.TotalUnidades
             });
         }
     };
@@ -73,8 +83,14 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             .limit(1)
             .maybeSingle();
 
+            const { data: inventario } = await supabase
+                .from('vta_inventario')
+                .select('*')
+                .eq('IdProduct', producto.IdProduct)
+
         setValues({
             ...producto,
+            IdTipoSalida: values?.IdTipoSalida,
             IdProduct: producto.IdProduct,
             Description: producto.Description,
             categoryname: producto.categoryname,
@@ -82,7 +98,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             PrecioCompra: entrada?.PrecioCompra || 0,
             ISV: entrada?.ISV || 0,
             PorcentajeGanancia: entrada?.PorcentajeGanancia || 0,
-            
+            Stock: inventario[0]?.TotalUnidades,
         });
     }
 
@@ -93,39 +109,57 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             console.log('Formulario con errores', errors);
             return;
         }
-
-        setLoading(true);
-
-        const entrada = {
-            IdProduct: values?.IdProduct,
-            Excento: values.Excento,
-            ISV: values.ISV,
-            PorcentajeGanancia: values.PorcentajeGanancia,
-            PrecioCompra: values.PrecioCompra,
-            PrecioVenta: values.PrecioVenta,
-            IdStatus: 3,
-            IdUserCreate: user?.IdUser,
-            Date: getLocalDateTimeString(),
-            IdVendor: values?.IdVendor,
-            Description: values?.Description || '',
-            Cantidad: values?.Cantidad
-        };
-
-        const { error: errorEntrada } = await supabase
-            .from('Entradas')
-            .insert([entrada]);
-
-        if (errorEntrada) {
-            console.error('Error al guardar entrada:', errorEntrada.message);
+        
+        if(values?.Stock < values?.CantidadSalida){
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'No se pudo guardar la entrada',
+                detail: 'No hay suficientes unidades disponibles para realizar la salida.',
+                life: 4000
+            });
+            return
+        }
+        setLoading(true);
+
+        const Datos = {
+            IdProduct: values?.IdProduct,
+            PrecioCompra: values?.PrecioCompra,
+            PrecioVenta: values?.PrecioVenta,
+            IdStatus: 5,
+            IdUserEdit: user?.IdUser,
+            Date: getLocalDateTimeString(),
+            CantidadSalida: values?.CantidadSalida,
+            IdTipoSalida: values?.IdTipoSalida,
+            SubTotal: values?.SubTotal,
+            Total: values?.Total,
+            ISVQty: values?.ISVQty,
+            IdCliente: values?.IdCliente,
+            IdCurrency: 1,
+            StockAntiguo: values?.Stock || values?.StockAntiguo,
+        };
+
+        const { error: errorEntrada } = await supabase
+            .from('Salidas')
+            .insert([Datos]);
+
+        if (errorEntrada) {
+            console.error('Error al guardar salida:', errorEntrada.message);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No se pudo guardar la salida',
                 life: 4000
             });
             setLoading(false);
             return;
         }
+        toast.current?.show({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Salida guardada correctamente',
+            life: 4000
+        });
+
 
         setTimeout(() => {
             getInfo();
@@ -167,6 +201,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
 
     return (
         <Dialog visible={showDialog} onHide={onHide} style={{ width: '60%' }} header={'Nueva Salida'}>
+            <ConfirmDialog />
             <Toast ref={toast} />
 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
@@ -186,6 +221,25 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
                             disabled={!editable}
                         />
                         <label htmlFor="IdTipoSalida">Tipo de salida</label>
+                    </FloatLabel>
+                </div>
+
+                <div style={{ flex: 1 }}>
+                    <FloatLabel>
+                        <Dropdown
+                            id="IdCliente"
+                            value={values.IdCliente}
+                            options={clientes}
+                            onChange={(e) => handleChange('IdCliente', e.value)}
+                            placeholder="Seleccione un tipo de Salida"
+                            required
+                            optionLabel="NombreCompleto"
+                            optionValue="IdCliente"
+                            className={errors.IdCliente ? 'p-invalid' : ''}
+                            style={{ width: '100%' }}
+                            disabled={!editable}
+                        />
+                        <label htmlFor="IdCliente">Cliente</label>
                     </FloatLabel>
                 </div>
             </div>
@@ -327,12 +381,13 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
 
             {/* Precio Compra y Precio Venta */}
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <div style={{ flex: 1 }}>
-                    {user?.IdRol === 1 && user?.IdRol === 2 (
+                {(user?.IdRol === 1 || user?.IdRol === 2) && (
+                    <div style={{ flex: 1 }}>
                         <FloatLabel>
                             <InputNumber
                                 id="PrecioCompra"
                                 value={values.PrecioCompra}
+                                prefix='L '
                                 onChange={(e) => handleChange('PrecioCompra', e.value)}
                                 required
                                 style={{ width: '100%' }}
@@ -343,8 +398,8 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
                             />
                             <label htmlFor="PrecioCompra">Precio Compra</label>
                         </FloatLabel>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 <div style={{ flex: 1 }}>
                     <FloatLabel>
@@ -366,7 +421,18 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             {/* Cantidad */}
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                 <div style={{ flex: 1 }}>
-
+                    <FloatLabel>
+                        <InputNumber
+                            id="Stock"
+                            value={values.Stock}
+                            onChange={(e) => handleChange('Stock', e.value)}
+                            style={{ width: '100%' }}
+                            disabled={true}
+                            suffix={` ${values?.UnitName}`}
+                            className={errors.Stock ? 'p-invalid' : ''}
+                        />
+                        <label htmlFor="Stock">Cantidad Disponible</label>
+                    </FloatLabel>
                 </div>
 
 

@@ -10,11 +10,14 @@ import { useUser } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import CalendarMonth from '../../components/CalendarMonth';
 import CRUDSalidas from './CRUDSalidas';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import getLocalDateTimeString from '../../utils/funciones';
 
 export default function SalidasScreen() {
   const [data, setData] = useState([]);
   const { user, logout } = useUser();
   const [showDialog, setShowDialog] = useState(false);
+  const [showDialogEliminar, setShowDialogEliminar] = useState(false);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [rangeDates, setRangeDates] = useState(() => {
@@ -32,7 +35,7 @@ export default function SalidasScreen() {
   const getInfo = async () => {
     setLoading(true);
 
-    let query = supabase.from('vta_salidas').select('*').eq('IdStatus', 3);
+    let query = supabase.from('vta_salidas').select('*').eq('IdStatus', 5);
 
     if (rangeDates && rangeDates[0] && rangeDates[1]) {
       const from = new Date(rangeDates[0]);
@@ -89,12 +92,74 @@ export default function SalidasScreen() {
     { field: 'IdSalida', Header: 'ID', center: true, className: 'XxSmall', filterMatchMode: 'equals',  hidden: user?.IdRol !==1 },
     { field: 'Date', Header: 'Fecha', center: true, format: 'Date', className: 'Medium', filterMatchMode: 'contains' },
     { field: 'Code', Header: 'Código', center: true, format: 'text', className: 'Large', filterMatchMode: 'equals' },
-    { field: 'ProductName', Header: 'Producto', center: false, format: 'text', filterMatchMode: 'contains' },
+    { field: 'Name', Header: 'Producto', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'NombreCompleto', Header: 'Cliente', center: false, format: 'text', filterMatchMode: 'contains' },
-    { field: 'UserName', Header: 'Usuario', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'Descripcion', Header: 'Descripción', center: false, format: 'text', filterMatchMode: 'contains' },
+    { field: 'UserName', Header: 'Usuario', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxSmall' },
     { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals' },
     { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'money', className: 'Small', filterMatchMode: 'equals' },
+    {
+      field: 'actions',
+      isIconColumn: true,
+      icon: 'pi pi-trash',
+      center: true,
+      className: 'XxxSmall',
+      filter: false,
+      onClick: (rowData) => {
+        confirmDialog({
+          message: '¿Estás seguro que quieres eliminar la salida?',
+          header: 'Confirmar eliminación',
+          icon: 'pi pi-exclamation-triangle',
+          acceptLabel: 'Aceptar',
+          rejectLabel: 'Cancelar',
+          accept: async() => {
+            let IdSalida = rowData?.IdSalida
+            const fechaEntrada = new Date(rowData?.Date);
+            const hoy = new Date();
+            const limite = new Date(hoy);
+            limite.setDate(hoy.getDate() - 3);
+            if (fechaEntrada < limite) {
+              toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No se puede eliminar una entrada mayor a 3 días',
+                life: 4000,
+              });
+              return;
+            }
+
+
+            const { error } = await supabase
+            .from('Salidas')
+            .update({
+              IdStatus: 6,
+              IdUserEdit: user?.IdUser,
+              Date: getLocalDateTimeString(),
+            })
+            .eq('IdSalida', IdSalida);
+
+            if (error) {
+              toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error al eliminar la salida',
+                life: 3000,
+              });
+              return;
+            }
+
+            toast.current?.show({
+              severity: 'success',
+              summary: 'Ecito',
+              detail: 'Salida eliminada correctamente',
+              life: 3000,
+            });
+
+            getInfo()
+          },
+        });
+      }
+    }
   ];
 
   useEffect(() => {
@@ -113,6 +178,7 @@ export default function SalidasScreen() {
   return (
     <>
       <Navbar onLogout={handleLogout} />
+      <ConfirmDialog/>
       <div className="dashboard-container" style={{ paddingTop: '50px' }}>
         <h2 style={{ textAlign: 'center' }}>Salidas</h2>
         <Toast ref={toast} />
