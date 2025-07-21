@@ -204,22 +204,22 @@ export default function EntradasScreen() {
       format: 'text',
       filterMatchMode: 'contains',
     },
-    {
-      field: 'Description',
-      Header: 'Descripción',
-      center: false,
-      frozen: false,
-      format: 'text',
-      filterMatchMode: 'contains',
-    },
-    {
-      field: 'Currency',
-      Header: 'Moneda',
-      center: false,
-      frozen: false,
-      format: 'text',
-      filterMatchMode: 'contains',
-    },
+    // {
+    //   field: 'Description',
+    //   Header: 'Descripción',
+    //   center: false,
+    //   frozen: false,
+    //   format: 'text',
+    //   filterMatchMode: 'contains',
+    // },
+    // {
+    //   field: 'Currency',
+    //   Header: 'Moneda',
+    //   center: false,
+    //   frozen: false,
+    //   format: 'text',
+    //   filterMatchMode: 'contains',
+    // },
     {
       field: 'PrecioCompra',
       Header: 'Precio Compra',
@@ -229,6 +229,7 @@ export default function EntradasScreen() {
       className: 'Small',
       filterMatchMode: 'equals',
       hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      prefix: 'L '
     },
     {
       field: 'ISV',
@@ -260,6 +261,7 @@ export default function EntradasScreen() {
       format: 'number',
       className: 'Small',
       filterMatchMode: 'equals',
+      prefix: 'L '
     },
     {
       field: 'UserNameCreate',

@@ -97,6 +97,9 @@ export default function SalidasScreen() {
     { field: 'UserName', Header: 'Usuario', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxSmall' },
     { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true, },
     { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'money', className: 'Small', filterMatchMode: 'equals' },
+    { field: 'SubTotal', Header: 'SubTotal', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true },
+    { field: 'ISVQty', Header: 'ISV', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true },
+    { field: 'Total', Header: 'Total', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true },
     {
       field: 'actions',
       isIconColumn: true,

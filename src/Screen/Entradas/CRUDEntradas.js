@@ -21,6 +21,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
 
     const initialValues = {
         IdEntrada: -1,
+        PorcentajeGanancia: 30,
+        ISV: 15,
     };
 
     const { values, setValues, handleChange, validateForm, errors } = useForm(initialValues);
@@ -41,6 +43,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
         if(selected?.length > 0){
             setValues({
                 ...selected[0],
+                PorcentajeGanancia: 30,
+                ISV: 15,
             })
         }
     };
@@ -67,7 +71,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
             Date: getLocalDateTimeString(),
             IdVendor: values?.IdVendor,
             Description: values?.Description || '',
-            Cantidad: values?.Cantidad
+            Cantidad: values?.Cantidad,
+            IdCurrency: 1,
         };
 
         // Paso 1: Insertar entrada
@@ -204,7 +209,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                             Code: selectedProduct.Code,
                                             Name: selectedProduct.Name,
                                             categoryname: selectedProduct.categoryname,
-                                            PorcentajeGanancia: selectedProduct.PorcentajeGanancia,
+                                            PorcentajeGanancia: 30,
+                                            ISV: 15,
                                             UnitName: selectedProduct.UnitName,
                                         }));
                                     } else {
@@ -234,7 +240,7 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                             value={values.categoryname}
                             onChange={(e) => handleChange('categoryname', e.target.value)}
                             style={{ width: '100%' }}
-                            disabled={!editable}
+                            disabled={true}
                         />
                         <label htmlFor="categoryname">Categoría</label>
                     </FloatLabel>
