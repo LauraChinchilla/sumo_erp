@@ -12,7 +12,6 @@ import { useUser } from '../../context/UserContext';
 import { Dropdown } from 'primereact/dropdown';
 import getLocalDateTimeString from '../../utils/funciones';
 import formatNumber from '../../utils/funcionesFormatNumber';
-import { ConfirmDialog } from 'primereact/confirmdialog';
 
 const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo, editable = true }) => {
     const toast = useRef(null);
@@ -201,7 +200,6 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
 
     return (
         <Dialog visible={showDialog} onHide={onHide} style={{ width: '60%' }} header={'Nueva Salida'}>
-            <ConfirmDialog />
             <Toast ref={toast} />
 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>

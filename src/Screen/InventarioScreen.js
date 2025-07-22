@@ -21,7 +21,7 @@ export default function InventarioScreen() {
   const [showDialog, setShowDialog] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
 
-  const getInventario = async () => {
+  const getInfo = async () => {
     setLoading(true);
     const { data, error } = await supabase.from('vta_inventario').select('*');
     if (!error) {
@@ -112,7 +112,7 @@ export default function InventarioScreen() {
   ];
 
   useEffect(() => {
-    getInventario();
+    getInfo();
   }, []);
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function InventarioScreen() {
               <Button
                 icon="pi pi-refresh"
                 className="p-button-success"
-                onClick={getInventario}
+                onClick={getInfo}
                 disabled={loading}
                 severity="primary"
               />
@@ -169,7 +169,7 @@ export default function InventarioScreen() {
           showDialog={showDialog}
           setSelected={setSelected}
           selected={selected}
-          getInfo={getInventario}
+          getInfo={getInfo}
           editable={false}
         />
       )}

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Login from './Screen/Login';
 import Dashboard from './Screen/Dashboard';
 import { UserProvider } from './context/UserContext';
@@ -13,9 +13,16 @@ import MovimientosScreen from './Screen/Movimientos/MovimientosScreen';
 import MainLayout from './components/MainLayout';
 import { useUser } from './context/UserContext';
 import KPIsScreen from './Screen/KPIs/KPIsScreen';
+import MaestrosScreen from './components/Maestros/MaestrosScreen';
 
 function AppContent() {
   const { logout } = useUser();
+  const navigate = useNavigate();
+
+  const handlerLogout = () => {
+    navigate('./')
+    logout()
+  }
 
   return (
     <Routes>
@@ -23,7 +30,7 @@ function AppContent() {
       <Route
         path="/Dashboard"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <Dashboard />
           </MainLayout>
         }
@@ -31,7 +38,7 @@ function AppContent() {
       <Route
         path="/products"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <ProductsScreen />
           </MainLayout>
         }
@@ -39,7 +46,7 @@ function AppContent() {
       <Route
         path="/inventory"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <InventarioScreen />
           </MainLayout>
         }
@@ -47,7 +54,7 @@ function AppContent() {
       <Route
         path="/entradas"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <EntradasScreen />
           </MainLayout>
         }
@@ -55,7 +62,7 @@ function AppContent() {
       <Route
         path="/salidas"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <SalidasScreen />
           </MainLayout>
         }
@@ -63,7 +70,7 @@ function AppContent() {
       <Route
         path="/config"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <Configuraciones />
           </MainLayout>
         }
@@ -71,7 +78,7 @@ function AppContent() {
       <Route
         path="/stockBajo"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <StockBajoScreen />
           </MainLayout>
         }
@@ -79,7 +86,7 @@ function AppContent() {
       <Route
         path="/caja"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <FlujoCajaScreen />
           </MainLayout>
         }
@@ -87,7 +94,7 @@ function AppContent() {
       <Route
         path="/movimientos"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <MovimientosScreen />
           </MainLayout>
         }
@@ -96,8 +103,16 @@ function AppContent() {
       <Route
         path="/KPIs"
         element={
-          <MainLayout onLogout={logout}>
+          <MainLayout onLogout={handlerLogout}>
             <KPIsScreen />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/Maestros"
+        element={
+          <MainLayout onLogout={handlerLogout}>
+            <MaestrosScreen />
           </MainLayout>
         }
       />

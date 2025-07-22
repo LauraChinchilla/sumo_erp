@@ -66,6 +66,18 @@ export default function Dashboard() {
       description:'Indicadores clave de mi Empresa',
       ruta:'/KPIs'
     },
+    {
+      icon: 'pi pi-cog',
+      title: 'Maestros',
+      description: 'Gestión de clientes, proveedores, usuarios, empresa y más.',
+      ruta: '/maestros', // ajusta esta ruta si usas una diferente
+    },
+    {
+      icon: 'pi pi-credit-card',
+      title: 'Créditos',
+      description: 'Gestión de cuentas por cobrar y créditos a clientes.',
+      ruta: '/creditos',
+    },
   ];
 
   return (
@@ -85,7 +97,7 @@ export default function Dashboard() {
         <div className="card-grid">
           {cards
             .filter(card => {
-              if (card.title === 'Movimientos' || card.title === 'KPIs') {
+              if (card.title === 'Movimientos' || card.title === 'KPIs' || card.title === 'Créditos') {
                 return user?.IdRol === 1 || user?.IdRol === 2;
               }
               return true;

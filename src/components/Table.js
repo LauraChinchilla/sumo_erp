@@ -93,7 +93,7 @@ export default function Table({ columns, data, globalFilter: externalFilter }) {
       <DataTable
         value={data}
         scrollable
-        scrollHeight="670px"
+        scrollHeight="590px"
         removableSort
         filterDisplay="menu"
         globalFilter={globalFilterValue}

@@ -8,7 +8,7 @@ import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
 import CalendarMonth from '../../components/CalendarMonth';
 import CRUDSalidas from './CRUDSalidas';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 import getLocalDateTimeString from '../../utils/funciones';
 
 export default function SalidasScreen() {
@@ -87,10 +87,11 @@ export default function SalidasScreen() {
     { field: 'Descripcion', Header: 'Descripción', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'UserName', Header: 'Usuario', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxSmall' },
     { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true, },
-    { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'money', className: 'Small', filterMatchMode: 'equals' },
-    { field: 'SubTotal', Header: 'SubTotal', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true },
-    { field: 'ISVQty', Header: 'ISV', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true },
-    { field: 'Total', Header: 'Total', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true },
+    { field: 'UnitName', Header: 'Unidad', className: 'Small', filterMatchMode: 'equals', summary: true, },
+    { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals' },
+    { field: 'SubTotal', Header: 'SubTotal', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals', summary: true },
+    { field: 'ISVQty', Header: 'ISV', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
+    { field: 'Total', Header: 'Total', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
     {
       field: 'actions',
       isIconColumn: true,
@@ -170,7 +171,6 @@ export default function SalidasScreen() {
 
   return (
     <>
-      <ConfirmDialog/>
       <div className="dashboard-container">
         <h2 style={{ textAlign: 'center' }}>Salidas</h2>
         <Toast ref={toast} />

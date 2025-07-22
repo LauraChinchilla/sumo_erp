@@ -8,7 +8,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { supabase } from '../../supabaseClient';
 import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 import { InputNumber } from 'primereact/inputnumber';
 
 const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
@@ -488,8 +488,6 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                 <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />
             </div>
         </Dialog>
-
-        <ConfirmDialog />
         </>
     );
 }
