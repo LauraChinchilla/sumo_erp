@@ -32,7 +32,7 @@ body {
 }
 
 .login-logo {
-  width: 40px;
+  width: 150px;
 }
 
 .login-title {
@@ -283,4 +283,10 @@ body {
 
 .badge-eliminado {
   background-color: #dc3545;
+}
+:root {
+  --color-azul: #34bae2;
+  --color-rosa: #f139e6;
+  --color-azul-hover: #27839e;
+  --color-rosa-hover: #ba2eb2;
 }

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 
-const CalendarMonth = ({ rangeDates, setRangeDates, selectedMonth, setSelectedMonth }) => {
+const CalendarMonth = ({ rangeDates, setRangeDates, selectedMonth, setSelectedMonth, ocultarCalendar = false }) => {
   const [monthOptions, setMonthOptions] = useState([]);
 
   useEffect(() => {
@@ -41,6 +41,7 @@ const CalendarMonth = ({ rangeDates, setRangeDates, selectedMonth, setSelectedMo
       const lastDay = new Date(current.value.getFullYear(), current.value.getMonth() + 1, 0);
       setRangeDates([firstDay, lastDay]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleMonthChange = (value) => {
@@ -61,15 +62,17 @@ const CalendarMonth = ({ rangeDates, setRangeDates, selectedMonth, setSelectedMo
         style={{ width: '220px' }}
       />
 
-      <Calendar
-        value={rangeDates}
-        onChange={(e) => setRangeDates(e.value)}
-        selectionMode="range"
-        readOnlyInput
-        showIcon
-        placeholder="Filtrar por fecha"
-        dateFormat="dd/mm/yy"
-      />
+      {!ocultarCalendar && (
+        <Calendar
+          value={rangeDates}
+          onChange={(e) => setRangeDates(e.value)}
+          selectionMode="range"
+          readOnlyInput
+          showIcon
+          placeholder="Filtrar por fecha"
+          dateFormat="dd/mm/yy"
+        />
+      )}
     </div>
   );
 };

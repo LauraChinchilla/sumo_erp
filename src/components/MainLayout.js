@@ -10,7 +10,7 @@ export default function MainLayout({ children, onLogout }) {
       <div style={{ paddingTop: '55px', paddingBottom: '60px' }}>
         {children}
       </div>
-      <FooterPag />
+      <FooterPag onLogout={onLogout} />
     </>
   );
 }

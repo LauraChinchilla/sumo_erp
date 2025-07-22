@@ -12,6 +12,7 @@ import FlujoCajaScreen from './Screen/FlujoCaja/FlijoCajaScreen';
 import MovimientosScreen from './Screen/Movimientos/MovimientosScreen';
 import MainLayout from './components/MainLayout';
 import { useUser } from './context/UserContext';
+import KPIsScreen from './Screen/KPIs/KPIsScreen';
 
 function AppContent() {
   const { logout } = useUser();
@@ -88,6 +89,15 @@ function AppContent() {
         element={
           <MainLayout onLogout={logout}>
             <MovimientosScreen />
+          </MainLayout>
+        }
+      />
+
+      <Route
+        path="/KPIs"
+        element={
+          <MainLayout onLogout={logout}>
+            <KPIsScreen />
           </MainLayout>
         }
       />

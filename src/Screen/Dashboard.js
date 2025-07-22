@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import 'primeicons/primeicons.css';
 import { useUser } from '../context/UserContext';
 
 export default function Dashboard() {
-  const { user, logout, loading } = useUser();
+  const { user, loading } = useUser();
   const navigate = useNavigate();
   const [selectedIndex, setSelectedIndex] = useState(null);
 
@@ -16,7 +15,7 @@ export default function Dashboard() {
     document.title = 'Sumo - Dashboard';
   }, [user, loading, navigate]);
 
-  if (loading) return null; 
+  if (loading) return null;
 
   const cards = [
     {
@@ -60,23 +59,33 @@ export default function Dashboard() {
       title: 'Movimientos',
       description: 'Historial completo de entradas, salidas y ajustes.',
       ruta: '/movimientos',
-    }
+    },
+    {
+      icon: 'pi pi-chart-line',
+      title: 'KPIs',
+      description:'Indicadores clave de mi Empresa',
+      ruta:'/KPIs'
+    },
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  }
-
   return (
-    <>
-      <Navbar onLogout={handleLogout} />
-      <div className="dashboard-container" style={{ paddingTop: '100px' }}>
-        <h2>Bienvenido, {user?.UserName}</h2>
+    <div
+      style={{
+        backgroundImage: 'url(https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo//Fonfo2.avif)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        minHeight: '87.9vh',
+        padding: '1rem'
+      }}
+    >
+      <div className="dashboard-container">
+        <h2 style={{ color: '#fff', textShadow: '1px 1px 4px #000' }}>
+          Bienvenido, {user?.UserName}
+        </h2>
         <div className="card-grid">
           {cards
             .filter(card => {
-              if (card.title === 'Movimientos') {
+              if (card.title === 'Movimientos' || card.title === 'KPIs') {
                 return user?.IdRol === 1 || user?.IdRol === 2;
               }
               return true;
@@ -101,6 +110,6 @@ export default function Dashboard() {
             ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Navbar from '../components/Navbar';
 import Table from '../components/Table';
 import { supabase } from '../supabaseClient';
 import { useUser } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom';
 import Loading from '../components/Loading';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -14,8 +12,7 @@ import { Toast } from 'primereact/toast';
 export default function InventarioScreen() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { user, logout } = useUser();
-  const navigate = useNavigate();
+  const { user } = useUser();
   const inputRef = useRef(null);
   const toast = useRef(null);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -113,11 +110,6 @@ export default function InventarioScreen() {
       },
     },
   ];
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
 
   useEffect(() => {
     getInventario();
