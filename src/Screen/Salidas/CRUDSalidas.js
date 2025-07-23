@@ -104,6 +104,14 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
     const guardarDatos = async (e) => {
         e.preventDefault();
 
+        // Condición: si el tipo de salida es 3, se requiere IdCliente
+        if (values?.IdTipoSalida === 3) {
+            rules.IdCliente = { required: true, message: 'Debe seleccionar un cliente' };
+        } else {
+            rules.IdCliente = { required: false };
+        }
+
+
         if (!validateForm(rules)) {
             console.log('Formulario con errores', errors);
             return;

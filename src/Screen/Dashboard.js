@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'primeicons/primeicons.css';
 import { useUser } from '../context/UserContext';
+import { Button } from 'primereact/button';
 
 export default function Dashboard() {
   const { user, loading } = useUser();
@@ -106,11 +107,28 @@ export default function Dashboard() {
               <div
                 key={index}
                 className={`dashboard-card ${selectedIndex === index ? 'card-selected' : ''}`}
+                style={{ position: 'relative' }}
                 onClick={() => {
                   setSelectedIndex(index);
                   navigate(card.ruta);
                 }}
               >
+                <Button
+                  icon="pi pi-external-link"
+                  className="p-button-text p-button-sm"
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    window.open(card.ruta, '_blank');
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: '0.5rem',
+                    right: '0.5rem',
+                    zIndex: 1,
+                    color: '#555'
+                  }}
+                />
+
                 <i className={`card-icon ${card.icon}`} />
                 <div>
                   <h3 style={{ margin: 0 }}>{card.title}</h3>
@@ -121,6 +139,7 @@ export default function Dashboard() {
               </div>
             ))}
         </div>
+
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import MainLayout from './components/MainLayout';
 import { useUser } from './context/UserContext';
 import KPIsScreen from './Screen/KPIs/KPIsScreen';
 import MaestrosScreen from './components/Maestros/MaestrosScreen';
+import CreditosScreen from './Screen/Creditos/CreditosScreen';
 
 function AppContent() {
   const { logout } = useUser();
@@ -113,6 +114,15 @@ function AppContent() {
         element={
           <MainLayout onLogout={handlerLogout}>
             <MaestrosScreen />
+          </MainLayout>
+        }
+      />
+
+      <Route
+        path="/creditos"
+        element={
+          <MainLayout onLogout={handlerLogout}>
+            <CreditosScreen />
           </MainLayout>
         }
       />
