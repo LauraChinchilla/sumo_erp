@@ -134,6 +134,7 @@ export default function Table({ columns, data, globalFilter: externalFilter }) {
 
 function getColumnWidth(size) {
   const widths = {
+    XxxxSmall: '20px',
     XxxSmall: '40px',
     XxSmall: '60px',
     Xsmall: '90px',
