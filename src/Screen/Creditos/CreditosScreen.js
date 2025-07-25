@@ -1,20 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Toast } from 'primereact/toast';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { confirmDialog } from 'primereact/confirmdialog';
+import { TabView, TabPanel } from 'primereact/tabview';
+
 import { supabase } from '../../supabaseClient';
 import Table from '../../components/Table';
-import { Button } from 'primereact/button';
 import Loading from '../../components/Loading';
-import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
 import CalendarMonth from '../../components/CalendarMonth';
-import { confirmDialog } from 'primereact/confirmdialog';
 import getLocalDateTimeString from '../../utils/funciones';
 
 export default function CreditosScreen() {
   const [data, setData] = useState([]);
+  const [dataPagados, setDataPagados] = useState([]);
   const { user } = useUser();
-  const [showDialog, setShowDialog] = useState(false);
-  const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [rangeDates, setRangeDates] = useState(() => {
     const now = new Date();
@@ -31,6 +32,7 @@ export default function CreditosScreen() {
     setLoading(true);
 
     let query = supabase.from('vta_creditos').select('*').eq('IdStatus', 5);
+    let query1 = supabase.from('vta_creditos_pagados').select('*');
 
     if (rangeDates && rangeDates[0] && rangeDates[1]) {
       const from = new Date(rangeDates[0]);
@@ -38,9 +40,12 @@ export default function CreditosScreen() {
       to.setHours(23, 59, 59, 999);
 
       query = query.gte('Date', from.toISOString()).lte('Date', to.toISOString());
+      query1 = query1.gte('Date', from.toISOString()).lte('Date', to.toISOString());
     }
 
     const { data, error } = await query;
+    const { data: data1 } = await query1;
+    setDataPagados(data1)
 
     if (!error) setData(data);
     else {
@@ -60,7 +65,7 @@ export default function CreditosScreen() {
       .from('vta_products')
       .select('*')
       .eq('Code', codigo.trim())
-      .eq('IdStatus', 1) 
+      .eq('IdStatus', 1)
       .single();
 
     if (error || !producto) {
@@ -72,21 +77,17 @@ export default function CreditosScreen() {
       });
       return;
     }
-
-    setSelected([producto]);
-    setShowDialog(true);
   };
 
   const columns = [
-    { field: 'IdSalida', Header: 'ID', center: true, className: 'XxSmall', filterMatchMode: 'equals',  hidden: user?.IdRol !==1 },
+    { field: 'IdSalida', Header: 'ID', center: true, className: 'XxSmall', filterMatchMode: 'equals', hidden: user?.IdRol !== 1 },
     { field: 'Date', Header: 'Fecha', center: true, format: 'Date', className: 'Medium', filterMatchMode: 'contains' },
     { field: 'Code', Header: 'Código', center: true, format: 'text', className: 'Medium', filterMatchMode: 'equals', count: true },
-    { field: 'Name', Header: 'Producto', center: false, format: 'text',  className: 'XxLarge', filterMatchMode: 'contains' },
-    { field: 'Descripcion', Header: 'Descripción', center: false, format: 'text', filterMatchMode: 'contains' },
-    { field: 'NombreCompleto', Header: 'Cliente', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxSmall' },
+    { field: 'Name', Header: 'Producto', center: false, format: 'text', className: 'XxLarge', filterMatchMode: 'contains' },
+    { field: 'NombreCompleto', Header: 'Cliente', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxLarge' },
     { field: 'UserName', Header: 'Usuario', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxSmall' },
-    { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true, },
-    { field: 'UnitName', Header: 'Unidad', className: 'Small', filterMatchMode: 'equals', summary: true, },
+    { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true },
+    { field: 'UnitName', Header: 'Unidad', className: 'Small', filterMatchMode: 'equals', summary: true },
     { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals' },
     { field: 'SubTotal', Header: 'SubTotal', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals', summary: true },
     { field: 'ISVQty', Header: 'ISV', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
@@ -97,63 +98,93 @@ export default function CreditosScreen() {
       icon: 'pi pi-dollar',
       center: true,
       className: 'XxxSmall',
+      frozen: true,
       filter: false,
       onClick: (rowData) => {
         confirmDialog({
           message: '¿Estás seguro que quieres pagar la salida?',
-          header: 'Confirmar eliminación',
+          header: 'Confirmar Pago',
           icon: 'pi pi-exclamation-triangle',
           acceptLabel: 'Aceptar',
           rejectLabel: 'Cancelar',
-          accept: async() => {
-            let IdSalida = rowData?.IdSalida
-            const fechaEntrada = new Date(rowData?.Date);
-            const hoy = new Date();
-            const limite = new Date(hoy);
-            limite.setDate(hoy.getDate() - 3);
-            if (fechaEntrada < limite) {
-              toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'No se puede eliminar una entrada mayor a 3 días',
-                life: 4000,
-              });
-              return;
-            }
-
-
-            const { error } = await supabase
-            .from('Salidas')
-            .update({
-              IdStatus: 6,
-              IdUserEdit: user?.IdUser,
-              Date: getLocalDateTimeString(),
-            })
-            .eq('IdSalida', IdSalida);
-
-            if (error) {
-              toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Error al eliminar la salida',
-                life: 3000,
-              });
-              return;
-            }
-
-            toast.current?.show({
-              severity: 'success',
-              summary: 'Ecito',
-              detail: 'Salida eliminada correctamente',
-              life: 3000,
-            });
-
-            getInfo()
+          accept: async () => {
+            pagarCredito(rowData);
           },
         });
-      }
-    }
+      },
+    },
   ];
+  
+  const columnsPagados = [
+    { field: 'IdSalida', Header: 'ID', center: true, className: 'XxSmall', filterMatchMode: 'equals', hidden: user?.IdRol !== 1 },
+    { field: 'Date', Header: 'Fecha', center: true, format: 'Date', className: 'Medium', filterMatchMode: 'contains' },
+    { field: 'Code', Header: 'Código', center: true, format: 'text', className: 'Medium', filterMatchMode: 'equals', count: true },
+    { field: 'Name', Header: 'Producto', center: false, format: 'text', className: 'XxLarge', filterMatchMode: 'contains' },
+    { field: 'NombreCompleto', Header: 'Cliente', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxLarge' },
+    { field: 'UserName', Header: 'Usuario', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxSmall' },
+    { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true },
+    { field: 'UnitName', Header: 'Unidad', className: 'Small', filterMatchMode: 'equals', summary: true },
+    { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals' },
+    { field: 'SubTotal', Header: 'SubTotal', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals', summary: true },
+    { field: 'ISVQty', Header: 'ISV', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
+    { field: 'Total', Header: 'Total', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
+    {
+      field: 'StatusName',
+      Header: 'Estado',
+      format: 'badge',
+      center: true,
+      className: 'Small',
+    },
+  ];
+
+  const pagarCredito = async (rowData) => {
+    setLoading(true);
+
+    const Datos = {
+      IdProduct: rowData?.IdProduct,
+      PrecioVenta: rowData?.PrecioVenta,
+      IdStatus: 5,
+      IdUserEdit: user?.IdUser,
+      Date: getLocalDateTimeString(),
+      CantidadSalida: rowData?.CantidadSalida,
+      IdTipoSalida: 1,
+      SubTotal: rowData?.SubTotal,
+      Total: rowData?.Total,
+      ISVQty: rowData?.ISVQty,
+      IdCliente: rowData?.IdCliente,
+      IdCurrency: 1,
+      IdSalidaCredito: rowData?.IdSalida,
+      PagoCredito: true,
+    };
+
+    const DatosSalidaA = {
+      IdStatus: 6,
+      IdUserEdit: user?.IdUser,
+      Date: getLocalDateTimeString(),
+    };
+
+    const { error: errorUpdate } = await supabase.from('Salidas').update(DatosSalidaA).eq('IdSalida', rowData?.IdSalida);
+    const { error } = await supabase.from('Salidas').insert([Datos]);
+
+    if (error) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo guardar el pago',
+        life: 4000,
+      });
+    } else {
+      toast.current?.show({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Pago guardado correctamente',
+        life: 4000,
+      });
+      getInfo();
+    }
+
+    setLoading(false);
+  };
 
   useEffect(() => {
     getInfo();
@@ -165,64 +196,69 @@ export default function CreditosScreen() {
   }, [data]);
 
   useEffect(() => {
-    document.title = 'Sumo - Creditos';
+    document.title = 'Sumo - Créditos';
   }, []);
 
   return (
-    <>
-      <div className="dashboard-container">
-        <h2 style={{ textAlign: 'center' }}>Creditos</h2>
-        <Toast ref={toast} />
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <InputText
-            inputRef={inputRef}
-            type="search"
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="Buscar por código (lector)"
-            className="p-inputtext-sm"
-            style={{ width: '300px' }}
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') buscarProductoPorCodigo(globalFilter);
-            }}
-          />
-
-          <CalendarMonth
-            rangeDates={rangeDates}
-            setRangeDates={setRangeDates}
-            selectedMonth={selectedMonth}
-            setSelectedMonth={setSelectedMonth}
-          />
-
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Button icon="pi pi-refresh"  className="p-button-success" severity='primary' onClick={getInfo} disabled={loading} />
-            <Button
-              label="Agregar Salida"
-              icon="pi pi-plus"
-              severity='primary'
-              className="p-button-success"
-              onClick={() => {
-                setSelected([]);
-                setShowDialog(true);
+    <div>
+      <Toast ref={toast} />
+      <TabView style={{marginTop: '3rem'}}>
+        <TabPanel header="Créditos">
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <InputText
+              inputRef={inputRef}
+              type="search"
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              placeholder="Buscar por código (lector)"
+              className="p-inputtext-sm"
+              style={{ width: '300px' }}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') buscarProductoPorCodigo(globalFilter);
               }}
             />
-          </div>
-        </div>
-        <Table columns={columns} data={data} globalFilter={globalFilter} />
-        {loading && <Loading message="Cargando salidas..." />}
-      </div>
 
-      {/* {showDialog && (
-        <CRUDSalidas
-          setShowDialog={setShowDialog}
-          showDialog={showDialog}
-          setSelected={setSelected}
-          selected={selected}
-          getInfo={getInfo}
-        /> 
-      )} */}
-    </>
+            <CalendarMonth
+              rangeDates={rangeDates}
+              setRangeDates={setRangeDates}
+              selectedMonth={selectedMonth}
+              setSelectedMonth={setSelectedMonth}
+            />
+
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <Button icon="pi pi-refresh" className="p-button-success" severity="primary" onClick={getInfo} disabled={loading} />
+            </div>
+          </div>
+
+          <Table columns={columns} data={data} globalFilter={globalFilter} />
+          {loading && <Loading message="Cargando..." />}
+        </TabPanel>
+
+        <TabPanel header="Créditos Pagados">
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <InputText
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              placeholder="Buscar por código"
+              className="p-inputtext-sm"
+              style={{ width: '300px' }}
+            />
+            <CalendarMonth
+              rangeDates={rangeDates}
+              setRangeDates={setRangeDates}
+              selectedMonth={selectedMonth}
+              setSelectedMonth={setSelectedMonth}
+            />
+
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <Button icon="pi pi-refresh"  className="p-button-success" severity='primary' onClick={getInfo} disabled={loading} />
+            </div>
+          </div>
+
+          <Table columns={columnsPagados} data={dataPagados} globalFilter={globalFilter} />
+        </TabPanel>
+      </TabView>
+    </div>
   );
 }

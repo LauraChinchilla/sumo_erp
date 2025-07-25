@@ -267,6 +267,10 @@ body {
   background-color: #28a745;
 }
 
+.badge-pagado {
+  background-color: #86a2d6;
+}
+
 .badge-inactivo {
   background-color: #dc3545;
 }

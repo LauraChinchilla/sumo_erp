@@ -84,7 +84,7 @@ export default function Dashboard() {
   return (
     <div
       style={{
-        backgroundImage: 'url(https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo//Fonfo2.avif)',
+        // backgroundImage: 'url(https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo//Fonfo2.avif)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         minHeight: '87.9vh',
