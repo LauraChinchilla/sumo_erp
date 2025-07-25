@@ -81,13 +81,14 @@ export default function SalidasScreen() {
   const columns = [
     { field: 'IdSalida', Header: 'ID', center: true, className: 'XxSmall', filterMatchMode: 'equals',  hidden: user?.IdRol !==1 },
     { field: 'Date', Header: 'Fecha', center: true, format: 'Date', className: 'Medium', filterMatchMode: 'contains' },
+    { field: 'TipoSalida', Header: 'Tipo de Salida', center: true, format: 'text', className: 'Medium', filterMatchMode: 'equals' },
     { field: 'Code', Header: 'Código', center: true, format: 'text', className: 'Large', filterMatchMode: 'equals', count: true },
     { field: 'Name', Header: 'Producto', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'NombreCompleto', Header: 'Cliente', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'Descripcion', Header: 'Descripción', center: false, format: 'text', filterMatchMode: 'contains' },
     { field: 'UserName', Header: 'Usuario', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxSmall' },
     { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true, },
-    { field: 'UnitName', Header: 'Unidad', className: 'Small', filterMatchMode: 'equals', summary: true, },
+    { field: 'UnitName', Header: 'Unidad', className: 'Small', filterMatchMode: 'equals' },
     { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals' },
     { field: 'SubTotal', Header: 'SubTotal', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals', summary: true },
     { field: 'ISVQty', Header: 'ISV', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
@@ -100,58 +101,129 @@ export default function SalidasScreen() {
       className: 'XxxSmall',
       filter: false,
       onClick: (rowData) => {
-        confirmDialog({
-          message: '¿Estás seguro que quieres eliminar la salida?',
-          header: 'Confirmar eliminación',
-          icon: 'pi pi-exclamation-triangle',
-          acceptLabel: 'Aceptar',
-          rejectLabel: 'Cancelar',
-          accept: async() => {
-            let IdSalida = rowData?.IdSalida
-            const fechaEntrada = new Date(rowData?.Date);
-            const hoy = new Date();
-            const limite = new Date(hoy);
-            limite.setDate(hoy.getDate() - 3);
-            if (fechaEntrada < limite) {
+        if(rowData?.PagoCredito){
+          confirmDialog({
+            message: (
+              <>
+                ¿Estás seguro que quieres eliminar la salida?<br />
+                <strong style={{ color: 'red' }}>Advertencia:</strong> esta salida se generó a partir de un pago de un crédito del cliente <strong>{rowData?.NombreCompleto}</strong>.<br />
+                Si la elimina, se restaurará el crédito.
+              </>
+            ),
+            header: 'Confirmar eliminación',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Aceptar',
+            rejectLabel: 'Cancelar',
+            accept: async () => {
+              let IdSalida = rowData?.IdSalida;
+              const fechaEntrada = new Date(rowData?.Date);
+              const hoy = new Date();
+              const limite = new Date(hoy);
+              limite.setDate(hoy.getDate() - 3);
+
+              if (fechaEntrada < limite) {
+                toast.current?.show({
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: 'No se puede eliminar una entrada mayor a 3 días',
+                  life: 4000,
+                });
+                return;
+              }
+
+              const { error: error2 } = await supabase
+                .from('Salidas')
+                .update({
+                  IdStatus: 5,
+                  IdUserEdit: user?.IdUser,
+                  Date: getLocalDateTimeString(),
+                })
+                .eq('IdSalida', rowData?.IdSalidaCredito);
+
+
+              const { error } = await supabase
+                .from('Salidas')
+                .update({
+                  IdStatus: 6,
+                  IdUserEdit: user?.IdUser,
+                  Date: getLocalDateTimeString(),
+                })
+                .eq('IdSalida', IdSalida);
+
+              if (error) {
+                toast.current?.show({
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: 'Error al eliminar la salida',
+                  life: 3000,
+                });
+                return;
+              }
+
               toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'No se puede eliminar una entrada mayor a 3 días',
-                life: 4000,
-              });
-              return;
-            }
-
-
-            const { error } = await supabase
-            .from('Salidas')
-            .update({
-              IdStatus: 6,
-              IdUserEdit: user?.IdUser,
-              Date: getLocalDateTimeString(),
-            })
-            .eq('IdSalida', IdSalida);
-
-            if (error) {
-              toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Error al eliminar la salida',
+                severity: 'success',
+                summary: 'Éxito',
+                detail: 'Salida eliminada correctamente',
                 life: 3000,
               });
-              return;
-            }
 
-            toast.current?.show({
-              severity: 'success',
-              summary: 'Ecito',
-              detail: 'Salida eliminada correctamente',
-              life: 3000,
-            });
+              getInfo();
+            },
+          });
+        }else{
+          confirmDialog({
+            message: '¿Estás seguro que quieres eliminar la salida?',
+            header: 'Confirmar eliminación',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Aceptar',
+            rejectLabel: 'Cancelar',
+            accept: async() => {
+              let IdSalida = rowData?.IdSalida
+              const fechaEntrada = new Date(rowData?.Date);
+              const hoy = new Date();
+              const limite = new Date(hoy);
+              limite.setDate(hoy.getDate() - 3);
+              if (fechaEntrada < limite) {
+                toast.current?.show({
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: 'No se puede eliminar una entrada mayor a 3 días',
+                  life: 4000,
+                });
+                return;
+              }
+              const { error } = await supabase
+              .from('Salidas')
+              .update({
+                IdStatus: 6,
+                IdUserEdit: user?.IdUser,
+                Date: getLocalDateTimeString(),
+              })
+              .eq('IdSalida', IdSalida);
 
-            getInfo()
-          },
-        });
+              if (error) {
+                toast.current?.show({
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: 'Error al eliminar la salida',
+                  life: 3000,
+                });
+                return;
+              }
+
+              toast.current?.show({
+                severity: 'success',
+                summary: 'Ecito',
+                detail: 'Salida eliminada correctamente',
+                life: 3000,
+              });
+
+              getInfo()
+
+              
+            },
+          });
+        }
       }
     }
   ];

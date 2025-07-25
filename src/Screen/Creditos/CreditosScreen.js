@@ -102,7 +102,12 @@ export default function CreditosScreen() {
       filter: false,
       onClick: (rowData) => {
         confirmDialog({
-          message: '¿Estás seguro que quieres pagar la salida?',
+          message: (
+            <>
+              ¿Estás seguro que quieres pagar el crédito del cliente <strong>{rowData?.NombreCompleto}</strong>?<br />
+              Cantidad: <strong>L {rowData?.Total}</strong>
+            </>
+          ),
           header: 'Confirmar Pago',
           icon: 'pi pi-exclamation-triangle',
           acceptLabel: 'Aceptar',
@@ -158,7 +163,7 @@ export default function CreditosScreen() {
     };
 
     const DatosSalidaA = {
-      IdStatus: 6,
+      IdStatus: 7,
       IdUserEdit: user?.IdUser,
       Date: getLocalDateTimeString(),
     };
