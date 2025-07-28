@@ -79,6 +79,18 @@ export default function Dashboard() {
       description: 'Gestión de cuentas por cobrar y créditos a clientes.',
       ruta: '/creditos',
     },
+    {
+      icon: 'pi pi-wallet',
+      title: 'Retiros',
+      description: 'Registro de retiros por ganancias o capital.',
+      ruta: '/retiros',
+    },
+    {
+      icon: 'pi pi-users',
+      title: 'Nómina',
+      description: 'Gestión de pagos a empleados y sueldos.',
+      ruta: '/nomina',
+    }
   ];
 
   return (
@@ -98,7 +110,7 @@ export default function Dashboard() {
         <div className="card-grid">
           {cards
             .filter(card => {
-              if (card.title === 'Movimientos' || card.title === 'KPIs' || card.title === 'Créditos') {
+              if (card.title === 'Movimientos' || card.title === 'KPIs' || card.title === 'Créditos'  || card.top === 'Retiros') {
                 return user?.IdRol === 1 || user?.IdRol === 2;
               }
               return true;
