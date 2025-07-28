@@ -11,6 +11,7 @@ import { Toast } from 'primereact/toast';
 import { useUser } from '../../context/UserContext';
 import { Dropdown } from 'primereact/dropdown';
 import getLocalDateTimeString from '../../utils/funciones';
+import CRUDProducts from '../Products/CRUDProducts';
 
 const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
     const toast = useRef(null);
@@ -18,6 +19,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
     const [loading, setLoading] = useState(false);
     const [proveedores, setProveedores] = useState([]);
     const [productos, setProductos] = useState([]);
+    const [showDialogProducto, setShowDialogProducto] = useState(false);
+    
 
     const initialValues = {
         IdEntrada: -1,
@@ -374,12 +377,25 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
             </div>
 
             {/* Botones */}
+            <Button label="Agregar Producto" onClick={() => {setShowDialogProducto(true)}} />
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
                 <Button label="Cancelar" className="p-button-secondary" onClick={onHide} disabled={loading} />
                 <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />
             </div>
+
+            {showDialogProducto && (
+              <CRUDProducts
+                setShowDialog={setShowDialogProducto}
+                showDialog={showDialogProducto}
+                setSelected={() => {}}
+                selected={[]}
+                getInfo={getValoresIniciales}
+              />
+            )}
         </Dialog>
-    );
+
+
+);
 }
 
 export default CRUDEntradas;

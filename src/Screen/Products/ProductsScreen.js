@@ -265,20 +265,20 @@ export default function Productos() {
             footer={
               <>
                 <Button
-                  label="Aceptar"
-                  icon="pi pi-check"
-                  className="p-button-danger"
-                  onClick={() => {
-                    cambiarEstadoProducto()
-                  }}
-                />
-                <Button
                   label="Cancelar"
                   icon="pi pi-times"
                   className="p-button-text"
                   onClick={() => {
                     setShowDialogStatus(false);
                     setSelected([]);
+                  }}
+                />
+                <Button
+                  label="Aceptar"
+                  icon="pi pi-check"
+                  className="primary"
+                  onClick={() => {
+                    cambiarEstadoProducto()
                   }}
                 />
               </>

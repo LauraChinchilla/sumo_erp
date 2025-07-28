@@ -14,15 +14,18 @@ import useForm from "../useForm";
 import { FloatLabel } from "primereact/floatlabel";
 import { InputText } from "primereact/inputtext";
 import { FileUpload } from "primereact/fileupload";
+import UnidadesCRUD from "./UnidadesCRUD";
 
 export default function MaestrosScreen() {
   const [dataClientes, setDataClientes] = useState([]);
   const [dataProveedores, setDataProveedores] = useState([]);
   const [dataUsers, setDataUsers] = useState([]);
   const [dataCategorias, setDataCategorias] = useState([]);
+  const [dataUnidades, setDataUnidades] = useState([]);
   const [showDialogClientes, setShowDialogClientes] = useState(false)
   const [showDialogProveedores, setShowDialogProveedores] = useState(false)
   const [showDialogCategorias, setShowDialogCategorias] = useState(false)
+  const [showDialogUnits, setShowDialogUnits] = useState(false)
   const [selected, setSelected] = useState([])
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
@@ -62,6 +65,11 @@ export default function MaestrosScreen() {
       const { data, error } = await supabase.from("vta_categorias").select("*");
       if (!error) {
         setDataCategorias(data);
+      }
+    } else if (activeIndex === 5) {
+      const { data, error } = await supabase.from("vta_unidades").select("*");
+      if (!error) {
+        setDataUnidades(data);
       }
     }
     setLoading(false);
@@ -369,6 +377,87 @@ export default function MaestrosScreen() {
             severity: 'warn',
             summary: 'Error',
             detail: 'No se puede editar una categoria Inactiva',
+            life: 4000
+          });
+        }
+      }
+    },
+  ];
+
+  const columnsUnits = [
+    {
+      field: "IdUnit",
+      Header: "ID",
+      center: true,
+      frozen: true,
+      className: "XxSmall",
+      filterMatchMode: "equals",
+      hidden: user?.IdRol !== 1,
+    },
+    {
+      field: 'Date',
+      Header: 'Fecha',
+      center: true,
+      frozen: false,
+      format: 'Date',
+      className: 'XxxxSmall',
+      filterMatchMode: 'contains',
+    },
+    {
+      field: "UnitName",
+      Header: "Unidad",
+      format: "text",
+      className: "Xxlarge",
+    },
+    {
+      field: "UnitSymbol",
+      Header: "Unidad",
+      format: "text",
+      className: "XxxSmall",
+    },
+    {
+      field: "Description",
+      Header: "Descripcion",
+      center: false,
+      frozen: false,
+      format: "text",
+      className: "Large",
+      filterMatchMode: "contains",
+    },
+    {
+      field: "StatusName",
+      Header: "Estado",
+      format: "badge",
+      center: true,
+      className: "XxxSmall",
+      onClick: (rowData) => {
+        confirmDialog({
+          message: `¿Deseas cambiar el estado de la unidad "${rowData.UnitName}"?`,
+          header: "Confirmar cambio de estado",
+          icon: "pi pi-exclamation-triangle",
+          accept: () => cambiarEstado("Units", "IdUnit", rowData),
+          rejectLabel: "Cancelar",
+        });
+      },
+    },
+    {
+      field: 'actions',
+      // Header: 'Acciones',
+      isIconColumn: true,
+      icon: 'pi pi-pencil',
+      center: true,
+      className: 'XxxSmall',
+      tooltip: 'Editar',
+      filter: false,
+      onClick: (rowData) => {
+        if(rowData?.IdStatus === 1){
+          setSelected([rowData])
+          setShowDialogUnits(true)
+        }else{
+          toast.current?.show({
+            severity: 'warn',
+            summary: 'Error',
+            detail: 'No se puede editar una unidad Inactiva',
             life: 4000
           });
         }
@@ -713,6 +802,7 @@ export default function MaestrosScreen() {
             </div>
             <Table columns={columnsClientes} data={dataClientes} />
           </TabPanel>
+
           <TabPanel header="Proveedores">
             {loading && <Loading message="Cargando..." />}
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
@@ -736,6 +826,7 @@ export default function MaestrosScreen() {
             </div>
             <Table columns={columnsProveedores} data={dataProveedores} />
           </TabPanel>
+
           <TabPanel header="Usuarios">
             {loading && <Loading message="Cargando..." />}
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
@@ -749,6 +840,7 @@ export default function MaestrosScreen() {
             </div>
             <Table columns={columnsUsers} data={dataUsers} />
           </TabPanel>
+
           <TabPanel header="Categorias">
             {loading && <Loading message="Cargando..." />}
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
@@ -771,6 +863,30 @@ export default function MaestrosScreen() {
               />
             </div>
             <Table columns={columnsCat} data={dataCategorias} />
+          </TabPanel>
+
+          <TabPanel header="Unidades">
+            {loading && <Loading message="Cargando..." />}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+              <Button
+                icon="pi pi-refresh"
+                className="p-button-success"
+                onClick={getInfo}
+                disabled={loading}
+                severity="primary"
+              />
+              <Button
+                icon="pi pi-plus"
+                label="Nueva Unidad"
+                severity='primary'
+                className="p-button-success"
+                onClick={() => {
+                  setSelected([])
+                  setShowDialogUnits(true)
+                }}
+              />
+            </div>
+            <Table columns={columnsUnits} data={dataUnidades} />
           </TabPanel>
         </TabView>
 
@@ -803,6 +919,18 @@ export default function MaestrosScreen() {
           <CategoriasCRUD
             showDialog={showDialogCategorias}
             setShowDialog={setShowDialogCategorias}
+            setSelected={setSelected}
+            selected={selected}
+            getInfo={getInfo}
+            editable={true}
+            setActiveIndex={setActiveIndex}
+          />
+        )}
+
+        {showDialogUnits && (
+          <UnidadesCRUD
+            setShowDialog={setShowDialogUnits}
+            showDialog={showDialogUnits}
             setSelected={setSelected}
             selected={selected}
             getInfo={getInfo}

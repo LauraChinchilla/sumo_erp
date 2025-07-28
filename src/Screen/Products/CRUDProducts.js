@@ -10,6 +10,8 @@ import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
 import { confirmDialog } from 'primereact/confirmdialog';
 import { InputNumber } from 'primereact/inputnumber';
+import CategoriasCRUD from '../../components/Maestros/CategoriasCRUD';
+import UnidadesCRUD from '../../components/Maestros/UnidadesCRUD';
 
 const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
     const [categorias, setCategorias] = useState([]);
@@ -17,6 +19,8 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
     const toast = useRef(null);
     const fileUploadRef = useRef(null);
     const [loading, setLoading] = useState(false);
+    const [showDialogCat, setShowDialogCat] = useState(false);
+    const [showDialogUnidad, setShowDialogUnidad] = useState(false);
 
     const initialValues = {
         IdProduct: -1,
@@ -482,11 +486,39 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
 
             </div>
 
+            
+            <Button label="Agregar Categoria" style={{marginTop: '1rem'}} onClick={() => {setShowDialogCat(true)}} />
+            <Button label="Agregar Unidad" style={{marginTop: '1rem', marginLeft: '1rem'}} onClick={() => {setShowDialogUnidad(true)}} />
             {/* Botones */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '3rem' }}>
                 <Button label="Cancelar" className="p-button-secondary" onClick={onHide} disabled={loading} />
                 <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />
             </div>
+
+            {showDialogCat && (     
+                <CategoriasCRUD
+                    showDialog={showDialogCat}
+                    setShowDialog={setShowDialogCat}
+                    setSelected={() => {}}
+                    selected={[]}
+                    getInfo={getValoresIniciales}
+                    editable={true}
+                    setActiveIndex={() => {}}
+                />
+            )}
+
+
+            {showDialogUnidad && (
+                <UnidadesCRUD
+                    setShowDialog={setShowDialogUnidad}
+                    showDialog={showDialogUnidad}
+                    setSelected={setSelected}
+                    selected={selected}
+                    getInfo={getInfo}
+                    editable={true}
+                    setActiveIndex={() => {}}
+                />
+            )}
         </Dialog>
         </>
     );

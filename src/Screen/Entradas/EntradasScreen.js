@@ -10,11 +10,13 @@ import { useUser } from '../../context/UserContext';
 import CRUDEntradas from './CRUDEntradas';
 import getLocalDateTimeString from '../../utils/funciones';
 import CalendarMonth from '../../components/CalendarMonth';
+import CRUDProducts from '../Products/CRUDProducts';
 
 export default function EntradasScreen() {
   const [data, setData] = useState([]);
   const { user } = useUser();
   const [showDialog, setShowDialog] = useState(false);
+  const [showDialogProducto, setShowDialogProducto] = useState(false);
   const [showDialogStatus, setShowDialogStatus] = useState(false);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -367,6 +369,15 @@ export default function EntradasScreen() {
                 setShowDialog(true);
               }}
             />
+            <Button
+              label="Agregar Producto"
+              icon="pi pi-plus"
+              className="p-button-success"
+              severity="primary"
+              onClick={() => {
+                setShowDialogProducto(true)
+              }}
+            />
           </div>
         </div>
 
@@ -420,6 +431,16 @@ export default function EntradasScreen() {
           showDialog={showDialog}
           setSelected={setSelected}
           selected={selected}
+          getInfo={getInfo}
+        />
+      )}
+
+      {showDialogProducto && (
+        <CRUDProducts
+          setShowDialog={setShowDialogProducto}
+          showDialog={showDialogProducto}
+          setSelected={() => {}}
+          selected={[]}
           getInfo={getInfo}
         />
       )}
