@@ -10,11 +10,11 @@ import ClientesCRUD from "./ClientesCRUD";
 import ProveedoresCRUD from "./ProveedoresCRUD";
 import CategoriasCRUD from "./CategoriasCRUD";
 import { confirmDialog } from "primereact/confirmdialog";
-import useForm from "../useForm";
 import { FloatLabel } from "primereact/floatlabel";
 import { InputText } from "primereact/inputtext";
 import { FileUpload } from "primereact/fileupload";
 import UnidadesCRUD from "./UnidadesCRUD";
+import useForm from "../../components/useForm";
 
 export default function MaestrosScreen() {
   const [dataClientes, setDataClientes] = useState([]);

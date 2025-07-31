@@ -10,8 +10,8 @@ import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
 import { confirmDialog } from 'primereact/confirmdialog';
 import { InputNumber } from 'primereact/inputnumber';
-import CategoriasCRUD from '../../components/Maestros/CategoriasCRUD';
-import UnidadesCRUD from '../../components/Maestros/UnidadesCRUD';
+import CategoriasCRUD from '../../Screen/Maestros/CategoriasCRUD';
+import UnidadesCRUD from '../../Screen/Maestros/UnidadesCRUD';
 
 const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
     const [categorias, setCategorias] = useState([]);

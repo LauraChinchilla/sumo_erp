@@ -90,6 +90,12 @@ export default function Dashboard() {
       title: 'Nómina',
       description: 'Gestión de pagos a empleados y sueldos.',
       ruta: '/nomina',
+    },
+    {
+      icon: 'pi pi-list',
+      title: 'Mov. de Caja',
+      description: 'Consulta detallada del historial de movimientos en caja.',
+      ruta: '/cajamovimientos',
     }
   ];
 
@@ -110,7 +116,7 @@ export default function Dashboard() {
         <div className="card-grid">
           {cards
             .filter(card => {
-              if (card.title === 'Movimientos' || card.title === 'KPIs' || card.title === 'Créditos'  || card.top === 'Retiros') {
+              if (card.title === 'Movimientos' || card.title === 'KPIs' || card.title === 'Créditos'  || card.top === 'Retiros' || card.title === 'Mov. de Caja') {
                 return user?.IdRol === 1 || user?.IdRol === 2;
               }
               return true;

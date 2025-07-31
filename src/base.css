@@ -285,6 +285,11 @@ body {
   color: black;
 }
 
+.badge-creado {
+  background-color: #09c0e0;
+  color: black;
+}
+
 .badge-eliminado {
   background-color: #dc3545;
 }

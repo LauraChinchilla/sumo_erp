@@ -13,9 +13,10 @@ import MovimientosScreen from './Screen/Movimientos/MovimientosScreen';
 import MainLayout from './components/MainLayout';
 import { useUser } from './context/UserContext';
 import KPIsScreen from './Screen/KPIs/KPIsScreen';
-import MaestrosScreen from './components/Maestros/MaestrosScreen';
+import MaestrosScreen from './Screen/Maestros/MaestrosScreen';
 import CreditosScreen from './Screen/Creditos/CreditosScreen';
 import RetirosScreen from './Screen/Retiros/RetirosScreen';
+import CajaMovimientosScreen from './Screen/CajaMovimientos/CajaMovimientosScreen';
 
 function AppContent() {
   const { logout } = useUser();
@@ -133,6 +134,15 @@ function AppContent() {
         element={
           <MainLayout onLogout={handlerLogout}>
             <RetirosScreen />
+          </MainLayout>
+        }
+      />
+
+      <Route
+        path="/cajamovimientos"
+        element={
+          <MainLayout onLogout={handlerLogout}>
+            <CajaMovimientosScreen />
           </MainLayout>
         }
       />
