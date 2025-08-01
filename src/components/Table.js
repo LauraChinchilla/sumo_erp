@@ -145,6 +145,7 @@ function getColumnWidth(size) {
     Xxlarge: '280px',
     Xxxlarge: '350px',
     Xxxxlarge: '450px',
+    Xxxxxlarge: '650px',
   };
   return widths[size] || 'auto';
 }
@@ -185,6 +186,16 @@ function formatValue(value, format, rowData, column = {}) {
       );
     }
 
+    case 'checkbox':
+      return (
+        <input
+          type="checkbox"
+          checked={!!value}
+          disabled
+          style={{ transform: 'scale(1.2)', cursor: 'default' }}
+        />
+      );
+
     case 'Date':
       if (!value) return '';
       const date = new Date(value);
@@ -209,5 +220,5 @@ function formatValue(value, format, rowData, column = {}) {
 
   if (formattedValue === null || formattedValue === undefined) formattedValue = '';
 
-  return formattedValue ? prefix + formattedValue + suffix : formattedValue
+  return formattedValue ? prefix + formattedValue + suffix : formattedValue;
 }

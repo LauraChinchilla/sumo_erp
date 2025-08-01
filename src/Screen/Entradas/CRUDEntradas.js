@@ -19,6 +19,7 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
     const [loading, setLoading] = useState(false);
     const [proveedores, setProveedores] = useState([]);
     const [productos, setProductos] = useState([]);
+    const [tipoEntradas, setTipoEntradas] = useState([]);
     const [showDialogProducto, setShowDialogProducto] = useState(false);
     
 
@@ -36,6 +37,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
         PrecioVenta: { required: true, message: 'Precio de venta requerido' },
         PorcentajeGanancia: { required: true, message: 'Porcentaje requerido' },
         ISV: { required: values?.Excento ? false : true, message: 'Porcentaje requerido' },
+        IdTipoEntrada: { required: true, message: 'Porcentaje requerido' },
+        IdVendor: { required: values?.IdTipoEntrada === 1 ? true : false, message: 'Porcentaje requerido' },
     };
 
     const getValoresIniciales = async () => {
@@ -43,6 +46,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
         if (!error) setProveedores(data);
         const { data: data2 } = await supabase.from('vta_products').select('*').eq('IdStatus',1);
         setProductos(data2)
+        const { data: data3, error: error3 } = await supabase.from('TipoEntradas').select('*');
+        if (!error3) setTipoEntradas(data3);
         if(selected?.length > 0){
             setValues({
                 ...selected[0],
@@ -62,6 +67,34 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
 
         setLoading(true);
 
+        if(values?.IdTipoEntrada === 2){
+            const { data: data3, error: error3 } = await supabase.from('vta_resumen_caja').select('*');
+    
+            if(error3){
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'No se pudo obtener el saldo actual',
+                    life: 4000
+                });
+                setLoading(false);
+                return;
+            }
+            
+            if(data3[0]?.SaldoActual < (values?.Cantidad * values.PrecioCompra) + (values?.ISV/100)) {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'El saldo actual es menor a la cantidad a pagar.',
+                    life: 4000
+                });
+                setLoading(false);
+                return;
+            }
+        }
+
+
+
         const entrada = {
             IdProduct: values?.IdProduct,
             Excento: values.Excento,
@@ -76,12 +109,11 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
             Description: values?.Description || '',
             Cantidad: values?.Cantidad,
             IdCurrency: 1,
+            IdTipoEntrada: values?.IdTipoEntrada,
+            Pagado: values?.IdTipoEntrada === 1 ? false : true
         };
 
-        // Paso 1: Insertar entrada
-        const { error: errorEntrada } = await supabase
-            .from('Entradas')
-            .insert([entrada]);
+        const { error: errorEntrada } = await supabase.from('Entradas').insert([entrada]);
 
         if (errorEntrada) {
             console.error('Error al guardar entrada:', errorEntrada.message);
@@ -93,13 +125,26 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
             });
             setLoading(false);
             return;
+        }else{
+            if(values?.IdTipoEntrada === 2){
+                const datos = {
+                    IdTipoMovimiento: 1,
+                    IdCategoria: 4,
+                    Descripcion: 'Pago a proveedor',
+                    Monto: (values?.Cantidad * values.PrecioCompra) + (values?.ISV/100),
+                    IdStatus: 8,
+                    Date: getLocalDateTimeString(),
+                    IdUser: user?.IdUser,
+                };
+                const { error } = await supabase.from('CajaMovimientos').insert([datos]);
+            }
         }
 
         setTimeout(() => {
             getInfo();
             setShowDialog(false);
-            setLoading(false);
         }, 800);
+        setLoading(false);
     };
 
     const onHide = () => {
@@ -263,6 +308,7 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                             className={errors.IdVendor ? 'p-invalid' : ''}
                             style={{ width: '100%' }}
                             disabled={!editable}
+                            showClear
                         />
 
                         <label htmlFor="IdVendor">Proveedor</label>
@@ -355,7 +401,23 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
             {/* Cantidad */}
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                 <div style={{ flex: 1 }}>
+                    <FloatLabel>
+                        <Dropdown
+                            id="IdTipoEntrada"
+                            value={values.IdTipoEntrada}
+                            options={tipoEntradas}
+                            onChange={(e) => handleChange('IdTipoEntrada', e.value)}
+                            placeholder="Seleccione un tipo de entrada"
+                            required
+                            optionLabel="TipoEntrada"
+                            optionValue="IdTipoEntrada"
+                            className={errors.IdTipoEntrada ? 'p-invalid' : ''}
+                            style={{ width: '100%' }}
+                            disabled={!editable}
+                        />
 
+                        <label htmlFor="IdTipoEntrada">Tipo de Entrada</label>
+                    </FloatLabel>
                 </div>
 
 
@@ -376,8 +438,18 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                 </div>
             </div>
 
+            {/* Totales a la derecha */}
+            <div style={{ textAlign: 'right', marginTop: '2rem', paddingRight: '1rem' }}>
+                <p><strong>Subtotal:</strong> L {((values?.Cantidad || 0) * (values?.PrecioCompra || 0)).toFixed(2)}</p>
+                <p><strong>ISV:</strong> L {(values?.Excento ? 0 : ((values?.Cantidad || 0) * (values?.PrecioCompra || 0) * ((values?.ISV || 0) / 100))).toFixed(2)}</p>
+                <p><strong>Total a Pagar:</strong> L {(
+                    ((values?.Cantidad || 0) * (values?.PrecioCompra || 0)) +
+                    (values?.Excento ? 0 : ((values?.Cantidad || 0) * (values?.PrecioCompra || 0) * ((values?.ISV || 0) / 100)))
+                ).toFixed(2)}</p>
+            </div>
+
             {/* Botones */}
-            <Button label="Agregar Producto" onClick={() => {setShowDialogProducto(true)}} />
+            <Button style={{marginTop: '1rem'}} severity="primary" label="Agregar Producto" onClick={() => {setShowDialogProducto(true)}} />
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
                 <Button label="Cancelar" className="p-button-secondary" onClick={onHide} disabled={loading} />
                 <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />

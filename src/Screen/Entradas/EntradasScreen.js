@@ -11,9 +11,11 @@ import CRUDEntradas from './CRUDEntradas';
 import getLocalDateTimeString from '../../utils/funciones';
 import CalendarMonth from '../../components/CalendarMonth';
 import CRUDProducts from '../Products/CRUDProducts';
+import { TabPanel, TabView } from 'primereact/tabview';
 
 export default function EntradasScreen() {
   const [data, setData] = useState([]);
+  const [data2, setData2] = useState([]);
   const { user } = useUser();
   const [showDialog, setShowDialog] = useState(false);
   const [showDialogProducto, setShowDialogProducto] = useState(false);
@@ -28,6 +30,7 @@ export default function EntradasScreen() {
   });
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef(null);
   const toast = useRef(null);
 
@@ -35,6 +38,8 @@ export default function EntradasScreen() {
     setLoading(true);
 
     let query = supabase.from('vta_entradas').select('*').eq('IdStatus', 3);
+    let query2 = supabase.from('vta_entradas').select('*').eq('IdStatus', 3).eq('IdTipoEntrada', 1).or('Pagado.eq.false');
+
 
     if (rangeDates && rangeDates[0] && rangeDates[1]) {
       const from = new Date(rangeDates[0]);
@@ -43,6 +48,17 @@ export default function EntradasScreen() {
       to.setHours(23, 59, 59, 999);
 
       query = query.gte('Date', from.toISOString()).lte('Date', to.toISOString());
+    }
+
+    const { data: data2, error: error2 } = await query2;   
+    if (!error2) setData2(data2);
+    else {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: error2.message,
+        life: 3000,
+      });
     }
 
     const { data, error } = await query;
@@ -187,6 +203,7 @@ export default function EntradasScreen() {
       center: false,
       frozen: false,
       format: 'text',
+      className: 'Xxxxxlarge',
       filterMatchMode: 'contains',
     },
     {
@@ -197,22 +214,6 @@ export default function EntradasScreen() {
       format: 'text',
       filterMatchMode: 'contains',
     },
-    // {
-    //   field: 'Description',
-    //   Header: 'Descripción',
-    //   center: false,
-    //   frozen: false,
-    //   format: 'text',
-    //   filterMatchMode: 'contains',
-    // },
-    // {
-    //   field: 'Currency',
-    //   Header: 'Moneda',
-    //   center: false,
-    //   frozen: false,
-    //   format: 'text',
-    //   filterMatchMode: 'contains',
-    // },
     {
       field: 'PrecioCompra',
       Header: 'Precio Compra',
@@ -285,6 +286,197 @@ export default function EntradasScreen() {
       filterMatchMode: 'contains',
     },
     {
+      field: 'SubTotal',
+      Header: 'SubTotal',
+      center: false,
+      frozen: false,
+      format: 'number',
+      summary: true,
+      className: 'Small',
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      prefix: 'L '
+    },
+    {
+      field: 'Total',
+      Header: 'Total',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      summary: true,
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      prefix: 'L '
+    },
+    {
+      field: 'Pagado',
+      Header: 'Pagado',
+      frozen: true,
+      alignFrozen: 'right',
+      center: true,
+      format: 'checkbox',
+      className: 'Small',
+      filterMatchMode: 'equals',
+    },
+    {
+      field: 'StatusName',
+      Header: 'Estado',
+      format: 'badge',
+      center: true,
+      className: 'Small',
+      frozen: true,
+      alignFrozen: 'right',
+      valueField: 'StatusName',
+      onClick: (rowData) => {
+        if(rowData?.IdStatus === 3){
+          setSelected([rowData]);
+          setShowDialogStatus(true);
+        }
+      },
+    }
+  ];
+
+  const columns2 = [
+    {
+      field: 'IdEntrada',
+      Header: 'ID',
+      center: true,
+      frozen: true,
+      className: 'XxSmall',
+      filterMatchMode: 'equals',
+    },
+    {
+      field: 'Date',
+      Header: 'Fecha',
+      center: true,
+      frozen: false,
+      format: 'Date',
+      className: 'Medium',
+      filterMatchMode: 'contains',
+    },
+    {
+      field: 'Code',
+      Header: 'Codigo',
+      center: true,
+      frozen: true,
+      format: 'text',
+      className: 'Large',
+      filterMatchMode: 'equals',
+      count: true
+    },
+    {
+      field: 'ProductName',
+      Header: 'Producto',
+      center: false,
+      frozen: false,
+      format: 'text',
+      filterMatchMode: 'contains',
+    },
+    {
+      field: 'VendorName',
+      Header: 'Proveedor',
+      center: false,
+      frozen: false,
+      format: 'text',
+      filterMatchMode: 'contains',
+    },
+    {
+      field: 'PrecioCompra',
+      Header: 'Precio Compra',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      prefix: 'L '
+    },
+    {
+      field: 'ISV',
+      Header: 'ISV',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      suffix: ' %',
+    },
+    {
+      field: 'PorcentajeGanancia',
+      Header: 'Porcentaje Ganancia',
+      center: false,
+      frozen: false,
+      format: 'number',
+      suffix: ' %',
+      className: 'Small',
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+    },
+    {
+      field: 'PrecioVenta',
+      Header: 'Precio Venta',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      filterMatchMode: 'equals',
+      prefix: 'L '
+    },
+    {
+      field: 'UserNameCreate',
+      Header: 'Usuario Creacion',
+      center: false,
+      frozen: false,
+      format: 'text',
+      className: 'Small',
+      filterMatchMode: 'contains',
+    },
+    {
+      field: 'Cantidad',
+      Header: 'Cantidad',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      filterMatchMode: 'equals',
+      summary: true,
+    },
+    {
+      field: 'UnitName',
+      Header: 'Unidad',
+      center: false,
+      frozen: false,
+      format: 'text',
+      className: 'XxSmall',
+      filterMatchMode: 'contains',
+    },
+    {
+      field: 'SubTotal',
+      Header: 'SubTotal',
+      center: false,
+      frozen: false,
+      format: 'number',
+      summary: true,
+      className: 'Small',
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      prefix: 'L '
+    },
+    {
+      field: 'Total',
+      Header: 'Total',
+      center: false,
+      frozen: false,
+      format: 'number',
+      className: 'Small',
+      summary: true,
+      filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      prefix: 'L '
+    },
+    {
       field: 'StatusName',
       Header: 'Estado',
       format: 'badge',
@@ -317,73 +509,123 @@ export default function EntradasScreen() {
 
   return (
     <>
-      <div className="dashboard-container">
-        <h2 style={{ textAlign: 'center' }}>Entradas</h2>
+      <div>
         <Toast ref={toast} />
-        <div
+        <div         
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginBottom: '1rem',
+            paddingTop: "45px",
+            paddingLeft: "10px",
+            paddingRight: "10px",
           }}
         >
 
-          <InputText
-            inputRef={inputRef}
-            type="search"
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="Buscar por código (lector)"
-            className="p-inputtext-sm"
-            style={{ width: '300px' }}
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                buscarProductoPorCodigo(globalFilter);
-              }
-            }}
-          />
+          <TabView 
+            activeIndex={activeIndex}
+            onTabChange={(e) => setActiveIndex(e.index)}
+          >
+            <TabPanel header="Entradas">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginBottom: '1rem',
+                }}
+              >
 
-          <CalendarMonth
-            rangeDates={rangeDates}
-            setRangeDates={setRangeDates}
-            selectedMonth={selectedMonth}
-            setSelectedMonth={setSelectedMonth}
-          />
+                <InputText
+                  inputRef={inputRef}
+                  type="search"
+                  value={globalFilter}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  placeholder="Buscar por código (lector)"
+                  className="p-inputtext-sm"
+                  style={{ width: '300px' }}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      buscarProductoPorCodigo(globalFilter);
+                    }
+                  }}
+                />
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Button
-              icon="pi pi-refresh"
-              className="p-button-success"
-              onClick={getInfo}
-              disabled={loading}
-              severity="primary"
-            />
-            <Button
-              label="Agregar Entrada"
-              icon="pi pi-plus"
-              className="p-button-success"
-              severity="primary"
-              onClick={() => {
-                setSelected([]);
-                setShowDialog(true);
-              }}
-            />
-            <Button
-              label="Agregar Producto"
-              icon="pi pi-plus"
-              className="p-button-success"
-              severity="primary"
-              onClick={() => {
-                setShowDialogProducto(true)
-              }}
-            />
-          </div>
+                <CalendarMonth
+                  rangeDates={rangeDates}
+                  setRangeDates={setRangeDates}
+                  selectedMonth={selectedMonth}
+                  setSelectedMonth={setSelectedMonth}
+                />
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <Button
+                    icon="pi pi-refresh"
+                    className="p-button-success"
+                    onClick={getInfo}
+                    disabled={loading}
+                    severity="primary"
+                  />
+                  <Button
+                    label="Agregar Entrada"
+                    icon="pi pi-plus"
+                    className="p-button-success"
+                    severity="primary"
+                    onClick={() => {
+                      setSelected([]);
+                      setShowDialog(true);
+                    }}
+                  />
+                  <Button
+                    label="Agregar Producto"
+                    icon="pi pi-plus"
+                    className="p-button-success"
+                    severity="primary"
+                    onClick={() => {
+                      setShowDialogProducto(true)
+                    }}
+                  />
+                </div>
+              </div>
+
+              <Table columns={columns} data={data} globalFilter={globalFilter} />
+
+              {loading && <Loading message="Cargando entradas..." />}
+            </TabPanel>
+
+            <TabPanel header='Pagos a Proveedores'>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginBottom: '1rem',
+                }}
+              >
+                <CalendarMonth
+                  rangeDates={rangeDates}
+                  setRangeDates={setRangeDates}
+                  selectedMonth={selectedMonth}
+                  setSelectedMonth={setSelectedMonth}
+                />
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <Button
+                    icon="pi pi-refresh"
+                    className="p-button-success"
+                    onClick={getInfo}
+                    disabled={loading}
+                    severity="primary"
+                  />
+                </div>
+              </div>
+
+              <Table columns={columns2} data={data2}/>
+
+              {loading && <Loading message="Cargando..." />}
+
+            </TabPanel>
+
+          </TabView>
+
+
         </div>
-
-        <Table columns={columns} data={data} globalFilter={globalFilter} />
-
-        {loading && <Loading message="Cargando entradas..." />}
       </div>
 
       {showDialogStatus && (

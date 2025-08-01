@@ -35,7 +35,7 @@ const CRUDMovimientos = ({setShowDialog, showDialog, setSelected, selected, getI
         const { data, error } = await supabase.from('TipoMovimiento').select('*');
         if (!error) setTipoMovimientos(data);
 
-        const { data: data2, error: error2 } = await supabase.from('CategoriaMov').select('*');
+        const { data: data2, error: error2 } = await supabase.from('CategoriaMov').select('*').neq('IdCategoria', 4);
         if (!error2) setCategorias(data2);
 
         if(selected?.length > 0){
