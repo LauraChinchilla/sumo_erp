@@ -62,16 +62,23 @@ body {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* exactamente 2 columnas */
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas para pantallas grandes */
   gap: 1.5rem;
   margin-top: 2rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .card-grid {
-    grid-template-columns: 1fr; /* en móviles, una por fila */
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas para tablets */
   }
 }
+
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr; /* 1 columna para móviles */
+  }
+}
+
 
 .dashboard-card {
   display: flex;

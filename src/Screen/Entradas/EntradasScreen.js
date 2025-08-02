@@ -115,7 +115,7 @@ export default function EntradasScreen() {
 
   const buscarEntradasPorProveedor = async () => {
     let IdVendor = proveedorSeleccionado
-    let query = supabase.from('vta_entradas').select('*').eq('IdVendor', IdVendor);
+    let query = supabase.from('vta_entradas').select('*').eq('IdVendor', IdVendor).eq('IdStatus', 3);
     const { data, error } = await query;
     if (!error) setData2(data);
     else {

@@ -94,6 +94,16 @@ export default function SalidasScreen() {
     { field: 'ISVQty', Header: 'ISV', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
     { field: 'Total', Header: 'Total', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
     {
+      field: 'PagoCredito',
+      Header: 'Pagado',
+      frozen: true,
+      alignFrozen: 'right',
+      center: true,
+      format: 'checkbox',
+      className: 'Small',
+      filterMatchMode: 'equals',
+    },
+    {
       field: 'actions',
       isIconColumn: true,
       icon: 'pi pi-trash',

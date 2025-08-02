@@ -54,14 +54,22 @@ const RetirosCRUD = ({setShowDialog, showDialog, setSelected, selected, getInfo,
             IdStatus: 1,
             Date: getLocalDateTimeString(),
             IdUserEdit: user?.IdUser,
+            Monto: values?.Monto,
         };
 
-        let error;
+        let error, data;
 
         if (values?.IdRetiro > 0) {
-            ({ error } = await supabase.from('Retiros').update(datos).eq('IdRetiro', values.IdRetiro));
+            ({ error } = await supabase
+                .from('Retiros')
+                .update(datos)
+                .eq('IdRetiro', values.IdRetiro));
         } else {
-            ({ error } = await supabase.from('Retiros').insert([datos]));
+            const res = await supabase
+                .from('Retiros')
+                .insert([datos])
+                .select('IdRetiro');
+            ({ data, error } = res);
         }
 
         if (error) {
@@ -75,6 +83,31 @@ const RetirosCRUD = ({setShowDialog, showDialog, setSelected, selected, getInfo,
             setLoading(false);
             return;
         }
+
+
+        const datos2 = {
+            IdTipoMovimiento: 1,
+            IdCategoria: 7,
+            Descripcion: 'Retiro de Dinero',
+            IdStatus: 8,
+            Date: getLocalDateTimeString(),
+            Monto: values?.Monto,
+            IdUser: user?.IdUser,
+            IdReferencia: data[0]?.IdRetiro,
+        };
+
+        const { error: error2 } = await supabase.from('CajaMovimientos').insert([datos2]);
+        if(error2){
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Se guardo el retiro, pero no se registro el movimiento en caja. Comunicate con soporte',
+                life: 4000
+            });
+            setLoading(false);
+            return;
+        }
+
 
         setTimeout(() => {
             getInfo();
@@ -149,6 +182,8 @@ const RetirosCRUD = ({setShowDialog, showDialog, setSelected, selected, getInfo,
                             style={{ width: '100%' }}
                             disabled={!editable}
                             prefix='L '
+                            minFractionDigits={2}
+                            maxFractionDigits={2}
                         />
                         <label htmlFor="Monto">Monto</label>
                     </FloatLabel>
