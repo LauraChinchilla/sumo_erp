@@ -111,21 +111,21 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             rules.IdCliente = { required: false };
         }
 
-
         if (!validateForm(rules)) {
             console.log('Formulario con errores', errors);
             return;
         }
-        
-        if(values?.Stock < values?.CantidadSalida){
+
+        if (values?.Stock < values?.CantidadSalida) {
             toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'No hay suficientes unidades disponibles para realizar la salida.',
-                life: 4000
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No hay suficientes unidades disponibles para realizar la salida.',
+            life: 4000
             });
-            return
+            return;
         }
+
         setLoading(true);
 
         const Datos = {
@@ -145,9 +145,11 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             StockAntiguo: values?.Stock || values?.StockAntiguo,
         };
 
-        const { error: errorEntrada } = await supabase
+        const { data: salidaInsertada, error: errorEntrada } = await supabase
             .from('Salidas')
-            .insert([Datos]);
+            .insert([Datos])
+            .select()
+            .single();
 
         if (errorEntrada) {
             console.error('Error al guardar salida:', errorEntrada.message);
@@ -160,13 +162,40 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             setLoading(false);
             return;
         }
+
+        // Solo registra movimiento en caja si es tipo de salida = 1 (venta)
+        if (values?.IdTipoSalida === 1) {
+            const datos = {
+                IdTipoMovimiento: 2,
+                IdCategoria: 5,
+                Descripcion: `Venta del Producto: ${values?.Code} - ${values?.Name}`,
+                Monto: values?.Total,
+                IdStatus: 8,
+                Date: getLocalDateTimeString(),
+                IdUser: user?.IdUser,
+                IdReferencia: salidaInsertada?.IdSalida,
+            };
+
+            const { error } = await supabase.from('CajaMovimientos').insert([datos]);
+
+            if (error) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Se realizó la salida, pero no se registró el movimiento en caja. Comuníquese con soporte.',
+                life: 4000
+            });
+            setLoading(false);
+            return;
+            }
+        }
+
         toast.current?.show({
             severity: 'success',
             summary: 'Éxito',
             detail: 'Salida guardada correctamente',
             life: 4000
         });
-
 
         setTimeout(() => {
             getInfo();

@@ -101,98 +101,40 @@ export default function SalidasScreen() {
       className: 'XxxSmall',
       filter: false,
       onClick: (rowData) => {
-        if(rowData?.PagoCredito){
-          confirmDialog({
-            message: (
-              <>
-                ¿Estás seguro que quieres eliminar la salida?<br />
-                <strong style={{ color: 'red' }}>Advertencia:</strong> esta salida se generó a partir de un pago de un crédito del cliente <strong>{rowData?.NombreCompleto}</strong>.<br />
-                Si la elimina, se restaurará el crédito.
-              </>
-            ),
-            header: 'Confirmar eliminación',
-            icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Aceptar',
-            rejectLabel: 'Cancelar',
-            accept: async () => {
-              let IdSalida = rowData?.IdSalida;
-              const fechaEntrada = new Date(rowData?.Date);
-              const hoy = new Date();
-              const limite = new Date(hoy);
-              limite.setDate(hoy.getDate() - 3);
+        const IdSalida = rowData?.IdSalida;
+        const fechaEntrada = new Date(rowData?.Date);
+        const hoy = new Date();
+        const limite = new Date(hoy);
+        limite.setDate(hoy.getDate() - 3);
 
-              if (fechaEntrada < limite) {
-                toast.current?.show({
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: 'No se puede eliminar una entrada mayor a 3 días',
-                  life: 4000,
-                });
-                return;
-              }
-
-              const { error: error2 } = await supabase
-                .from('Salidas')
-                .update({
-                  IdStatus: 5,
-                  IdUserEdit: user?.IdUser,
-                  Date: getLocalDateTimeString(),
-                })
-                .eq('IdSalida', rowData?.IdSalidaCredito);
-
-
-              const { error } = await supabase
-                .from('Salidas')
-                .update({
-                  IdStatus: 6,
-                  IdUserEdit: user?.IdUser,
-                  Date: getLocalDateTimeString(),
-                })
-                .eq('IdSalida', IdSalida);
-
-              if (error) {
-                toast.current?.show({
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: 'Error al eliminar la salida',
-                  life: 3000,
-                });
-                return;
-              }
-
-              toast.current?.show({
-                severity: 'success',
-                summary: 'Éxito',
-                detail: 'Salida eliminada correctamente',
-                life: 3000,
-              });
-
-              getInfo();
-            },
+        if (fechaEntrada < limite) {
+          toast.current?.show({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se puede eliminar una entrada mayor a 3 días',
+            life: 4000,
           });
-        }else{
-          confirmDialog({
-            message: '¿Estás seguro que quieres eliminar la salida?',
-            header: 'Confirmar eliminación',
-            icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Aceptar',
-            rejectLabel: 'Cancelar',
-            accept: async() => {
-              let IdSalida = rowData?.IdSalida
-              const fechaEntrada = new Date(rowData?.Date);
-              const hoy = new Date();
-              const limite = new Date(hoy);
-              limite.setDate(hoy.getDate() - 3);
-              if (fechaEntrada < limite) {
-                toast.current?.show({
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: 'No se puede eliminar una entrada mayor a 3 días',
-                  life: 4000,
-                });
-                return;
-              }
-              const { error } = await supabase
+          return;
+        }
+
+        if (rowData?.IdTipoSalida === 3 && rowData?.PagoCredito === true) {
+          toast.current?.show({
+            severity: 'warn',
+            summary: 'No permitido',
+            detail: 'No se puede eliminar una salida de crédito ya pagada.',
+            life: 4000,
+          });
+          return;
+        }
+
+        confirmDialog({
+          message: '¿Estás seguro que quieres eliminar la salida?',
+          header: 'Confirmar eliminación',
+          icon: 'pi pi-exclamation-triangle',
+          acceptLabel: 'Aceptar',
+          rejectLabel: 'Cancelar',
+          accept: async () => {
+            const { error } = await supabase
               .from('Salidas')
               .update({
                 IdStatus: 6,
@@ -201,30 +143,48 @@ export default function SalidasScreen() {
               })
               .eq('IdSalida', IdSalida);
 
-              if (error) {
-                toast.current?.show({
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: 'Error al eliminar la salida',
-                  life: 3000,
-                });
-                return;
-              }
-
+            if (error) {
               toast.current?.show({
-                severity: 'success',
-                summary: 'Ecito',
-                detail: 'Salida eliminada correctamente',
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error al eliminar la salida',
                 life: 3000,
               });
+              return;
+            }
+            // Si es venta, también actualizar el movimiento de caja
+            if (rowData?.IdTipoSalida === 1) {
+              const { data: data5, error: movError } = await supabase
+                .from('CajaMovimientos')
+                .update({
+                  IdStatus: 9,
+                  IdUser: user?.IdUser,
+                  Date: getLocalDateTimeString(),
+                })
+                .eq('IdReferencia', IdSalida)
+                .eq('IdCategoria', 5);
 
-              getInfo()
+              if (movError) {
+                toast.current?.show({
+                  severity: 'warn',
+                  summary: 'Atención',
+                  detail: 'La salida fue eliminada, pero el movimiento de caja no se actualizó.',
+                  life: 4000,
+                });
+              }
+            }
+            toast.current?.show({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Salida eliminada correctamente',
+              life: 3000,
+            });
 
-              
-            },
-          });
-        }
+            getInfo();
+          },
+        });
       }
+
     }
   ];
 
