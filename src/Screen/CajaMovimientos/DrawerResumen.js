@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Sidebar } from 'primereact/sidebar';
 import { supabase } from '../../supabaseClient';
 import { Card } from 'primereact/card';
+import formatNumber from "../../utils/funcionesFormatNumber";
+
 
 const DrawerResumen = ({ setShowDialog, showDialog }) => {
     const [data, setData] = useState([]);
@@ -28,9 +30,9 @@ const DrawerResumen = ({ setShowDialog, showDialog }) => {
             {data.length > 0 ? (
                 <div className="p-fluid">
                     <Card title="Totales" className="mb-3">
-                        <p><strong>Ingresos:</strong> L. {data[0].TotalIngresos?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                        <p><strong>Egresos:</strong> L. {data[0].TotalEgresos?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                        <p><strong>Saldo Actual:</strong> L. {data[0].SaldoActual?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                        <p><strong>Ingresos:</strong> L. {formatNumber(data[0].TotalIngresos)}</p>
+                        <p><strong>Egresos:</strong> L. {formatNumber(data[0].TotalEgresos)}</p>
+                        <p><strong>Saldo Actual:</strong> L. {formatNumber(data[0].SaldoActual)}</p>
                     </Card>
                 </div>
             ) : (

@@ -1,21 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { supabase } from '../../supabaseClient';
-import Table from '../../components/Table';
 import { Button } from 'primereact/button';
-import Loading from '../../components/Loading';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
-import { useUser } from '../../context/UserContext';
-import CRUDEntradas from './CRUDEntradas';
-import getLocalDateTimeString from '../../utils/funciones';
-import CalendarMonth from '../../components/CalendarMonth';
-import CRUDProducts from '../Products/CRUDProducts';
+import { FloatLabel } from 'primereact/floatlabel';
+import { Dropdown } from 'primereact/dropdown';
+import { confirmDialog } from 'primereact/confirmdialog';
 import { TabPanel, TabView } from 'primereact/tabview';
+
+import { supabase } from '../../supabaseClient';
+
+import Table from '../../components/Table';
+import CalendarMonth from '../../components/CalendarMonth';
+import Loading from '../../components/Loading';
+import getLocalDateTimeString from '../../utils/funciones';
+import formatNumber from "../../utils/funcionesFormatNumber";
+
+import { useUser } from '../../context/UserContext';
+import CRUDProducts from '../Products/CRUDProducts';
+import CRUDEntradas from './CRUDEntradas';
 
 export default function EntradasScreen() {
   const [data, setData] = useState([]);
   const [data2, setData2] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
   const { user } = useUser();
   const [showDialog, setShowDialog] = useState(false);
   const [showDialogProducto, setShowDialogProducto] = useState(false);
@@ -36,42 +45,49 @@ export default function EntradasScreen() {
 
   const getInfo = async () => {
     setLoading(true);
+    if(activeIndex === 0){
+      let query = supabase.from('vta_entradas').select('*').eq('IdStatus', 3);
+      if (rangeDates && rangeDates[0] && rangeDates[1]) {
+        const from = new Date(rangeDates[0]);
+        const to = new Date(rangeDates[1]);
 
-    let query = supabase.from('vta_entradas').select('*').eq('IdStatus', 3);
-    let query2 = supabase.from('vta_entradas').select('*').eq('IdStatus', 3).eq('IdTipoEntrada', 1).or('Pagado.eq.false');
+        to.setHours(23, 59, 59, 999);
 
+        query = query.gte('Date', from.toISOString()).lte('Date', to.toISOString());
+      }
+      const { data, error } = await query;
+      if (!error) setData(data);
+      else {
+        toast.current?.show({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.message,
+          life: 3000,
+        });
+      }
 
-    if (rangeDates && rangeDates[0] && rangeDates[1]) {
-      const from = new Date(rangeDates[0]);
-      const to = new Date(rangeDates[1]);
-
-      to.setHours(23, 59, 59, 999);
-
-      query = query.gte('Date', from.toISOString()).lte('Date', to.toISOString());
+    }else if(activeIndex === 1){
+      if(!proveedorSeleccionado){
+        toast.current?.show({
+          severity: 'warn',
+          summary: 'Advertencia',
+          detail: 'Seleccione el proveedor',
+          life: 4000,
+        });
+      }
+      let query = supabase.from('vta_proveedores_pendientes_pago').select('*');
+      const { data, error } = await query;
+      if(!error) setProveedores(data)
+ 
+      if(data.length <= 0){
+        toast.current?.show({
+          severity: 'warn',
+          summary: 'Advertencia',
+          detail: 'No tienes facturas pendientes para pagar con ningun proveedor',
+          life: 4000,
+        });
+      }
     }
-
-    const { data: data2, error: error2 } = await query2;   
-    if (!error2) setData2(data2);
-    else {
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: error2.message,
-        life: 3000,
-      });
-    }
-
-    const { data, error } = await query;
-    if (!error) setData(data);
-    else {
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: error.message,
-        life: 3000,
-      });
-    }
-
     setLoading(false);
   };
 
@@ -97,6 +113,20 @@ export default function EntradasScreen() {
     setShowDialog(true);
   };
 
+  const buscarEntradasPorProveedor = async () => {
+    let IdVendor = proveedorSeleccionado
+    let query = supabase.from('vta_entradas').select('*').eq('IdVendor', IdVendor);
+    const { data, error } = await query;
+    if (!error) setData2(data);
+    else {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.message,
+        life: 3000,
+      });
+    }
+  }
 
   const cambiarEstadoEntrada = async () => {
     if (!selected[0]?.IdEntrada) return;
@@ -167,6 +197,96 @@ export default function EntradasScreen() {
       setShowDialogStatus(false);
       setSelected([]);
     }, 800);
+  };
+
+  const pagarFacturas = async () => {
+    const VendorName = data2[0]?.VendorName || 'Proveedor';
+    const cantidadFacturas = data2.length;
+    const TotalAPagar = data2.reduce((acc, item) => acc + (parseFloat(item?.Total) || 0), 0);
+
+
+    confirmDialog({
+      message: `¿Está seguro que desea pagarle a **${VendorName}** un total de ${cantidadFacturas} factura(s) por **L ${formatNumber(TotalAPagar)}**?`,
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí',
+      rejectLabel: 'No',
+      accept: async () => {
+        const { data: data3, error: error3 } = await supabase.from('vta_resumen_caja').select('*');
+        if (error3) {
+          toast.current?.show({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo obtener el Saldo Actual',
+            life: 4000,
+          });
+          return;
+        }
+
+        const SaldoActual = parseFloat(data3[0]?.SaldoActual || 0);
+        const TotalAPagar = data2.reduce((acc, item) => acc + (parseFloat(item?.Total) || 0), 0);
+        if (TotalAPagar > SaldoActual) {
+          toast.current?.show({
+            severity: 'warn',
+            summary: 'Fondos insuficientes',
+            detail: `El total a pagar (L ${TotalAPagar.toFixed(2)}) excede el saldo actual (L ${SaldoActual.toFixed(2)})`,
+            life: 5000,
+          });
+          return;
+        }
+
+        const IdEntradas = data2.map(i => i?.IdEntrada);
+
+        const { error } = await supabase
+          .from('Entradas')
+          .update({
+            Pagado: true,
+            IdUserPago: user?.IdUser,
+          })
+          .in('IdEntrada', IdEntradas);
+
+        if (error) {
+          console.error('Error al actualizar entradas:', error.message);
+          toast.current?.show({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo completar el pago',
+            life: 4000,
+          });
+          return;
+        }
+
+        const datos = {
+          IdTipoMovimiento: 1,
+          IdCategoria: 4,
+          Descripcion: `Pago a proveedor. Id: ${proveedorSeleccionado}`,
+          Monto: TotalAPagar,
+          IdStatus: 8,
+          Date: getLocalDateTimeString(),
+          IdUser: user?.IdUser,
+        };
+        const { error: error4 } = await supabase.from('CajaMovimientos').insert([datos]);
+        if(error4){
+          toast.current?.show({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Se efectuo el pago pero no se registro el movimiento de caja. Comunicate con soporte.',
+            life: 3000,
+          });
+        }
+
+        toast.current?.show({
+          severity: 'success',
+          summary: 'Pago registrado',
+          detail: 'Facturas marcadas como pagadas',
+          life: 3000,
+        });
+
+        getInfo();
+        setProveedorSeleccionado(null);
+        setData2([])
+      },
+    });
   };
 
   const columns = [
@@ -496,8 +616,18 @@ export default function EntradasScreen() {
 
   useEffect(() => {
     getInfo();
+    setProveedorSeleccionado(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rangeDates]);
+  }, [rangeDates, activeIndex]);
+
+  useEffect(() => {
+    if(proveedorSeleccionado){
+      buscarEntradasPorProveedor()
+    }else{
+      setData2([])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proveedorSeleccionado]);
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -597,13 +727,37 @@ export default function EntradasScreen() {
                   justifyContent: 'space-between',
                   marginBottom: '1rem',
                 }}
-              >
-                <CalendarMonth
-                  rangeDates={rangeDates}
-                  setRangeDates={setRangeDates}
-                  selectedMonth={selectedMonth}
-                  setSelectedMonth={setSelectedMonth}
-                />
+              > 
+
+                <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-end' }}>
+                  <div style={{ flex: 1 }}>
+                    <FloatLabel>
+                      <Dropdown
+                        id="IdVendor"
+                        value={proveedorSeleccionado}
+                        options={proveedores}
+                        onChange={(e) => setProveedorSeleccionado(e.value)}
+                        placeholder="Seleccione un proveedor"
+                        required
+                        optionLabel="VendorName"
+                        optionValue="IdVendor"
+                        style={{ width: '100%' }}
+                        showClear
+                      />
+                      <label htmlFor="IdVendor">Proveedor</label>
+                    </FloatLabel>
+                  </div>
+
+                  <Button
+                    icon="pi pi-dollar"
+                    label='Pagar'
+                    className="p-button-success"
+                    onClick={pagarFacturas}
+                    disabled={data2?.length <= 0}
+                    severity="primary"
+                  />
+                </div>
+
 
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <Button
