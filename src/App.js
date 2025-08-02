@@ -17,6 +17,7 @@ import MaestrosScreen from './Screen/Maestros/MaestrosScreen';
 import CreditosScreen from './Screen/Creditos/CreditosScreen';
 import RetirosScreen from './Screen/Retiros/RetirosScreen';
 import CajaMovimientosScreen from './Screen/CajaMovimientos/CajaMovimientosScreen';
+import PersonalScreen from './Screen/Personal/PersonalScreen';
 
 function AppContent() {
   const { logout } = useUser();
@@ -143,6 +144,15 @@ function AppContent() {
         element={
           <MainLayout onLogout={handlerLogout}>
             <CajaMovimientosScreen />
+          </MainLayout>
+        }
+      />
+
+      <Route
+        path="/personal"
+        element={
+          <MainLayout onLogout={handlerLogout}>
+            <PersonalScreen />
           </MainLayout>
         }
       />
