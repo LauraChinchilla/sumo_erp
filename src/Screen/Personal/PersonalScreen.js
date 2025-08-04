@@ -9,6 +9,7 @@ import Table from "../../components/Table";
 
 import { supabase } from "../../supabaseClient";
 import { useUser } from "../../context/UserContext";
+import CRUDPersonal from "./CRUDPersonal";
 
 export default function PersonalScreen() {
   const [data, setData] = useState([]);
@@ -23,7 +24,7 @@ export default function PersonalScreen() {
   const getInfo = async () => {
     setLoading(true);
     if (activeIndex === 0) {
-      const { data, error } = await supabase.from("vta_personal").select("*");
+      const { data, error } = await supabase.from("vta_personal").select("*").order("IdPersonal", { ascending: true });
       if (!error) {
         setData(data);
       }
@@ -303,6 +304,17 @@ export default function PersonalScreen() {
             <Table columns={columnsUnits} data={dataUnidades} />
           </TabPanel> */}
         </TabView>
+
+        {showDialog && (
+          <CRUDPersonal
+            setShowDialog={setShowDialog}
+            showDialog={showDialog}
+            setSelected={setSelected}
+            selected={selected}
+            getInfo={getInfo}
+            setActiveIndex={setActiveIndex}
+          />
+        )}
 
       </div>
     </>

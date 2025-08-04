@@ -10,17 +10,14 @@ import { Toast } from 'primereact/toast';
 import { FileUpload } from 'primereact/fileupload';
 import { confirmDialog } from 'primereact/confirmdialog';
 import { InputNumber } from 'primereact/inputnumber';
-import CategoriasCRUD from '../../Screen/Maestros/CategoriasCRUD';
-import UnidadesCRUD from '../../Screen/Maestros/UnidadesCRUD';
+import getLocalDateTimeString from '../../utils/funciones';
 
-const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
+const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo, setActiveIndex, editable= true}) => {
     const [tipoPlanillas, setTipoPlanilla] = useState([]);
     const [cargos, setCargos] = useState([]);
     const toast = useRef(null);
     const fileUploadRef = useRef(null);
     const [loading, setLoading] = useState(false);
-    const [showDialogCat, setShowDialogCat] = useState(false);
-    const [showDialogUnidad, setShowDialogUnidad] = useState(false);
 
     const initialValues = {
         IdPersonal: -1,
@@ -39,7 +36,7 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
 
     const getValoresIniciales = async () => {
         setLoading(true)
-        const { data, error } = await supabase.from('TipoPlanillas').select('*');
+        const { data, error } = await supabase.from('TipoPlanilla').select('*');
         if (!error) setTipoPlanilla(data);
 
         const { data: cargosTempo  } = await supabase.from('Cargos').select('*');
@@ -69,29 +66,60 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
             Identidad: values.Identidad,
             IdTipoPlanilla: values.IdTipoPlanilla,
             IdCargo: values.IdCargo,
-            IdStatus:  1,
+            IdStatus: 1,
             FotoURL: values.FotoURL || null,
             SueldoFijo: values?.SueldoFijo,
+            FechaIngreso: values?.FechaIngreso ? values?.FechaIngreso : getLocalDateTimeString()
         };
 
-        let error;
+        let error, insertedData;
 
         if (values?.IdPersonal > 0) {
-            ({ error } = await supabase.from('Products').update(Datos).eq('IdPersonal', values.IdPersonal));
+            ({ error } = await supabase.from('Personal').update(Datos).eq('IdPersonal', values.IdPersonal));
         } else {
-            ({ error } = await supabase.from('Products').insert([Datos]));
+            const { data, error: insertError } = await supabase.from('Personal').insert([Datos]).select('IdPersonal'); // Obtener el ID recién insertado
+
+            error = insertError;
+            insertedData = data?.[0];
+
+            if (!error && insertedData?.IdPersonal) {
+                const codigo = `PER-${insertedData.IdPersonal.toString().padStart(4, '0')}`;
+                const { error: updateCodigoError } = await supabase.from('Personal').update({ CodigoPersonal: codigo }).eq('IdPersonal', insertedData.IdPersonal);
+                if (updateCodigoError) {
+                    toast.current.show({
+                        severity: 'error',
+                        summary: 'Error al asignar código',
+                        detail: updateCodigoError.message,
+                        life: 4000,
+                    });
+                    setLoading(false);
+                    return;
+                }
+            }
         }
 
         setLoading(false);
 
         if (error) {
-            console.error('Error al guardar producto:', error.message);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: error.message, life: 4000 });
+            console.error('Error al guardar personal:', error.message);
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.message,
+                life: 4000,
+            });
             return;
         }
 
-        toast.current.show({ severity: 'success', summary: 'Éxito', detail: values?.IdPersonal > 0 ? 'Producto actualizado correctamente' : 'Producto agregado correctamente', life: 3000 });
-        setTimeout(() => {            
+        toast.current.show({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: values?.IdPersonal > 0 ? 'Personal actualizado correctamente' : 'Personal agregado correctamente',
+            life: 3000,
+        });
+
+        setTimeout(() => {
+            setActiveIndex(0)
             getInfo();
             setShowDialog(false);
         }, 1000);
@@ -102,7 +130,6 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
         setSelected([]);
     };
 
-    // Función para confirmar la eliminación
     const confirmarEliminarImagen = () => {
       confirmDialog({
         message: '¿Estás seguro que quieres eliminar la imagen?',
@@ -115,68 +142,64 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
     };
 
     const eliminarImagen = async () => {
-        if (!values.ImageURL || !values?.IdPersonal) {
-            toast.current.show({
-            severity: 'warn',
-            summary: 'No hay imagen para eliminar',
-            life: 3000,
+        if (!values.FotoURL || !values?.IdPersonal) {
+                toast.current.show({
+                severity: 'warn',
+                summary: 'No hay imagen para eliminar',
+                life: 3000,
             });
             return;
         }
 
         try {
-            const urlParts = values.ImageURL.split('/');
+            const urlParts = values.FotoURL.split('/');
             const fileName = urlParts[urlParts.length - 1];
 
-            const { error: deleteError } = await supabase.storage
-            .from('product-images')
-            .remove([fileName]);
+            const { error: deleteError } = await supabase.storage.from('personal-images').remove([fileName]);
 
             if (deleteError) {
-            toast.current.show({
-                severity: 'error',
-                summary: 'Error al eliminar imagen',
-                detail: deleteError.message,
-                life: 4000,
-            });
-            return;
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Error al eliminar imagen',
+                    detail: deleteError.message,
+                    life: 4000,
+                });
+                return;
             }
 
-            const { error: updateError } = await supabase
-            .from('Products')
-            .update({ ImageURL: null })
-            .eq('IdPersonal', values.IdPersonal);
+            const { error: updateError } = await supabase.from('Personal').update({ FotoURL: null }).eq('IdPersonal', values.IdPersonal);
 
             if (updateError) {
-            toast.current.show({
-                severity: 'error',
-                summary: 'Error al actualizar producto',
-                detail: updateError.message,
-                life: 4000,
-            });
-            return;
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Error al actualizar el personal',
+                    detail: updateError.message,
+                    life: 4000,
+                });
+                return;
             }
 
             setValues((prev) => ({
-            ...prev,
-            ImageURL: null,
+                ...prev,
+                FotoURL: null,
             }));
 
             toast.current.show({
-            severity: 'success',
-            summary: 'Imagen eliminada',
-            detail: 'Imagen eliminada y producto actualizado correctamente',
-            life: 3000,
+                severity: 'success',
+                summary: 'Imagen eliminada',
+                detail: 'Imagen eliminada y personal actualizado correctamente',
+                life: 3000,
             });
 
+            setActiveIndex(0)
             getInfo();
 
         } catch (err) {
             toast.current.show({
-            severity: 'error',
-            summary: 'Error inesperado',
-            detail: err.message || 'Algo salió mal',
-            life: 4000,
+                severity: 'error',
+                summary: 'Error inesperado',
+                detail: err.message || 'Algo salió mal',
+                life: 4000,
             });
         }
     };
@@ -200,13 +223,11 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
             return;
         }
 
-        const code = selected[0]?.Code || values.Code || 'producto';
+        const code = selected[0]?.CodigoPersonal || values.CodigoPersonal || 'personal';
         const extension = file.name.split('.').pop().toLowerCase();
         const fileName = `${code}.${extension}`;
 
-        const { error: uploadError } = await supabase.storage
-            .from('product-images')
-            .upload(fileName, file, { upsert: true });
+        const { error: uploadError } = await supabase.storage.from('personal-images').upload(fileName, file, { upsert: true });
 
         if (uploadError) {
             toast.current.show({
@@ -217,9 +238,7 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
             return;
         }
 
-        const { data: urlData, error: urlError } = supabase.storage
-            .from('product-images')
-            .getPublicUrl(fileName);
+        const { data: urlData, error: urlError } = supabase.storage.from('personal-images').getPublicUrl(fileName);
 
         if (urlError) {
             toast.current.show({
@@ -230,25 +249,22 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
             return;
         }
 
-        const imageUrl = urlData?.publicUrl;
+        const FotoURL = urlData?.publicUrl;
 
         setValues((prev) => ({
             ...prev,
-            ImageURL: imageUrl,
+            FotoURL: FotoURL,
         }));
 
         if (fileUploadRef.current) fileUploadRef.current.clear();
 
         if (values?.IdPersonal > 0) {
-            const { error: updateError } = await supabase
-                .from('Products')
-                .update({ ImageURL: imageUrl })
-                .eq('IdPersonal', values.IdPersonal);
+            const { error: updateError } = await supabase.from('Personal').update({ FotoURL: FotoURL }).eq('IdPersonal', values.IdPersonal);
 
             if (updateError) {
                 toast.current.show({
                     severity: 'error',
-                    summary: 'Error al actualizar producto',
+                    summary: 'Error al actualizar personal',
                     detail: updateError.message,
                 });
                 return;
@@ -257,19 +273,18 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
             toast.current.show({
                 severity: 'success',
                 summary: 'Imagen subida',
-                detail: 'Imagen asignada correctamente al producto.',
+                detail: 'Imagen asignada correctamente al personal.',
             });
 
             getInfo();
         } else {
             toast.current.show({
                 severity: 'warn',
-                summary: 'Producto aún no guardado',
-                detail: 'Guarda el producto antes de subir la imagen.',
+                summary: 'Personal aún no guardado',
+                detail: 'Guarda el personal antes de subir la imagen.',
             });
         }
     };
-
 
 
     useEffect(() => {
@@ -286,131 +301,114 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
 
             <div style={{ display: 'flex', gap: '2rem' }}>
                 <div  style={{ flex: 2 }}>
-                    {/* Código y Nombre */}
+                    {/* Nombre y Apellido */}
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                         <div style={{ flex: 1 }}>
                         <FloatLabel>
                             <InputText
-                                id="Code"
-                                value={values.Code}
-                                onChange={(e) => handleChange('Code', e.target.value)}
+                                id="Nombre"
+                                value={values.Nombre}
+                                onChange={(e) => handleChange('Nombre', e.target.value)}
                                 required
                                 style={{ width: '100%' }}
-                                className={errors.Code ? 'p-invalid' : ''}
+                                className={errors.Nombre ? 'p-invalid' : ''}
                                 disabled={!editable}
                                 autoFocus
                             />
-                            <label htmlFor="Code">Código</label>
+                            <label htmlFor="Nombre">Nombre</label>
                         </FloatLabel>
                         </div>
 
                         <div style={{ flex: 1 }}>
                         <FloatLabel>
                             <InputText
-                                id="Name"
-                                value={values.Name}
-                                onChange={(e) => handleChange('Name', e.target.value)}
+                                id="Apellido"
+                                value={values.Apellido}
+                                onChange={(e) => handleChange('Apellido', e.target.value)}
                                 required
                                 style={{ width: '100%' }}
-                                className={errors.Name ? 'p-invalid' : ''}
+                                className={errors.Apellido ? 'p-invalid' : ''}
                                 disabled={!editable}
                             />
-                            <label htmlFor="Name">Nombre</label>
+                            <label htmlFor="Apellido">Apellido</label>
                         </FloatLabel>
                         </div>
                     </div>
 
-                    {/* Descripción y Categoría */}
+                    {/* Identidad y Plnilla */}
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                         <div style={{ flex: 1 }}>
                             <FloatLabel>
                                 <InputText
-                                    id="Description"
-                                    value={values.Description}
-                                    onChange={(e) => handleChange('Description', e.target.value)}
+                                    id="Identidad"
+                                    value={values.Identidad}
+                                    onChange={(e) => handleChange('Identidad', e.target.value)}
                                     style={{ width: '100%' }}
                                     disabled={!editable}
                                 />
-                                <label htmlFor="Description">Descripción</label>
+                                <label htmlFor="Identidad">Identidad</label>
                             </FloatLabel>
                         </div>
 
                         <div style={{ flex: 1 }}>
                             <FloatLabel>
                                 <Dropdown
-                                    id="IdCategory"
-                                    value={values.IdCategory}
+                                    id="IdTipoPlanilla"
+                                    value={values.IdTipoPlanilla}
                                     options={tipoPlanillas}
-                                    onChange={(e) => handleChange('IdCategory', e.value)}
-                                    placeholder="Seleccione una categoría"
+                                    onChange={(e) => handleChange('IdTipoPlanilla', e.value)}
+                                    placeholder="Seleccione una tipo de planilla"
                                     required
-                                    optionLabel="Name"
-                                    optionValue="IdCategory"
-                                    className={errors.IdCategory ? 'p-invalid' : ''}
+                                    optionLabel="TipoPlanilla"
+                                    optionValue="IdTipoPlanilla"
+                                    className={errors.IdTipoPlanilla ? 'p-invalid' : ''}
                                     style={{ width: '100%' }}
                                     disabled={!editable}
                                     showClear
                                 />
 
-                                <label htmlFor="IdCategory">Categoría</label>
+                                <label htmlFor="IdTipoPlanilla">Tipi de Planilla</label>
                             </FloatLabel>
                         </div>
                     </div>
 
-                    {/* Minimo y Maximo */}
+                    {/* Cargo y Sueldo */}
                     <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                        <div style={{ flex: 1 }}>
-                            <FloatLabel>
-                                <InputNumber
-                                    id="StockMinimo"
-                                    value={values.StockMinimo}
-                                    onChange={(e) => handleChange('StockMinimo', e.value)}
-                                    style={{ width: '100%' }}
-                                    disabled={!editable}
-                                />
-                                <label htmlFor="StockMinimo">Stock Minimo</label>
-                            </FloatLabel>
-                        </div>
-
-                        <div style={{ flex: 1 }}>
-                            <FloatLabel>
-                                <InputNumber
-                                    id="StockMaximo"
-                                    value={values.StockMaximo}
-                                    onChange={(e) => handleChange('StockMaximo', e.value)}
-                                    style={{ width: '100%' }}
-                                    disabled={!editable}
-                                />
-                                <label htmlFor="StockMaximo">Stock Maximo</label>
-                            </FloatLabel>
-                        </div>
-                    </div>
-
-                    {/* Unidad */}
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-
                         <div style={{ flex: 1 }}>
                             <FloatLabel>
                                 <Dropdown
-                                    id="IdUnit"
-                                    value={values.IdUnit}
+                                    id="IdCargo"
+                                    value={values.IdCargo}
                                     options={cargos}
-                                    onChange={(e) => handleChange('IdUnit', e.value)}
-                                    placeholder="Seleccione una unidad"
+                                    onChange={(e) => handleChange('IdCargo', e.value)}
+                                    placeholder="Seleccione un cargo"
                                     required
-                                    optionLabel="UnitName"
-                                    optionValue="IdUnit"
-                                    className={errors.IdUnit ? 'p-invalid' : ''}
+                                    optionLabel="Cargo"
+                                    optionValue="IdCargo"
+                                    className={errors.IdCargo ? 'p-invalid' : ''}
                                     style={{ width: '100%' }}
                                     disabled={!editable}
                                     showClear
                                 />
 
-                                <label htmlFor="IdUnit">Unidad</label>
+                                <label htmlFor="IdCargo">Cargo</label>
                             </FloatLabel>
                         </div>
 
                         <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <InputNumber
+                                    id="SueldoFijo"
+                                    value={values.SueldoFijo}
+                                    onChange={(e) => handleChange('SueldoFijo', e.value)}
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                    prefix='L '
+                                    minFractionDigits={2}
+                                    maxFractionDigits={2}
+                                />
+                                <label htmlFor="SueldoFijo">Sueldo Fijo</label>
+                            </FloatLabel>
                         </div>
                     </div>
                 </div>
@@ -427,7 +425,7 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
                             uploadHandler={handleUpload}
                             chooseLabel="Agregar Imagen"
                             auto
-                            disabled={values?.ImageURL}
+                            disabled={values?.FotoURL}
                         />
 
                         <div
@@ -442,7 +440,7 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
                             }}
                         >
                             {/* Botón X */}
-                            {values.ImageURL && (
+                            {values.FotoURL && (
                                 <Button
                                 icon="pi pi-times"
                                 className="p-button-rounded p-button-danger p-button-sm"
@@ -457,11 +455,11 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                 />
                             )}
 
-                            <h5>Imagen del Producto</h5>
+                            <h5>Foto Personal</h5>
 
-                            {values.ImageURL ? (
+                            {values.FotoURL ? (
                                 <img
-                                src={values.ImageURL}
+                                src={values.FotoURL}
                                 alt="Imagen del producto"
                                 style={{
                                     width: '100%',
@@ -479,39 +477,12 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
 
             </div>
 
-            
-            <Button label="Agregar Categoria" style={{marginTop: '1rem'}} onClick={() => {setShowDialogCat(true)}} />
-            <Button label="Agregar Unidad" style={{marginTop: '1rem', marginLeft: '1rem'}} onClick={() => {setShowDialogUnidad(true)}} />
+    
             {/* Botones */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '3rem' }}>
                 <Button label="Cancelar" className="p-button-secondary" onClick={onHide} disabled={loading} />
                 <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />
             </div>
-
-            {showDialogCat && (     
-                <CategoriasCRUD
-                    showDialog={showDialogCat}
-                    setShowDialog={setShowDialogCat}
-                    setSelected={() => {}}
-                    selected={[]}
-                    getInfo={getValoresIniciales}
-                    editable={true}
-                    setActiveIndex={() => {}}
-                />
-            )}
-
-
-            {showDialogUnidad && (
-                <UnidadesCRUD
-                    setShowDialog={setShowDialogUnidad}
-                    showDialog={showDialogUnidad}
-                    setSelected={setSelected}
-                    selected={selected}
-                    getInfo={getInfo}
-                    editable={true}
-                    setActiveIndex={() => {}}
-                />
-            )}
         </Dialog>
         </>
     );
