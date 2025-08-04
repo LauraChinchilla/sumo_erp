@@ -11,10 +11,12 @@ import { supabase } from "../../supabaseClient";
 import { useUser } from "../../context/UserContext";
 import CRUDPersonal from "./CRUDPersonal";
 import ModalImage from "../../components/ModalImage";
+import CRUDNominas from "./CRUDNominas";
 
 export default function PersonalScreen() {
   const [data, setData] = useState([]);
   const [showDialog, setShowDialog] = useState(false)
+  const [showDialog2, setShowDialog2] = useState(false)
   const [selected, setSelected] = useState([])
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -22,11 +24,15 @@ export default function PersonalScreen() {
   const { user } = useUser();
   const toast = useRef(null);
 
-
   const getInfo = async () => {
     setLoading(true);
     if (activeIndex === 0) {
       const { data, error } = await supabase.from("vta_personal").select("*").order("IdPersonal", { ascending: true });
+      if (!error) {
+        setData(data);
+      }
+    } else if(activeIndex === 1){
+      const { data, error } = await supabase.from("vta_nominas").select("*").order("IdNomina", { ascending: true });
       if (!error) {
         setData(data);
       }
@@ -158,14 +164,87 @@ export default function PersonalScreen() {
     }
   ];
 
+  const colums2 = [
+    {
+      field: "IdNomina",
+      Header: "ID",
+      center: true,
+      frozen: true,
+      className: "XxSmall",
+      filterMatchMode: "equals",
+      hidden: user?.IdRol !== 1,
+    },
+    {
+      field: 'Date',
+      Header: 'Fecha',
+      center: true,
+      frozen: false,
+      format: 'Date',
+      className: 'XxxSmall',
+      filterMatchMode: 'contains',
+    },
+    {
+      field: 'CodigoPersonal',
+      Header: 'Codigo',
+      center: true,
+      frozen: true,
+      format: 'text',
+      className: 'XxxSmall',
+      filterMatchMode: 'equals',
+      count: true,
+    },
+    {
+      field: "NombreCompleto",
+      Header: "Empleado",
+      format: "text",
+      className: "Medium",
+    },
+    {
+      field: "Identidad",
+      Header: "Identidad",
+      center: false,
+      frozen: false,
+      format: "text",
+      className: "XxSmall",
+      filterMatchMode: "contains",
+    },
+    {
+      field: "TipoPlanilla",
+      Header: "Tipo de Planilla",
+      center: false,
+      frozen: false,
+      format: "text",
+      className: "Medium",
+      filterMatchMode: "contains",
+    },
+    { field: 'SueldoFijo', Header: 'Sueldo Fijo', format: 'number', className: 'Small', summary: true, prefix: 'L ' },
+    { field: 'Monto', Header: 'Monto Pagado', format: 'number', className: 'Small', summary: true, prefix: 'L ' },
+    {
+      field: "StatusName",
+      Header: "Estado",
+      format: "badge",
+      center: true,
+      className: "XxxSmall",
+      onClick: (rowData) => {
+        if(rowData?.IdStatus === 10){
+          confirmDialog({
+            message: `¿Estás seguro de eliminar la nomina pagada a "${rowData.NombreCompleto}"?`,
+            header: "Confirmar cambio de estado",
+            icon: "pi pi-exclamation-triangle",
+            acceptLabel: "Sí",
+            rejectLabel: "Cancelar",
+            accept: () => cambiarEstado("Nominas", "IdNomina", rowData),
+          });
+        }
+      },
+    },
+  ];
+
   const cambiarEstado = async (tabla, idCampo, rowData) => {
-    const nuevoEstado = rowData.IdStatus === 1 ? 2 : 1;
+    const nuevoEstado = rowData.IdStatus === 10 ? 11 : 10;
     const textoEstado = nuevoEstado === 1 ? 'activado' : 'inactivado';
 
-    const { error } = await supabase
-      .from(tabla)
-      .update({ IdStatus: nuevoEstado })
-      .eq(idCampo, rowData[idCampo]);
+    const { error } = await supabase.from(tabla).update({ IdStatus: nuevoEstado }).eq(idCampo, rowData[idCampo]);
 
     if (error) {
       toast.current?.show({
@@ -234,7 +313,7 @@ export default function PersonalScreen() {
             <Table columns={colums1} data={data} />
           </TabPanel>
 
-          {/* <TabPanel header="Proveedores">
+          <TabPanel header="Pago de Nominas">
             {loading && <Loading message="Cargando..." />}
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
               <Button
@@ -246,19 +325,19 @@ export default function PersonalScreen() {
               />
               <Button
                 icon="pi pi-plus"
-                label="Nuevo Proveedor"
+                label="Nuevo Pago"
                 severity='primary'
                 className="p-button-success"
                 onClick={() => {
                   setSelected([])
-                  setShowDialogProveedores(true)
+                  setShowDialog2(true)
                 }}
               />
             </div>
-            <Table columns={columnsProveedores} data={dataProveedores} />
+            <Table columns={colums2} data={data} />
           </TabPanel>
 
-          <TabPanel header="Usuarios">
+          {/* <TabPanel header="Usuarios">
             {loading && <Loading message="Cargando..." />}
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
               <Button
@@ -342,6 +421,18 @@ export default function PersonalScreen() {
           />
         )}
 
+        {showDialog2 && (
+          <CRUDNominas
+            setShowDialog={setShowDialog2}
+            showDialog={showDialog2}
+            setSelected={setSelected}
+            selected={selected}
+            getInfo={getInfo}
+            setActiveIndex={setActiveIndex}
+          />
+        )}
+
+      
       </div>
     </>
   );
