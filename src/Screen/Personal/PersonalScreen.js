@@ -10,15 +10,17 @@ import Table from "../../components/Table";
 import { supabase } from "../../supabaseClient";
 import { useUser } from "../../context/UserContext";
 import CRUDPersonal from "./CRUDPersonal";
+import ModalImage from "../../components/ModalImage";
 
 export default function PersonalScreen() {
   const [data, setData] = useState([]);
   const [showDialog, setShowDialog] = useState(false)
   const [selected, setSelected] = useState([])
   const [loading, setLoading] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [showDialogImage, setShowDialogImage] = useState(false);
   const { user } = useUser();
   const toast = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
 
 
   const getInfo = async () => {
@@ -140,6 +142,20 @@ export default function PersonalScreen() {
         }
       }
     },
+    {
+      field: 'actions',
+      // Header: 'Acciones',
+      isIconColumn: true,
+      icon: 'pi pi-image',
+      center: true,
+      className: 'XxxSmall',
+      tooltip: 'Ver imagen',
+      filter: false,
+      onClick: (rowData) => {
+        setSelected([rowData]);
+        setShowDialogImage(true);
+      }
+    }
   ];
 
   const cambiarEstado = async (tabla, idCampo, rowData) => {
@@ -313,6 +329,16 @@ export default function PersonalScreen() {
             selected={selected}
             getInfo={getInfo}
             setActiveIndex={setActiveIndex}
+          />
+        )}
+
+        {showDialogImage && (
+          <ModalImage
+            selected={selected}
+            setSelected={setSelected}
+            showDialogImage={showDialogImage}
+            setShowDialogImage={setShowDialogImage}
+            Personal={true}
           />
         )}
 

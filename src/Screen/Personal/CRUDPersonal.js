@@ -11,6 +11,7 @@ import { FileUpload } from 'primereact/fileupload';
 import { confirmDialog } from 'primereact/confirmdialog';
 import { InputNumber } from 'primereact/inputnumber';
 import getLocalDateTimeString from '../../utils/funciones';
+import { Calendar } from 'primereact/calendar';
 
 const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo, setActiveIndex, editable= true}) => {
     const [tipoPlanillas, setTipoPlanilla] = useState([]);
@@ -32,6 +33,8 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
         Apellido: { required: true, message: 'El nombre es obligatorio' },
         IdCargo: { required: true, message: 'Debe seleccionar una categoría' },
         IdTipoPlanilla: { required: true, message: 'Debe seleccionar una unidad' },
+        SueldoFijo: { required: true, message: 'Debe seleccionar una unidad' },
+        FechaIngreso: { required: true, message: 'Debe seleccionar una unidad' },
     };
 
     const getValoresIniciales = async () => {
@@ -58,6 +61,19 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
             return;
         }
 
+        const hoy = new Date();
+        const fechaIngreso = new Date(values.FechaIngreso);
+
+        if (isNaN(fechaIngreso.getTime()) || fechaIngreso >= hoy) {
+            toast.current.show({
+                severity: 'warn',
+                summary: 'Fecha inválida',
+                detail: 'La fecha de ingreso debe ser menor a hoy.',
+                life: 4000,
+            });
+            return;
+        }
+
         setLoading(true);
 
         const Datos = {
@@ -69,7 +85,8 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
             IdStatus: 1,
             FotoURL: values.FotoURL || null,
             SueldoFijo: values?.SueldoFijo,
-            FechaIngreso: values?.FechaIngreso ? values?.FechaIngreso : getLocalDateTimeString()
+            FechaIngreso: values?.FechaIngreso,
+            Date: getLocalDateTimeString(),
         };
 
         let error, insertedData;
@@ -77,7 +94,7 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
         if (values?.IdPersonal > 0) {
             ({ error } = await supabase.from('Personal').update(Datos).eq('IdPersonal', values.IdPersonal));
         } else {
-            const { data, error: insertError } = await supabase.from('Personal').insert([Datos]).select('IdPersonal'); // Obtener el ID recién insertado
+            const { data, error: insertError } = await supabase.from('Personal').insert([Datos]).select('IdPersonal'); 
 
             error = insertError;
             insertedData = data?.[0];
@@ -367,7 +384,7 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                     showClear
                                 />
 
-                                <label htmlFor="IdTipoPlanilla">Tipi de Planilla</label>
+                                <label htmlFor="IdTipoPlanilla">Tipo de Planilla</label>
                             </FloatLabel>
                         </div>
                     </div>
@@ -405,12 +422,33 @@ const CRUDPersonal = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                     disabled={!editable}
                                     prefix='L '
                                     minFractionDigits={2}
+                                    className={errors.SueldoFijo ? 'p-invalid' : ''}
                                     maxFractionDigits={2}
                                 />
                                 <label htmlFor="SueldoFijo">Sueldo Fijo</label>
                             </FloatLabel>
                         </div>
                     </div>
+
+                    {/* Fecha de Ingreso */}
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <Calendar
+                                    id="FechaIngreso"
+                                    value={values.FechaIngreso ? new Date(values.FechaIngreso) : null}
+                                    onChange={(e) => handleChange('FechaIngreso', e.value)}
+                                    dateFormat="dd/mm/yy"
+                                    showIcon
+                                    className={errors.FechaIngreso ? 'p-invalid' : ''}
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                />
+                                <label htmlFor="FechaIngreso">Fecha de Ingreso</label>
+                            </FloatLabel>
+                        </div>
+                    </div>
+
                 </div>
 
                 {values?.IdPersonal > 0 && (
