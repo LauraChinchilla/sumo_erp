@@ -13,7 +13,7 @@ import { InputNumber } from 'primereact/inputnumber';
 import CategoriasCRUD from '../../Screen/Maestros/CategoriasCRUD';
 import UnidadesCRUD from '../../Screen/Maestros/UnidadesCRUD';
 
-const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
+const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true, Code = null}) => {
     const [categorias, setCategorias] = useState([]);
     const [unidades, setUnidades] = useState([]);
     const toast = useRef(null);
@@ -46,10 +46,17 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
         const { data: unitsTempo  } = await supabase.from('Units').select('*').eq('IdStatus',1);
         setUnidades(unitsTempo);
 
-        if(selected.length > 0){
+        if(selected?.length > 0){
             setValues(selected[0]);
         } else {
-            setValues(initialValues);
+            if(Code){
+                setValues({
+                    ...initialValues,
+                    Code: Code,
+                });
+            }else{
+                setValues(initialValues);
+            }
         }
         setLoading(false)
     };
@@ -485,14 +492,13 @@ const CRUDProducts = ({setShowDialog, showDialog, setSelected, selected, getInfo
                 )}
 
             </div>
-
             
-            <Button label="Agregar Categoria" style={{marginTop: '1rem'}} onClick={() => {setShowDialogCat(true)}} />
-            <Button label="Agregar Unidad" style={{marginTop: '1rem', marginLeft: '1rem'}} onClick={() => {setShowDialogUnidad(true)}} />
+            <Button icon='pi pi-tags' severity='primary' tooltip='Agregar Categoria' tooltipOptions={{position: 'top'}} style={{marginTop: '1rem'}} onClick={() => {setShowDialogCat(true)}} />
+            <Button icon='pi pi-sort-numeric-down' severity='primary' tooltip="Agregar Unidad" tooltipOptions={{position: 'top'}} style={{marginTop: '1rem', marginLeft: '1rem'}} onClick={() => {setShowDialogUnidad(true)}} />
             {/* Botones */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '3rem' }}>
                 <Button label="Cancelar" className="p-button-secondary" onClick={onHide} disabled={loading} />
-                <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />
+                <Button label="Guardar" severity='primary' onClick={guardarDatos} loading={loading} disabled={loading} />
             </div>
 
             {showDialogCat && (     

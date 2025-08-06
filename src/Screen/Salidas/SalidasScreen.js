@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { supabase } from '../../supabaseClient';
-import Table from '../../components/Table';
-import { Button } from 'primereact/button';
-import Loading from '../../components/Loading';
-import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
-import { useUser } from '../../context/UserContext';
-import CalendarMonth from '../../components/CalendarMonth';
-import CRUDSalidas from './CRUDSalidas';
-import { confirmDialog } from 'primereact/confirmdialog';
-import getLocalDateTimeString from '../../utils/funciones';
+import React, { useEffect, useRef, useState } from "react";
+import { supabase } from "../../supabaseClient";
+import Table from "../../components/Table";
+import { Button } from "primereact/button";
+import Loading from "../../components/Loading";
+import { InputText } from "primereact/inputtext";
+import { Toast } from "primereact/toast";
+import { useUser } from "../../context/UserContext";
+import CalendarMonth from "../../components/CalendarMonth";
+import CRUDSalidas from "./CRUDSalidas";
+import { confirmDialog } from "primereact/confirmdialog";
+import getLocalDateTimeString from "../../utils/funciones";
 
 export default function SalidasScreen() {
   const [data, setData] = useState([]);
@@ -24,21 +24,23 @@ export default function SalidasScreen() {
     return [firstDay, lastDay];
   });
   const [selectedMonth, setSelectedMonth] = useState(null);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [globalFilter, setGlobalFilter] = useState("");
   const inputRef = useRef(null);
   const toast = useRef(null);
 
   const getInfo = async () => {
     setLoading(true);
 
-    let query = supabase.from('vta_salidas').select('*').eq('IdStatus', 5);
+    let query = supabase.from("vta_salidas").select("*").eq("IdStatus", 5).order('IdSalida', { ascending: true });
 
     if (rangeDates && rangeDates[0] && rangeDates[1]) {
       const from = new Date(rangeDates[0]);
       const to = new Date(rangeDates[1]);
       to.setHours(23, 59, 59, 999);
 
-      query = query.gte('Date', from.toISOString()).lte('Date', to.toISOString());
+      query = query
+        .gte("Date", from.toISOString())
+        .lte("Date", to.toISOString());
     }
 
     const { data, error } = await query;
@@ -46,8 +48,8 @@ export default function SalidasScreen() {
     if (!error) setData(data);
     else {
       toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
+        severity: "error",
+        summary: "Error",
         detail: error.message,
         life: 3000,
       });
@@ -58,16 +60,16 @@ export default function SalidasScreen() {
 
   const buscarProductoPorCodigo = async (codigo) => {
     const { data: producto, error } = await supabase
-      .from('vta_products')
-      .select('*')
-      .eq('Code', codigo.trim())
-      .eq('IdStatus', 1) 
+      .from("vta_products")
+      .select("*")
+      .eq("Code", codigo.trim())
+      .eq("IdStatus", 1)
       .single();
 
     if (error || !producto) {
       toast.current?.show({
-        severity: 'warn',
-        summary: 'No encontrado',
+        severity: "warn",
+        summary: "No encontrado",
         detail: `No se encontró un producto con código: ${codigo}`,
         life: 3000,
       });
@@ -79,36 +81,138 @@ export default function SalidasScreen() {
   };
 
   const columns = [
-    { field: 'IdSalida', Header: 'ID', center: true, className: 'XxSmall', filterMatchMode: 'equals',  hidden: user?.IdRol !==1 },
-    { field: 'Date', Header: 'Fecha', center: true, format: 'Date', className: 'Medium', filterMatchMode: 'contains' },
-    { field: 'TipoSalida', Header: 'Tipo de Salida', center: true, format: 'text', className: 'Medium', filterMatchMode: 'equals' },
-    { field: 'Code', Header: 'Código', center: true, format: 'text', className: 'Large', filterMatchMode: 'equals', count: true },
-    { field: 'Name', Header: 'Producto', center: false, format: 'text', filterMatchMode: 'contains' },
-    { field: 'NombreCompleto', Header: 'Cliente', center: false, format: 'text', filterMatchMode: 'contains' },
-    { field: 'Descripcion', Header: 'Descripción', center: false, format: 'text', filterMatchMode: 'contains' },
-    { field: 'UserName', Header: 'Usuario', center: false, format: 'text', filterMatchMode: 'contains', className: 'XxSmall' },
-    { field: 'CantidadSalida', Header: 'Cantidad', center: true, format: 'number', className: 'Small', filterMatchMode: 'equals', summary: true, },
-    { field: 'UnitName', Header: 'Unidad', className: 'Small', filterMatchMode: 'equals' },
-    { field: 'PrecioVenta', Header: 'Precio Venta', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals' },
-    { field: 'SubTotal', Header: 'SubTotal', center: true, format: 'number', prefix: 'L ', className: 'Small', filterMatchMode: 'equals', summary: true },
-    { field: 'ISVQty', Header: 'ISV', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
-    { field: 'Total', Header: 'Total', center: true, format: 'number', className: 'Small', prefix: 'L ', filterMatchMode: 'equals', summary: true },
     {
-      field: 'PagoCredito',
-      Header: 'Pagado',
-      frozen: true,
-      alignFrozen: 'right',
+      field: "IdSalida",
+      Header: "ID",
       center: true,
-      format: 'checkbox',
-      className: 'Small',
-      filterMatchMode: 'equals',
+      className: "XxSmall",
+      filterMatchMode: "equals",
+      hidden: user?.IdRol !== 1,
     },
     {
-      field: 'actions',
-      isIconColumn: true,
-      icon: 'pi pi-trash',
+      field: "Date",
+      Header: "Fecha",
       center: true,
-      className: 'XxxSmall',
+      format: "Date",
+      className: "Medium",
+      filterMatchMode: "contains",
+    },
+    {
+      field: "TipoSalida",
+      Header: "Tipo de Salida",
+      center: true,
+      format: "text",
+      className: "Medium",
+      filterMatchMode: "equals",
+    },
+    {
+      field: "Code",
+      Header: "Código",
+      center: true,
+      format: "text",
+      className: "Large",
+      filterMatchMode: "equals",
+      count: true,
+    },
+    {
+      field: "Name",
+      Header: "Producto",
+      center: false,
+      format: "text",
+      filterMatchMode: "contains",
+    },
+    {
+      field: "NombreCompleto",
+      Header: "Cliente",
+      center: false,
+      format: "text",
+      filterMatchMode: "contains",
+    },
+    {
+      field: "Descripcion",
+      Header: "Descripción",
+      center: false,
+      format: "text",
+      filterMatchMode: "contains",
+    },
+    {
+      field: "UserName",
+      Header: "Usuario",
+      center: false,
+      format: "text",
+      filterMatchMode: "contains",
+      className: "XxSmall",
+    },
+    {
+      field: "CantidadSalida",
+      Header: "Cantidad",
+      center: true,
+      format: "number",
+      className: "Small",
+      filterMatchMode: "equals",
+      summary: true,
+    },
+    {
+      field: "UnitName",
+      Header: "Unidad",
+      className: "Small",
+      filterMatchMode: "equals",
+    },
+    {
+      field: "PrecioVenta",
+      Header: "Precio Venta",
+      center: true,
+      format: "number",
+      prefix: "L ",
+      className: "Small",
+      filterMatchMode: "equals",
+    },
+    {
+      field: "SubTotal",
+      Header: "SubTotal",
+      center: true,
+      format: "number",
+      prefix: "L ",
+      className: "Small",
+      filterMatchMode: "equals",
+      summary: true,
+    },
+    {
+      field: "ISVQty",
+      Header: "ISV",
+      center: true,
+      format: "number",
+      className: "Small",
+      prefix: "L ",
+      filterMatchMode: "equals",
+      summary: true,
+    },
+    {
+      field: "Total",
+      Header: "Total",
+      center: true,
+      format: "number",
+      className: "Small",
+      prefix: "L ",
+      filterMatchMode: "equals",
+      summary: true,
+    },
+    {
+      field: "PagoCredito",
+      Header: "Pagado",
+      frozen: true,
+      alignFrozen: "right",
+      center: true,
+      format: "checkbox",
+      className: "Small",
+      filterMatchMode: "equals",
+    },
+    {
+      field: "actions",
+      isIconColumn: true,
+      icon: "pi pi-trash",
+      center: true,
+      className: "XxxSmall",
       filter: false,
       onClick: (rowData) => {
         const IdSalida = rowData?.IdSalida;
@@ -119,9 +223,9 @@ export default function SalidasScreen() {
 
         if (fechaEntrada < limite) {
           toast.current?.show({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se puede eliminar una entrada mayor a 3 días',
+            severity: "error",
+            summary: "Error",
+            detail: "No se puede eliminar una entrada mayor a 3 días",
             life: 4000,
           });
           return;
@@ -129,35 +233,35 @@ export default function SalidasScreen() {
 
         if (rowData?.IdTipoSalida === 3 && rowData?.PagoCredito === true) {
           toast.current?.show({
-            severity: 'warn',
-            summary: 'No permitido',
-            detail: 'No se puede eliminar una salida de crédito ya pagada.',
+            severity: "warn",
+            summary: "No permitido",
+            detail: "No se puede eliminar una salida de crédito ya pagada.",
             life: 4000,
           });
           return;
         }
 
         confirmDialog({
-          message: '¿Estás seguro que quieres eliminar la salida?',
-          header: 'Confirmar eliminación',
-          icon: 'pi pi-exclamation-triangle',
-          acceptLabel: 'Aceptar',
-          rejectLabel: 'Cancelar',
+          message: "¿Estás seguro que quieres eliminar la salida?",
+          header: "Confirmar eliminación",
+          icon: "pi pi-exclamation-triangle",
+          acceptLabel: "Aceptar",
+          rejectLabel: "Cancelar",
           accept: async () => {
             const { error } = await supabase
-              .from('Salidas')
+              .from("Salidas")
               .update({
                 IdStatus: 6,
                 IdUserEdit: user?.IdUser,
                 Date: getLocalDateTimeString(),
               })
-              .eq('IdSalida', IdSalida);
+              .eq("IdSalida", IdSalida);
 
             if (error) {
               toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Error al eliminar la salida',
+                severity: "error",
+                summary: "Error",
+                detail: "Error al eliminar la salida",
                 life: 3000,
               });
               return;
@@ -165,37 +269,37 @@ export default function SalidasScreen() {
             // Si es venta, también actualizar el movimiento de caja
             if (rowData?.IdTipoSalida === 1) {
               const { data: data5, error: movError } = await supabase
-                .from('CajaMovimientos')
+                .from("CajaMovimientos")
                 .update({
                   IdStatus: 9,
                   IdUser: user?.IdUser,
                   Date: getLocalDateTimeString(),
                 })
-                .eq('IdReferencia', IdSalida)
-                .eq('IdCategoria', 5);
+                .eq("IdReferencia", IdSalida)
+                .eq("IdCategoria", 5);
 
               if (movError) {
                 toast.current?.show({
-                  severity: 'warn',
-                  summary: 'Atención',
-                  detail: 'La salida fue eliminada, pero el movimiento de caja no se actualizó.',
+                  severity: "warn",
+                  summary: "Atención",
+                  detail:
+                    "La salida fue eliminada, pero el movimiento de caja no se actualizó.",
                   life: 4000,
                 });
               }
             }
             toast.current?.show({
-              severity: 'success',
-              summary: 'Éxito',
-              detail: 'Salida eliminada correctamente',
+              severity: "success",
+              summary: "Éxito",
+              detail: "Salida eliminada correctamente",
               life: 3000,
             });
 
             getInfo();
           },
         });
-      }
-
-    }
+      },
+    },
   ];
 
   useEffect(() => {
@@ -208,16 +312,22 @@ export default function SalidasScreen() {
   }, [data]);
 
   useEffect(() => {
-    document.title = 'Sumo - Salidas';
+    document.title = "Sumo - Salidas";
   }, []);
 
   return (
     <>
       <div className="dashboard-container">
-        <h2 style={{ textAlign: 'center' }}>Salidas</h2>
+        <h2 style={{ textAlign: "center" }}>Salidas</h2>
         <Toast ref={toast} />
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "1rem",
+          }}
+        >
           <InputText
             inputRef={inputRef}
             type="search"
@@ -225,10 +335,10 @@ export default function SalidasScreen() {
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder="Buscar por código (lector)"
             className="p-inputtext-sm"
-            style={{ width: '300px' }}
+            style={{ width: "300px" }}
             autoFocus
             onKeyDown={(e) => {
-              if (e.key === 'Enter') buscarProductoPorCodigo(globalFilter);
+              if (e.key === "Enter") buscarProductoPorCodigo(globalFilter);
             }}
           />
 
@@ -239,12 +349,29 @@ export default function SalidasScreen() {
             setSelectedMonth={setSelectedMonth}
           />
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Button icon="pi pi-refresh"  className="p-button-success" severity='primary' onClick={getInfo} disabled={loading} />
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <Button
+              icon="pi pi-refresh"
+              className="p-button-success"
+              severity="primary"
+              onClick={getInfo}
+              disabled={loading}
+            />
+            <Button
+              icon="pi pi-external-link"
+              label="Ver Creditos"
+              className="p-button-success"
+              severity="primary"
+              onClick={(e) => {
+                e.stopPropagation(); 
+                window.open('/Creditos', '_blank');
+              }}
+              disabled={loading}
+            />
             <Button
               label="Agregar Salida"
               icon="pi pi-plus"
-              severity='primary'
+              severity="primary"
               className="p-button-success"
               onClick={() => {
                 setSelected([]);
@@ -264,7 +391,7 @@ export default function SalidasScreen() {
           setSelected={setSelected}
           selected={selected}
           getInfo={getInfo}
-        /> 
+        />
       )}
     </>
   );

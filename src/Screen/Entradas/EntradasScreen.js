@@ -19,6 +19,7 @@ import formatNumber from "../../utils/funcionesFormatNumber";
 import { useUser } from '../../context/UserContext';
 import CRUDProducts from '../Products/CRUDProducts';
 import CRUDEntradas from './CRUDEntradas';
+import ProveedoresCRUD from '../Maestros/ProveedoresCRUD';
 
 export default function EntradasScreen() {
   const [data, setData] = useState([]);
@@ -28,8 +29,10 @@ export default function EntradasScreen() {
   const { user } = useUser();
   const [showDialog, setShowDialog] = useState(false);
   const [showDialogProducto, setShowDialogProducto] = useState(false);
+  const [showDialogProveedores, setShowDialogProveedores] = useState(false);
   const [showDialogStatus, setShowDialogStatus] = useState(false);
   const [selected, setSelected] = useState([]);
+  const [selected1, setSelected1] = useState([]);
   const [loading, setLoading] = useState(false);
   const [rangeDates, setRangeDates] = useState(() => {
     const now = new Date();
@@ -99,13 +102,23 @@ export default function EntradasScreen() {
       .eq('IdStatus', 1) 
       .single();
       
-    if (error || !producto) {
-      toast.current?.show({
-        severity: 'warn',
-        summary: 'No encontrado',
-        detail: `No se encontró el producto con código: ${codigo}`,
-        life: 3000,
-      });
+    if (error || !producto) {confirmDialog({
+      message: (
+        <>
+          No se encontró el producto con código: <strong>{codigo}</strong>,<br />
+          ¿Desea agregarlo?
+        </>
+      ),
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí',
+      rejectLabel: 'No',
+      accept: async () => {
+        // Acción cuando acepta
+        setShowDialogProducto(true)
+      },
+    });
+
       return;
     }
 
@@ -690,8 +703,30 @@ export default function EntradasScreen() {
                     icon="pi pi-refresh"
                     className="p-button-success"
                     onClick={getInfo}
+                    tooltip='Cargar'
+                    tooltipOptions={{position: 'top'}}
                     disabled={loading}
                     severity="primary"
+                  />
+                  <Button
+                    icon="pi pi-box"
+                    tooltip='Agregar Producto'
+                    tooltipOptions={{position: 'top'}}
+                    className="p-button-success"
+                    severity="primary"
+                    onClick={() => {
+                      setShowDialogProducto(true)
+                    }}
+                  />
+                  <Button
+                    icon="pi pi-truck"
+                    tooltip='Agregar Proveedor'
+                    className="p-button-success"
+                    tooltipOptions={{position: 'top'}}
+                    severity="primary"
+                    onClick={() => {
+                      setShowDialogProveedores(true)
+                    }}
                   />
                   <Button
                     label="Agregar Entrada"
@@ -701,15 +736,6 @@ export default function EntradasScreen() {
                     onClick={() => {
                       setSelected([]);
                       setShowDialog(true);
-                    }}
-                  />
-                  <Button
-                    label="Agregar Producto"
-                    icon="pi pi-plus"
-                    className="p-button-success"
-                    severity="primary"
-                    onClick={() => {
-                      setShowDialogProducto(true)
                     }}
                   />
                 </div>
@@ -838,8 +864,21 @@ export default function EntradasScreen() {
           setSelected={() => {}}
           selected={[]}
           getInfo={getInfo}
+          Code={globalFilter}
         />
       )}
+
+      {showDialogProveedores && (
+        <ProveedoresCRUD
+          showDialog={showDialogProveedores}
+          setShowDialog={setShowDialogProveedores}
+          setSelected={setSelected}
+          selected={selected}
+          getInfo={getInfo}
+          editable={true}
+        />
+      )}
+
     </>
   );
 }

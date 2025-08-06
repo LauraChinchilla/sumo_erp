@@ -23,7 +23,7 @@ export default function InventarioScreen() {
 
   const getInfo = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('vta_inventario').select('*');
+    const { data, error } = await supabase.from('vta_inventario').select('*').order('TotalUnidades', { ascending: false });
     if (!error) {
       setData(data);
       setFilteredData(data); // <- esto

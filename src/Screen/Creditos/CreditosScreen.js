@@ -39,7 +39,7 @@ export default function CreditosScreen() {
     setLoading(true);
 
     if(activeIndex === 1 || activeIndex === 0){
-      let query = supabase.from('vta_creditos').select('*').eq('IdStatus', 5);
+      let query = supabase.from('vta_creditos').select('*').eq('IdStatus', 5).eq('PagoCredito', false);
       let query1 = supabase.from('vta_creditos_pagados').select('*');
   
       if (rangeDates && rangeDates[0] && rangeDates[1]) {
@@ -172,58 +172,10 @@ export default function CreditosScreen() {
     },
   ];
 
-  const pagarCredito = async (rowData) => {
-    setLoading(true);
-
-    const Datos = {
-      IdProduct: rowData?.IdProduct,
-      PrecioVenta: rowData?.PrecioVenta,
-      IdStatus: 5,
-      IdUserEdit: user?.IdUser,
-      Date: getLocalDateTimeString(),
-      CantidadSalida: rowData?.CantidadSalida,
-      IdTipoSalida: 1,
-      SubTotal: rowData?.SubTotal,
-      Total: rowData?.Total,
-      ISVQty: rowData?.ISVQty,
-      IdCliente: rowData?.IdCliente,
-      IdCurrency: 1,
-      IdSalidaCredito: rowData?.IdSalida,
-      PagoCredito: true,
-    };
-
-    const DatosSalidaA = {
-      // IdStatus: 7,
-      IdUserEdit: user?.IdUser,
-      Date: getLocalDateTimeString(),
-    };
-
-    const { error: errorUpdate } = await supabase.from('Salidas').update(DatosSalidaA).eq('IdSalida', rowData?.IdSalida);
-    const { error } = await supabase.from('Salidas').insert([Datos]);
-
-    if (error) {
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'No se pudo guardar el pago',
-        life: 4000,
-      });
-    } else {
-      toast.current?.show({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'Pago guardado correctamente',
-        life: 4000,
-      });
-      getInfo();
-    }
-
-    setLoading(false);
-  };
 
   const buscarSalidasPorCliente = async () => {
     let IdCliente = clienteSeleccionado
-    let query = supabase.from('vta_salidas').select('*').eq('IdCliente', IdCliente).eq('IdStatus', 5);
+    let query = supabase.from('vta_salidas').select('*').eq('IdCliente', IdCliente).eq('IdStatus', 5).eq('IdTipoSalida', 3);
     const { data, error } = await query;
     if (!error) setData2(data);
     else {

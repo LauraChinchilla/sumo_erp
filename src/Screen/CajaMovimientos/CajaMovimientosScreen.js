@@ -126,6 +126,15 @@ export default function CajaMovimientosScreen() {
       valueField: 'StatusName',
       onClick: (rowData) => {
         if(rowData?.IdStatus === 8){
+          if(rowData?.IdCategoria === 4 || rowData.IdCategoria === 5 || rowData?.IdCategoria === 6){
+              toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: `No se puede eliminar este movimiento. Viene de ${rowData?.Categoria}`,
+                life: 3000,
+              });
+            return
+          }
           confirmDialog({
             message: `¿Estás seguro de eliminar el movimiento?`,
             header: "Confirmar",

@@ -123,7 +123,7 @@ const ProveedoresCRUD = ({setShowDialog, showDialog, setSelected, selected, getI
 
 
     return (
-        <Dialog visible={showDialog} onHide={onHide} style={{ width: '60%' }} header={selected?.length > 0 ? 'Editar Proveedor' : 'Nueva Proveedor'}>
+        <Dialog visible={showDialog} onHide={onHide} style={{ width: '60%' }} header={selected?.length > 0 ? 'Editar Proveedor' : 'Agregar Proveedor'}>
             <Toast ref={toast} />
 
             {/* Nombre y Identificacion */}

@@ -12,6 +12,8 @@ import { useUser } from '../../context/UserContext';
 import { Dropdown } from 'primereact/dropdown';
 import getLocalDateTimeString from '../../utils/funciones';
 import CRUDProducts from '../Products/CRUDProducts';
+import formatNumber from '../../utils/funcionesFormatNumber';
+import ProveedoresCRUD from '../Maestros/ProveedoresCRUD';
 
 const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo, editable= true}) => {
     const toast = useRef(null);
@@ -21,6 +23,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
     const [productos, setProductos] = useState([]);
     const [tipoEntradas, setTipoEntradas] = useState([]);
     const [showDialogProducto, setShowDialogProducto] = useState(false);
+    const [showDialogProveedores, setShowDialogProveedores] = useState(false);
+    const [saldo, setSaldo] = useState([]);
     
 
     const initialValues = {
@@ -48,6 +52,9 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
         setProductos(data2)
         const { data: data3, error: error3 } = await supabase.from('TipoEntradas').select('*');
         if (!error3) setTipoEntradas(data3);
+        const { data: data4 } = await supabase.from('vta_resumen_caja').select('*');
+        setSaldo(data4[0])
+
         if(selected?.length > 0){
             setValues({
                 ...selected[0],
@@ -439,17 +446,48 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
             </div>
 
             {/* Totales a la derecha */}
-            <div style={{ textAlign: 'right', marginTop: '2rem', paddingRight: '1rem' }}>
-                <p><strong>Subtotal:</strong> L {((values?.Cantidad || 0) * (values?.PrecioCompra || 0)).toFixed(2)}</p>
-                <p><strong>ISV:</strong> L {(values?.Excento ? 0 : ((values?.Cantidad || 0) * (values?.PrecioCompra || 0) * ((values?.ISV || 0) / 100))).toFixed(2)}</p>
-                <p><strong>Total a Pagar:</strong> L {(
-                    ((values?.Cantidad || 0) * (values?.PrecioCompra || 0)) +
-                    (values?.Excento ? 0 : ((values?.Cantidad || 0) * (values?.PrecioCompra || 0) * ((values?.ISV || 0) / 100)))
-                ).toFixed(2)}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', padding: '0 1rem' }}>
+                
+                {/* Saldo Actual alineado a la izquierda */}
+                <div style={{ textAlign: 'left' }}>
+                    <p><strong>Saldo Actual:</strong> L {formatNumber(saldo?.SaldoActual || 0)}</p>
+                </div>
+
+                {/* Totales alineados a la derecha */}
+                <div style={{ textAlign: 'right' }}>
+                    <p><strong>Subtotal:</strong> L {formatNumber((values?.Cantidad || 0) * (values?.PrecioCompra || 0))}</p>
+                    <p><strong>ISV:</strong> L {formatNumber(values?.Excento ? 0 : ((values?.Cantidad || 0) * (values?.PrecioCompra || 0) * ((values?.ISV || 0) / 100)))}</p>
+                    <p><strong>Total a Pagar:</strong> L {formatNumber(
+                        ((values?.Cantidad || 0) * (values?.PrecioCompra || 0)) +
+                        (values?.Excento ? 0 : ((values?.Cantidad || 0) * (values?.PrecioCompra || 0) * ((values?.ISV || 0) / 100)))
+                    )}</p>
+                </div>
             </div>
 
+
             {/* Botones */}
-            <Button style={{marginTop: '1rem'}} severity="primary" label="Agregar Producto" onClick={() => {setShowDialogProducto(true)}} />
+            <div style={{display: 'flex', gap: '1rem'}}>                
+                <Button
+                    icon="pi pi-box"
+                    tooltip='Agregar Producto'
+                    tooltipOptions={{position: 'top'}}
+                    className="p-button-success"
+                    severity="primary"
+                    onClick={() => {
+                        setShowDialogProducto(true)
+                    }}
+                />
+                <Button
+                    icon="pi pi-truck"
+                    tooltip='Agregar Proveedor'
+                    className="p-button-success"
+                    tooltipOptions={{position: 'top'}}
+                    severity="primary"
+                    onClick={() => {
+                      setShowDialogProveedores(true)
+                    }}
+                />
+            </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
                 <Button label="Cancelar" className="p-button-secondary" onClick={onHide} disabled={loading} />
                 <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />
@@ -463,6 +501,18 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                 selected={[]}
                 getInfo={getValoresIniciales}
               />
+            )}
+
+            {showDialogProveedores && (
+                <ProveedoresCRUD
+                    showDialog={showDialogProveedores}
+                    setShowDialog={setShowDialogProveedores}
+                    setSelected={() =>{}}
+                    selected={[]}
+                    getInfo={getValoresIniciales}
+                    editable={true}
+                    setActiveIndex={() => {}}
+                />
             )}
         </Dialog>
 
