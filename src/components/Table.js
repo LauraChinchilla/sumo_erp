@@ -66,7 +66,8 @@ export default function Table({ columns, data, globalFilter: externalFilter }) {
               footerStyle={{
                 textAlign: isNumber ? 'right' : (col.center ? 'center' : 'left'),
                 fontWeight: 'bold',
-                background: '#f9f9f9',
+                background: 'var(--footer-bg)',
+                color: 'var(--text-color)',
               }}
             />
           );

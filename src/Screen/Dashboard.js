@@ -151,7 +151,12 @@ export default function Dashboard() {
                 <i className={`card-icon ${card.icon}`} />
                 <div>
                   <h3 style={{ margin: 0 }}>{card.title}</h3>
-                  <p style={{ marginTop: '0.5rem', fontSize: '14px', color: '#555' }}>
+                  <p   
+                    style={{
+                      marginTop: '0.5rem',
+                      fontSize: '14px',
+                      color: 'var(--text-description)',
+                    }}>
                     {card.description}
                   </p>
                 </div>

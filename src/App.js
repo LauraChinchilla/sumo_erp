@@ -18,6 +18,7 @@ import CreditosScreen from './Screen/Creditos/CreditosScreen';
 import RetirosScreen from './Screen/Retiros/RetirosScreen';
 import CajaMovimientosScreen from './Screen/CajaMovimientos/CajaMovimientosScreen';
 import PersonalScreen from './Screen/Personal/PersonalScreen';
+import { ThemeProvider } from './context/ThemeContext';
 
 function AppContent() {
   const { logout } = useUser();
@@ -163,9 +164,11 @@ function AppContent() {
 function App() {
   return (
     <UserProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <ThemeProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </ThemeProvider>
     </UserProvider>
   );
 }

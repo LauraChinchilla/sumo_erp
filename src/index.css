@@ -2,8 +2,24 @@
 @import 'primereact/resources/primereact.min.css';
 @import 'primeicons/primeicons.css';
 
-body {
+/* body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
   background-color: #f4f6f8;
+} */
+
+/* Tema claro */
+body[data-theme='light'] {
+  --bg-footer: #f9f9f9;
+  --text-color: #333;
+  --border-color: #ddd;
+  --footer-shadow: rgba(0, 0, 0, 0.05);
+}
+
+/* Tema oscuro */
+body[data-theme='dark'] {
+  --bg-footer: #1e1e2f;
+  --text-color: #eee;
+  --border-color: #444;
+  --footer-shadow: rgba(255, 255, 255, 0.05);
 }

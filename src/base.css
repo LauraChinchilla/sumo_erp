@@ -1,14 +1,46 @@
-/* src/base.css */
+/* ==================== */
+/* 🎨 Variables de Tema */
+/* ==================== */
 
-/* ======= GLOBAL ======= */
+body[data-theme='light'] {
+  --bg-color: #f1f3f4;
+  --bg-card: #ffffff;
+  --text-color: #333;
+  --text-light: #555;
+  --border-color: #d0d7de;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --table-head-bg: #e0f4ff;
+  --badge-color: white;
+}
+
+body[data-theme='dark'] {
+  --bg-color: #1f1f2b;
+  --bg-card: #2a2a3d;
+  --text-color: #e0e0e0;
+  --text-light: #aaa;
+  --border-color: #3a3a50;
+  --shadow-color: rgba(255, 255, 255, 0.05);
+  --table-head-bg: #32324a;
+  --badge-color: black;
+}
+
+/* ============= */
+/* 🔧 Globales */
+/* ============= */
+
 body {
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', sans-serif;
-  background-color: #f1f3f4;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ======= LOGIN ======= */
+/* ============= */
+/* 🔐 LOGIN */
+/* ============= */
+
 .login-wrapper {
   min-height: 100vh;
   display: flex;
@@ -22,8 +54,10 @@ body {
   max-width: 400px;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  background-color: white;
+  box-shadow: 0 8px 20px var(--shadow-color);
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .login-header {
@@ -42,7 +76,7 @@ body {
 .login-label {
   display: block;
   margin-bottom: 4px;
-  color: #333;
+  color: var(--text-color);
   font-weight: 500;
 }
 
@@ -56,54 +90,55 @@ body {
   font-size: 14px;
 }
 
+/* ============= */
+/* 🧮 Dashboard */
+/* ============= */
+
 .dashboard-container {
   padding: 2rem;
 }
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columnas para pantallas grandes */
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-top: 2rem;
 }
 
 @media (max-width: 1024px) {
   .card-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas para tablets */
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
   .card-grid {
-    grid-template-columns: 1fr; /* 1 columna para móviles */
+    grid-template-columns: 1fr;
   }
 }
-
 
 .dashboard-card {
   display: flex;
   align-items: flex-start;
-  background-color: white;
+  background-color: var(--bg-card);
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px var(--shadow-color);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   cursor: pointer;
+  color: var(--text-color);
 }
 
 .dashboard-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 20px var(--shadow-color);
 }
 
-/* 🔲 Card seleccionada */
 .card-selected {
-  background-color: #f3f4f6;
-  border: 2px solid #d0d7de;
+  background-color: var(--bg-color);
+  border: 2px solid var(--border-color);
   box-shadow: none;
 }
-
-
 
 .card-icon {
   font-size: 2rem;
@@ -111,7 +146,9 @@ body {
   margin-right: 1rem;
 }
 
-
+/* ============= */
+/* 🧭 Navbar */
+/* ============= */
 
 .navbar {
   position: fixed;
@@ -119,13 +156,14 @@ body {
   left: 0;
   right: 0;
   height: 100px;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px var(--shadow-color);
   z-index: 1000;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .navbar-logo {
@@ -134,7 +172,7 @@ body {
   gap: 0.5rem;
   font-weight: bold;
   font-size: 1.2rem;
-  color: #333;
+  color: var(--text-color);
 }
 
 .navbar-menu-button {
@@ -142,102 +180,50 @@ body {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #333;
+  color: var(--text-color);
 }
 
-/* Tamaños personalizados para columnas */
-/* Anchura por clase */
-
-.p-column-header.XxxSmall,
-.p-cell.XxxSmall {
-  min-width: 40px;
-  max-width: 40px;
+.navbar-logo img {
+  object-fit: contain;
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
-.p-column-header.XxSmall,
-.p-cell.XxSmall {
-  min-width: 60px;
-  max-width: 60px;
-}
+/* ============= */
+/* 📊 Tablas PrimeReact */
+/* ============= */
 
-.p-column-header.Xsmall,
-.p-cell.Xsmall {
-  min-width: 90px;
-  max-width: 90px;
-}
-
-.p-column-header.Small,
-.p-cell.Small {
-  min-width: 120px;
-  max-width: 120px;
-}
-
-.p-column-header.Medium,
-.p-cell.Medium {
-  min-width: 150px;
-  max-width: 150px;
-}
-
-.p-column-header.Large,
-.p-cell.Large {
-  min-width: 180px;
-  max-width: 180px;
-}
-
-.p-column-header.Xlarge,
-.p-cell.Xlarge {
-  min-width: 220px;
-  max-width: 220px;
-}
-
-.p-column-header.Xxlarge,
-.p-cell.Xxlarge {
-  min-width: 280px;
-  max-width: 280px;
-}
-
-.p-column-header.Xxxlarge,
-.p-cell.Xxxlarge {
-  min-width: 350px;
-  max-width: 350px;
-}
-
-.p-column-header.Xxxxlarge,
-.p-cell.Xxxxlarge {
-  min-width: 450px;
-  max-width: 450px;
-}
-
-
-/* base.css o un archivo global */
 .custom-table .p-datatable-thead > tr > th {
-  background-color: #e0f4ff; /* celeste suave */
-  color: #000;
+  background-color: var(--table-head-bg);
+  color: var(--text-color);
   font-weight: bold;
   padding: 0.4rem 0.5rem !important;
 }
 
 .custom-table .p-datatable-tbody > tr > td {
-  padding: 0.25rem 0.5rem !important; /* reduce el padding para que sea más delgada */
+  padding: 0.25rem 0.5rem !important;
   font-size: 0.85rem;
+  color: var(--text-color);
 }
 
 .custom-table .p-column-title {
   font-size: 0.85rem;
 }
 
-/* Añadir bordes a todas las celdas, incluidas las verticales */
+/* Añadir bordes */
 .custom-table .p-datatable-thead > tr > th,
 .custom-table .p-datatable-tbody > tr > td {
-  border: 1px solid #d0d7de; /* color gris claro */
+  border: 1px solid var(--border-color);
   box-sizing: border-box;
 }
 
-/* Opcional: bordes más definidos para filas */
 .custom-table .p-datatable-tbody > tr {
-  border-bottom: 1px solid #d0d7de;
+  border-bottom: 1px solid var(--border-color);
 }
 
+/* ============= */
+/* 🔘 Botones */
+/* ============= */
 
 .p-button.p-button-primary {
   background-color: #2f86c0 !important;
@@ -250,59 +236,357 @@ body {
   border-color: #005fa3 !important;
 }
 
-.navbar-logo img {
-  object-fit: contain;
-  margin-right: 8px;
-  vertical-align: middle;
-}
+/* ============= */
+/* 📏 Columnas tamaño personalizado */
+/* ============= */
 
+.p-column-header.XxxSmall,
+.p-cell.XxxSmall { min-width: 40px; max-width: 40px; }
 
-/* COLORES DE ESTADOS */
+.p-column-header.XxSmall,
+.p-cell.XxSmall { min-width: 60px; max-width: 60px; }
+
+.p-column-header.Xsmall,
+.p-cell.Xsmall { min-width: 90px; max-width: 90px; }
+
+.p-column-header.Small,
+.p-cell.Small { min-width: 120px; max-width: 120px; }
+
+.p-column-header.Medium,
+.p-cell.Medium { min-width: 150px; max-width: 150px; }
+
+.p-column-header.Large,
+.p-cell.Large { min-width: 180px; max-width: 180px; }
+
+.p-column-header.Xlarge,
+.p-cell.Xlarge { min-width: 220px; max-width: 220px; }
+
+.p-column-header.Xxlarge,
+.p-cell.Xxlarge { min-width: 280px; max-width: 280px; }
+
+.p-column-header.Xxxlarge,
+.p-cell.Xxxlarge { min-width: 350px; max-width: 350px; }
+
+.p-column-header.Xxxxlarge,
+.p-cell.Xxxxlarge { min-width: 450px; max-width: 450px; }
+
+/* ============= */
+/* 🟢 Badges */
+/* ============= */
 
 .badge {
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
   font-size: 0.75rem;
-  color: white;
   display: inline-block;
   min-width: 60px;
   text-align: center;
+  color: var(--badge-color);
 }
 
-/* Colores según estado o categoría */
-.badge-activo {
-  background-color: #28a745;
-}
+/* Colores de estados */
+.badge-activo     { background-color: #28a745; }
+.badge-pagado     { background-color: #86a2d6; }
+.badge-inactivo   { background-color: #dc3545; }
+.badge-ingresado,
+.badge-creada,
+.badge-creado     { background-color: #09c0e0; color: black; }
+.badge-eliminado  { background-color: #dc3545; }
 
-.badge-pagado {
-  background-color: #86a2d6;
-}
+/* ============= */
+/* 🎨 Colores personalizados */
+/* ============= */
 
-.badge-inactivo {
-  background-color: #dc3545;
-}
-
-.badge-ingresado {
-  background-color: #09c0e0;
-  color: black;
-}
-
-.badge-creada {
-  background-color: #09c0e0;
-  color: black;
-}
-
-.badge-creado {
-  background-color: #09c0e0;
-  color: black;
-}
-
-.badge-eliminado {
-  background-color: #dc3545;
-}
 :root {
   --color-azul: #34bae2;
   --color-rosa: #f139e6;
   --color-azul-hover: #27839e;
   --color-rosa-hover: #ba2eb2;
+}
+
+/* Claro */
+body[data-theme='light'] {
+  --text-description: #555;
+}
+
+/* Oscuro */
+body[data-theme='dark'] {
+  --text-description: #ccc;
+}
+/* Claro */
+body[data-theme='light'] {
+  --table-bg: #ffffff;
+  --table-text: #000;
+  --table-border: #d0d7de;
+}
+
+/* Oscuro */
+body[data-theme='dark'] {
+  --table-bg: #2a2a3d;
+  --table-text: #eee;
+  --table-border: #444;
+}
+
+/* Aplica el fondo dinámico a toda la tabla */
+.custom-table {
+  background-color: var(--table-bg) !important;
+  color: var(--table-text) !important;
+  border-color: var(--table-border) !important;
+}
+
+/* Encabezados */
+.custom-table .p-datatable-thead > tr > th {
+  background-color: var(--table-head-bg);
+  color: var(--table-text);
+}
+
+/* Celdas */
+.custom-table .p-datatable-tbody > tr > td {
+  background-color: var(--table-bg);
+  color: var(--table-text);
+}
+
+/* Bordes */
+.custom-table .p-datatable-thead > tr > th,
+.custom-table .p-datatable-tbody > tr > td {
+  border: 1px solid var(--table-border);
+}
+
+.custom-table {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+
+/* Claro */
+body[data-theme='light'] {
+  --footer-bg: #f9f9f9;
+}
+
+/* Oscuro */
+body[data-theme='dark'] {
+  --footer-bg: #1e1e2f;
+}
+
+/* Claro */
+body[data-theme='light'] {
+  --input-bg: #ffffff;
+  --input-text: #000000;
+  --input-border: #ced4da;
+}
+
+/* Oscuro */
+body[data-theme='dark'] {
+  --input-bg: #2a2a3d;
+  --input-text: #ffffff;
+  --input-border: #555;
+}
+
+/* Estilo general para todos los InputText */
+.p-inputtext {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border: 1px solid var(--input-border) !important;
+  transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+}
+
+/* Placeholder también debe cambiar de color */
+.p-inputtext::placeholder {
+  color: var(--input-text);
+  opacity: 0.6;
+}
+
+/* Al enfocar */
+.p-inputtext:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(100, 150, 250, 0.4); /* opcional */
+}
+
+/* Modo Claro */
+body[data-theme='light'] {
+  --dialog-bg: #ffffff;
+  --dialog-text: #333;
+  --dropdown-bg: #ffffff;
+  --dropdown-text: #000;
+  --dropdown-hover: #f0f0f0;
+  --input-bg: #ffffff;
+  --input-border: #ced4da;
+}
+
+/* Modo Oscuro */
+body[data-theme='dark'] {
+  --dialog-bg: #2a2a3d;
+  --dialog-text: #e0e0e0;
+  --dropdown-bg: #1e1e2f;
+  --dropdown-text: #f1f1f1;
+  --dropdown-hover: #3a3a50;
+  --input-bg: #2a2a3d;
+  --input-border: #555;
+}
+
+.p-dialog {
+  background-color: var(--dialog-bg);
+  color: var(--dialog-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.p-dialog .p-dialog-content {
+  background-color: var(--dialog-bg);
+  color: var(--dialog-text);
+}
+
+.p-dialog .p-dialog-header {
+  background-color: var(--dialog-bg); /* mismo fondo */
+  color: var(--dialog-text);
+  border-bottom: none; /* quitar línea */
+}
+
+.p-dialog-footer {
+  background-color: var(--dialog-bg);
+  border-top: none; /* opcional, si quieres quitar la línea de arriba del footer */
+}
+
+
+
+.p-dropdown {
+  background-color: var(--input-bg);
+  color: var(--dropdown-text);
+  border: 1px solid var(--input-border);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.p-dropdown .p-dropdown-label {
+  color: var(--dropdown-text);
+}
+
+.p-dropdown-panel {
+  background-color: var(--dropdown-bg);
+  color: var(--dropdown-text);
+}
+
+.p-dropdown-items .p-dropdown-item {
+  color: var(--dropdown-text);
+  background-color: var(--dropdown-bg);
+}
+
+.p-dropdown-items .p-dropdown-item:hover {
+  background-color: var(--dropdown-hover);
+}
+
+.p-dropdown {
+  background-color: var(--input-bg);
+  color: var(--dropdown-text);
+  border: 1px solid var(--input-border);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.p-dropdown .p-dropdown-label {
+  color: var(--dropdown-text);
+}
+
+.p-dropdown-panel {
+  background-color: var(--dropdown-bg);
+  color: var(--dropdown-text);
+}
+
+.p-dropdown-items .p-dropdown-item {
+  color: var(--dropdown-text);
+  background-color: var(--dropdown-bg);
+}
+
+.p-dropdown-items .p-dropdown-item:hover {
+  background-color: var(--dropdown-hover);
+}
+
+.p-inputtext,
+.p-inputnumber-input {
+  background-color: var(--input-bg);
+  color: var(--dialog-text);
+  border: 1px solid var(--input-border);
+}
+
+.p-float-label label {
+  color: var(--dialog-text);
+}
+
+/* Sidebar (DrawerResumen) - Dark theme */
+body[data-theme='dark'] .p-sidebar {
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Cambiar el título <h3> dentro del sidebar */
+body[data-theme='dark'] .p-sidebar h3 {
+  color: var(--text-color);
+  margin-top: 0;
+}
+
+/* Card dentro del sidebar */
+body[data-theme='dark'] .p-sidebar .p-card {
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  border-radius: 12px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Texto dentro de las cartas */
+body[data-theme='dark'] .p-sidebar .p-card p {
+  color: var(--text-color);
+}
+
+/* Scrollbar en dark, si tiene */
+body[data-theme='dark'] .p-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+body[data-theme='dark'] .p-sidebar::-webkit-scrollbar-track {
+  background: var(--bg-card);
+}
+
+body[data-theme='dark'] .p-sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+}
+/* Navbar - Dark theme */
+body[data-theme='dark'] .navbar {
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* Logo */
+body[data-theme='dark'] .navbar-logo {
+  color: var(--text-color);
+}
+
+/* Menu button */
+body[data-theme='dark'] .navbar-menu-button {
+  color: var(--text-color);
+}
+
+/* PrimeReact Menu popup */
+body[data-theme='dark'] .p-menu {
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Menu items */
+body[data-theme='dark'] .p-menu .p-menuitem-link {
+  color: var(--text-color);
+}
+
+/* Hover effect */
+body[data-theme='dark'] .p-menu .p-menuitem-link:hover {
+  background-color: var(--table-head-bg);
+  color: var(--text-color);
+}
+
+/* Icons color in menu */
+body[data-theme='dark'] .p-menu .p-menuitem-icon {
+  color: var(--text-color);
 }
