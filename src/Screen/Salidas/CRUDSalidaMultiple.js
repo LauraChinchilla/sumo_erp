@@ -32,7 +32,6 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
     const { values, setValues, handleChange, validateForm, errors } = useForm(initialValues);
 
     const rules = {
-        CantidadSalida: { required: true, message: 'Debe seleccionar una categoría' },
         IdTipoSalida: { required: true, message: 'Debe seleccionar un tipo de salida' },
     };
 
@@ -78,7 +77,7 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
     const guardarDatos = async (e) => {
         e.preventDefault();
 
-        // Condición: si el tipo de salida es 3, se requiere IdCliente
+        // Validar campos generales (tipo salida, cliente si aplica, etc.)
         if (values?.IdTipoSalida === 3) {
             rules.IdCliente = { required: true, message: 'Debe seleccionar un cliente' };
         } else {
@@ -90,85 +89,123 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
             return;
         }
 
-        if (values?.Stock < values?.CantidadSalida) {
+        if (!productosSeleccionados || productosSeleccionados.length === 0) {
             toast.current?.show({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No hay suficientes unidades disponibles para realizar la salida.',
-            life: 4000
+                severity: 'warn',
+                summary: 'Advertencia',
+                detail: 'Debe seleccionar al menos un producto para la salida.',
+                life: 4000
+            });
+            return;
+        }
+
+        const productoConError = productosSeleccionados.find(prod => {
+            const cantidad = parseFloat(prod.CantidadSalida) || 0;
+            const stock = parseFloat(prod.Stock) || 0;
+            return cantidad > stock;
+        });
+
+        if (productoConError) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error de stock',
+                detail: `El producto ${productoConError.Name} tiene stock insuficiente.`,
+                life: 5000
             });
             return;
         }
 
         setLoading(true);
 
-        const Datos = {
-            IdProduct: values?.IdProduct,
-            PrecioCompra: values?.PrecioCompra,
-            PrecioVenta: values?.PrecioVenta,
-            IdStatus: 5,
-            IdUserEdit: user?.IdUser,
-            Date: getLocalDateTimeString(),
-            CantidadSalida: values?.CantidadSalida,
+        const totalGeneral = productosSeleccionados.reduce((acc, prod) => acc + (prod.Total || 0), 0);
+
+
+        let datosEncabezado = {
             IdTipoSalida: values?.IdTipoSalida,
-            SubTotal: values?.SubTotal,
-            Total: values?.Total,
-            ISVQty: values?.ISVQty,
             IdCliente: values?.IdCliente,
-            IdCurrency: 1,
-            StockAntiguo: values?.Stock || values?.StockAntiguo,
-            PagoCredito: values?.IdTipoSalida === 3 ? false : true,
-        };
+            Date: getLocalDateTimeString(),
+            Total: totalGeneral,
+        }
 
-        const { data: salidaInsertada, error: errorEntrada } = await supabase
-            .from('Salidas')
-            .insert([Datos])
-            .select()
-            .single();
+        const { data: salidaInsertadaEnc, error: errorSalidaEnc } = await supabase.from('SalidasEnc').insert([datosEncabezado]).select().single();
 
-        if (errorEntrada) {
-            console.error('Error al guardar salida:', errorEntrada.message);
+
+        if(errorSalidaEnc){
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'No se pudo guardar la salida',
+                detail: `No se pudo insertar el encabezado de la Salida`,
                 life: 4000
             });
             setLoading(false);
             return;
         }
-
-        // Solo registra movimiento en caja si es tipo de salida = 1 (venta)
-        if (values?.IdTipoSalida === 1) {
-            const datos = {
-                IdTipoMovimiento: 2,
-                IdCategoria: 5,
-                Descripcion: `Venta del Producto: ${values?.Code} - ${values?.Name}`,
-                Monto: values?.Total,
-                IdStatus: 8,
+        // Insertar cada salida individualmente
+        for (const item of productosSeleccionados) {
+            const Datos = {
+                IdProduct: item.IdProduct,
+                PrecioCompra: item.PrecioCompra,
+                PrecioVenta: item.PrecioVenta,
+                IdStatus: 5,
+                IdUserEdit: user?.IdUser,
                 Date: getLocalDateTimeString(),
-                IdUser: user?.IdUser,
-                IdReferencia: salidaInsertada?.IdSalida,
+                CantidadSalida: item.CantidadSalida,
+                IdTipoSalida: values?.IdTipoSalida,
+                SubTotal: item.SubTotal,
+                Total: item.Total,
+                ISVQty: item.ISVQty,
+                IdCliente: values?.IdTipoSalida === 3 ? values?.IdCliente : null,
+                IdCurrency: 1,
+                StockAntiguo: item.Stock || item.StockAntiguo,
+                PagoCredito: values?.IdTipoSalida === 3 ? false : true,
+                IdSalidaEnc: salidaInsertadaEnc?.IdSalidaEnc,
             };
 
-            const { error } = await supabase.from('CajaMovimientos').insert([datos]);
 
-            if (error) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Se realizó la salida, pero no se registró el movimiento en caja. Comuníquese con soporte.',
-                life: 4000
-            });
-            setLoading(false);
-            return;
+            const { data: salidaInsertada, error: errorSalida } = await supabase.from('Salidas').insert([Datos]).select().single();
+
+            if (errorSalida) {
+                console.error(`Error al guardar salida del producto ${item.Name}:`, errorSalida.message);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: `No se pudo guardar la salida del producto ${item.Name}.`,
+                    life: 4000
+                });
+                setLoading(false);
+                return;
+            }
+
+            if (values?.IdTipoSalida === 1) {
+                const datosCaja = {
+                    IdTipoMovimiento: 2,
+                    IdCategoria: 5,
+                    Descripcion: `Venta del Producto: ${item.Code} - ${item.Name}`,
+                    Monto: item.Total,
+                    IdStatus: 8,
+                    Date: getLocalDateTimeString(),
+                    IdUser: user?.IdUser,
+                    IdReferencia: salidaInsertada?.IdSalida,
+                };
+
+                const { error: errorCaja } = await supabase.from('CajaMovimientos').insert([datosCaja]);
+
+                if (errorCaja) {
+                    toast.current?.show({
+                        severity: 'warn',
+                        summary: 'Advertencia',
+                        detail: `La salida de ${item.Name} se registró, pero el movimiento en caja no.`,
+                        life: 5000
+                    });
+                    // Aquí NO detenemos el proceso, solo mostramos advertencia
+                }
             }
         }
 
         toast.current?.show({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Salida guardada correctamente',
+            detail: 'Todas las salidas se guardaron correctamente.',
             life: 4000
         });
 
@@ -252,9 +289,10 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
             prev.map(item => {
             if (item.IdSalida === rowData.IdSalida) {
                 const precio = parseFloat(item.PrecioVenta) || 0;
-                const subTotal = cantidad * precio;
-                const total = subTotal;
-
+                const precioCompra = parseFloat(item.PrecioCompra) || 0;
+                const subTotal = precioCompra * cantidad;
+                const total = precio * cantidad;
+                
                 return {
                     ...item,
                     [field]: cantidad,
