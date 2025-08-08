@@ -44,34 +44,6 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
 
         const { data: clientesTempo } = await supabase.from('Clientes').select('*');
         setClientes(clientesTempo);
-
-        // if (selected?.length > 0) {
-        //     const producto = selected[0];
-
-        //     const { data: entrada } = await supabase
-        //         .from('vta_entradas')
-        //         .select('*')
-        //         .eq('IdProduct', producto.IdProduct)
-        //         .eq('IdStatus', 3)
-        //         .order('Date', { ascending: false })
-        //         .limit(1)
-        //         .maybeSingle();
-        //     const { data: inventario } = await supabase
-        //         .from('vta_inventario')
-        //         .select('*')
-        //         .eq('IdProduct', producto.IdProduct)
-
-
-        //     setValues({
-        //         ...producto,
-        //         IdTipoSalida: 1,
-        //         PrecioVenta: entrada?.PrecioVenta || 0,
-        //         PrecioCompra: entrada?.PrecioCompra || 0,
-        //         ISV: entrada?.ISV || 0,
-        //         PorcentajeGanancia: entrada?.PorcentajeGanancia || 0,
-        //         Stock: inventario[0]?.TotalUnidades
-        //     });
-        // }
     };
 
     const guardarDatos = async (e) => {
@@ -132,14 +104,10 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
 
         setLoading(true);
 
-        const totalGeneral = productosSeleccionados.reduce((acc, prod) => acc + (prod.Total || 0), 0);
-
-
         let datosEncabezado = {
             IdTipoSalida: values?.IdTipoSalida,
             IdCliente: values?.IdCliente,
             Date: getLocalDateTimeString(),
-            Total: totalGeneral,
         }
 
         const { data: salidaInsertadaEnc, error: errorSalidaEnc } = await supabase.from('SalidasEnc').insert([datosEncabezado]).select().single();
@@ -169,7 +137,7 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
                 SubTotal: item.SubTotal,
                 Total: item.Total,
                 ISVQty: item.ISVQty,
-                IdCliente: values?.IdTipoSalida === 3 ? values?.IdCliente : null,
+                IdCliente: values?.IdCliente,
                 IdCurrency: 1,
                 StockAntiguo: item.Stock || item.StockAntiguo,
                 PagoCredito: values?.IdTipoSalida === 3 ? false : true,
@@ -445,6 +413,7 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
                                     className={errors.IdCliente ? 'p-invalid' : ''}
                                     style={{ width: '100%' }}
                                     disabled={!editable}
+                                    showClear
                                 />
                                 <label htmlFor="IdCliente">Cliente</label>
                             </FloatLabel>
