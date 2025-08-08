@@ -223,11 +223,13 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
 
     useEffect(() => {
         const cantidad = parseFloat(values?.CantidadSalida) || 0;
-        const precio = parseFloat(values?.PrecioVenta) || 0;
+        const precioVentaConISV = parseFloat(values?.PrecioVenta) || 0;
         const isv = parseFloat(values?.ISV) || 0;
-        const subTotal = cantidad * precio;
-        const isvTotal = values?.Excento ? 0 : (subTotal * isv) / 100;
-        const total = subTotal + isvTotal;
+        const precioUnitarioSinISV = values?.Excento ? precioVentaConISV : precioVentaConISV / (1 + isv / 100);
+
+        const subTotal = cantidad * precioUnitarioSinISV;
+        const isvTotal = values?.Excento ? 0 : subTotal * (isv / 100);
+        const total = precioVentaConISV * cantidad;
 
         setValues({
             ...values,

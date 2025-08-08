@@ -115,6 +115,21 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
             return;
         }
 
+        const productoConCantidadCero = productosSeleccionados.find(prod => {
+            const cantidad = parseFloat(prod.CantidadSalida) || 0;
+            return cantidad <= 0;
+        });
+
+        if (productoConCantidadCero) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Cantidad inválida',
+                detail: `El producto ${productoConCantidadCero.Name} tiene una cantidad no válida (0 o menor).`,
+                life: 5000
+            });
+            return;
+        }
+
         setLoading(true);
 
         const totalGeneral = productosSeleccionados.reduce((acc, prod) => acc + (prod.Total || 0), 0);
@@ -269,6 +284,7 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
             SubTotal: 0,
             ISVQty: 0,
             Total: 0,
+            ISVCalculado: entrada?.ISVCalculado,
         };
 
 
@@ -285,23 +301,31 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
 
     const handleCellEdit = (rowData, field, newValue) => {
         const cantidad = parseFloat(newValue) || 0;
+        const precioVentaConISV = parseFloat(rowData?.PrecioVenta) || 0;
+        const isv = parseFloat(rowData?.ISV) || 0;
+
+        // Calcular precio unitario sin ISV
+        const precioUnitarioSinISV = rowData?.Excento
+            ? precioVentaConISV
+            : precioVentaConISV / (1 + isv / 100);
+
+        // Cálculos
+        const subTotal = cantidad * precioUnitarioSinISV;
+        const isvTotal = rowData?.Excento ? 0 : subTotal * (isv / 100);
+        const total = precioVentaConISV * cantidad;
+
         setProductosSeleccionados(prev =>
-            prev.map(item => {
-            if (item.IdSalida === rowData.IdSalida) {
-                const precio = parseFloat(item.PrecioVenta) || 0;
-                const precioCompra = parseFloat(item.PrecioCompra) || 0;
-                const subTotal = precioCompra * cantidad;
-                const total = precio * cantidad;
-                
-                return {
-                    ...item,
-                    [field]: cantidad,
-                    SubTotal: subTotal,
-                    Total: total,
-                };
-            }
-            return item;
-            })
+            prev.map(item =>
+                item.IdSalida === rowData.IdSalida
+                    ? {
+                        ...item,
+                        [field]: cantidad,
+                        SubTotal: subTotal,
+                        ISVQty: isvTotal,
+                        Total: total,
+                    }
+                    : item
+            )
         );
     };
 
@@ -334,6 +358,14 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
         {
             field: 'SubTotal',
             Header: 'SubTotal',
+            className: 'Small',
+            format: 'number',
+            summary: true,
+            prefix: 'L '
+        },
+        {
+            field: 'ISVQty',
+            Header: 'ISV',
             className: 'Small',
             format: 'number',
             summary: true,

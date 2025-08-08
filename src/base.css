@@ -333,7 +333,16 @@ body[data-theme='dark'] {
   color: var(--table-text) !important;
   border-color: var(--table-border) !important;
 }
+/* Restablecer estilo de error para inputs PrimeReact */
+.p-inputtext.p-invalid {
+  border: 1px solid #dc3545 !important; /* rojo */
+}
 
+.p-dropdown.p-invalid,
+.p-calendar.p-invalid,
+.p-inputnumber.p-invalid {
+  border: 1px solid #dc3545 !important;
+}
 /* Encabezados */
 .custom-table .p-datatable-thead > tr > th {
   background-color: var(--table-head-bg);
