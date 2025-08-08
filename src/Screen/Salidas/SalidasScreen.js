@@ -10,11 +10,13 @@ import CalendarMonth from "../../components/CalendarMonth";
 import CRUDSalidas from "./CRUDSalidas";
 import { confirmDialog } from "primereact/confirmdialog";
 import getLocalDateTimeString from "../../utils/funciones";
+import CRUDSalidaMultiple from "./CRUDSalidaMultiple";
 
 export default function SalidasScreen() {
   const [data, setData] = useState([]);
   const { user } = useUser();
   const [showDialog, setShowDialog] = useState(false);
+  const [showDialog2, setShowDialog2] = useState(false);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [rangeDates, setRangeDates] = useState(() => {
@@ -369,6 +371,18 @@ export default function SalidasScreen() {
               disabled={loading}
             />
             <Button
+              icon="pi pi-plus"
+              label="Salida Multiple"
+              tooltip="Agregar"
+              className="p-button-success"
+              severity="primary"
+              onClick={(e) => {
+                setShowDialog2(true)
+              }}
+              tooltipOptions={{ position: 'top'}}
+              disabled={loading}
+            />
+            <Button
               label="Agregar Salida"
               icon="pi pi-plus"
               severity="primary"
@@ -388,6 +402,16 @@ export default function SalidasScreen() {
         <CRUDSalidas
           setShowDialog={setShowDialog}
           showDialog={showDialog}
+          setSelected={setSelected}
+          selected={selected}
+          getInfo={getInfo}
+        />
+      )}
+
+      {showDialog2 && (
+        <CRUDSalidaMultiple
+          setShowDialog={setShowDialog2}
+          showDialog={showDialog2}
           setSelected={setSelected}
           selected={selected}
           getInfo={getInfo}

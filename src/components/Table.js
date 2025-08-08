@@ -6,7 +6,7 @@ import { ColumnGroup } from 'primereact/columngroup';
 import { Row } from 'primereact/row';
 import '../base.css';
 
-export default function Table({ columns, data, globalFilter: externalFilter }) {
+export default function Table({ columns, data, globalFilter: externalFilter, onCellEdit }) {
   const [globalFilter, setGlobalFilter] = useState('');
   const globalFilterValue = externalFilter !== undefined ? externalFilter : globalFilter;
 
@@ -116,11 +116,26 @@ export default function Table({ columns, data, globalFilter: externalFilter }) {
                 width: getColumnWidth(col.className),
               }}
               align={isNumber ? 'end' : (col.center ? 'center' : 'start')}
-              body={rowData =>
-                col.isIconColumn
+              // body={rowData =>
+              //   col.isIconColumn
+              //     ? renderIconBody(col.icon, col.onClick, rowData, col.tooltip)
+              //     : formatValue(rowData[col.field], col.format, rowData, col)
+              // }
+              body={rowData => {
+                if (col.editable) {
+                  return (
+                    <InputText
+                      value={rowData[col.field]}
+                      onChange={(e) => onCellEdit?.(rowData, col.field, e.target.value)}
+                      style={{ width: '100%', textAlign: isNumber ? 'right' : 'left' }}
+                    />
+                  );
+                }
+
+                return col.isIconColumn
                   ? renderIconBody(col.icon, col.onClick, rowData, col.tooltip)
-                  : formatValue(rowData[col.field], col.format, rowData, col)
-              }
+                  : formatValue(rowData[col.field], col.format, rowData, col);
+              }}
               filter={col.filter !== false}
               filterMatchMode={col.filterMatchMode || 'contains'}
               frozen={col.frozen || false}

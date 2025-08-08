@@ -1,0 +1,432 @@
+import { Dialog } from 'primereact/dialog';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useForm from '../../components/useForm';
+import { InputText } from 'primereact/inputtext';
+import { Button } from 'primereact/button';
+import { FloatLabel } from 'primereact/floatlabel';
+import { supabase } from '../../supabaseClient';
+import { Toast } from 'primereact/toast';
+import { useUser } from '../../context/UserContext';
+import { Dropdown } from 'primereact/dropdown';
+import getLocalDateTimeString from '../../utils/funciones';
+import ClientesCRUD from '../Maestros/ClientesCRUD';
+import { Card } from 'primereact/card';
+import Table from '../../components/Table';
+
+const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, getInfo, editable = true }) => {
+    const toast = useRef(null);
+    const { user } = useUser();
+    const [loading, setLoading] = useState(false);
+    const [productos, setProductos] = useState([]);
+    const [tiposSalida, setTiposSalida] = useState([]);
+    const [clientes, setClientes] = useState([]);
+    const [showDialogClientes, setShowDialogClientes] = useState(false)
+    const [productosSeleccionados, setProductosSeleccionados] = useState([]);
+    const [codigoEscaneado, setCodigoEscaneado] = useState('');
+
+    const initialValues = {
+        IdSalidaEnc: -1,
+        IdTipoSalida: 1,
+    };
+
+    const { values, setValues, handleChange, validateForm, errors } = useForm(initialValues);
+
+    const rules = {
+        CantidadSalida: { required: true, message: 'Debe seleccionar una categoría' },
+        IdTipoSalida: { required: true, message: 'Debe seleccionar un tipo de salida' },
+    };
+
+    const getValoresIniciales = async () => {
+        const { data: data2 } = await supabase.from('vta_productos_existentes').select('*');
+        setProductos(data2);
+
+        const { data: salidasTempo } = await supabase.from('TipoSalidas').select('*');
+        setTiposSalida(salidasTempo);
+
+        const { data: clientesTempo } = await supabase.from('Clientes').select('*');
+        setClientes(clientesTempo);
+
+        // if (selected?.length > 0) {
+        //     const producto = selected[0];
+
+        //     const { data: entrada } = await supabase
+        //         .from('vta_entradas')
+        //         .select('*')
+        //         .eq('IdProduct', producto.IdProduct)
+        //         .eq('IdStatus', 3)
+        //         .order('Date', { ascending: false })
+        //         .limit(1)
+        //         .maybeSingle();
+        //     const { data: inventario } = await supabase
+        //         .from('vta_inventario')
+        //         .select('*')
+        //         .eq('IdProduct', producto.IdProduct)
+
+
+        //     setValues({
+        //         ...producto,
+        //         IdTipoSalida: 1,
+        //         PrecioVenta: entrada?.PrecioVenta || 0,
+        //         PrecioCompra: entrada?.PrecioCompra || 0,
+        //         ISV: entrada?.ISV || 0,
+        //         PorcentajeGanancia: entrada?.PorcentajeGanancia || 0,
+        //         Stock: inventario[0]?.TotalUnidades
+        //     });
+        // }
+    };
+
+    const guardarDatos = async (e) => {
+        e.preventDefault();
+
+        // Condición: si el tipo de salida es 3, se requiere IdCliente
+        if (values?.IdTipoSalida === 3) {
+            rules.IdCliente = { required: true, message: 'Debe seleccionar un cliente' };
+        } else {
+            rules.IdCliente = { required: false };
+        }
+
+        if (!validateForm(rules)) {
+            console.log('Formulario con errores', errors);
+            return;
+        }
+
+        if (values?.Stock < values?.CantidadSalida) {
+            toast.current?.show({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No hay suficientes unidades disponibles para realizar la salida.',
+            life: 4000
+            });
+            return;
+        }
+
+        setLoading(true);
+
+        const Datos = {
+            IdProduct: values?.IdProduct,
+            PrecioCompra: values?.PrecioCompra,
+            PrecioVenta: values?.PrecioVenta,
+            IdStatus: 5,
+            IdUserEdit: user?.IdUser,
+            Date: getLocalDateTimeString(),
+            CantidadSalida: values?.CantidadSalida,
+            IdTipoSalida: values?.IdTipoSalida,
+            SubTotal: values?.SubTotal,
+            Total: values?.Total,
+            ISVQty: values?.ISVQty,
+            IdCliente: values?.IdCliente,
+            IdCurrency: 1,
+            StockAntiguo: values?.Stock || values?.StockAntiguo,
+            PagoCredito: values?.IdTipoSalida === 3 ? false : true,
+        };
+
+        const { data: salidaInsertada, error: errorEntrada } = await supabase
+            .from('Salidas')
+            .insert([Datos])
+            .select()
+            .single();
+
+        if (errorEntrada) {
+            console.error('Error al guardar salida:', errorEntrada.message);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No se pudo guardar la salida',
+                life: 4000
+            });
+            setLoading(false);
+            return;
+        }
+
+        // Solo registra movimiento en caja si es tipo de salida = 1 (venta)
+        if (values?.IdTipoSalida === 1) {
+            const datos = {
+                IdTipoMovimiento: 2,
+                IdCategoria: 5,
+                Descripcion: `Venta del Producto: ${values?.Code} - ${values?.Name}`,
+                Monto: values?.Total,
+                IdStatus: 8,
+                Date: getLocalDateTimeString(),
+                IdUser: user?.IdUser,
+                IdReferencia: salidaInsertada?.IdSalida,
+            };
+
+            const { error } = await supabase.from('CajaMovimientos').insert([datos]);
+
+            if (error) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Se realizó la salida, pero no se registró el movimiento en caja. Comuníquese con soporte.',
+                life: 4000
+            });
+            setLoading(false);
+            return;
+            }
+        }
+
+        toast.current?.show({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Salida guardada correctamente',
+            life: 4000
+        });
+
+        setTimeout(() => {
+            getInfo();
+            setShowDialog(false);
+            setLoading(false);
+        }, 800);
+    };
+
+    const handleAgregarProductoPorCodigo = async () => {
+        const producto = productos.find(p => p.Code === codigoEscaneado.trim());
+
+        if (!producto) {
+            toast.current?.show({
+                severity: 'warn',
+                summary: 'No encontrado',
+                detail: 'Producto no encontrado con ese código',
+                life: 3000
+            });
+            return;
+        }
+
+        // Verificar si ya fue agregado
+        const yaExiste = productosSeleccionados.some(p => p.IdProduct === producto.IdProduct);
+        if (yaExiste) {
+            toast.current?.show({
+                severity: 'info',
+                summary: 'Duplicado',
+                detail: 'Este producto ya fue agregado',
+                life: 3000
+            });
+            setCodigoEscaneado('');
+            return;
+        }
+
+        // Obtener datos de entrada y stock
+        const { data: entrada } = await supabase
+            .from('vta_entradas')
+            .select('*')
+            .eq('IdProduct', producto.IdProduct)
+            .eq('IdStatus', 3)
+            .order('Date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        const { data: inventario } = await supabase
+            .from('vta_inventario')
+            .select('*')
+            .eq('IdProduct', producto.IdProduct);
+
+        const nuevoProducto = {
+            ...producto,
+            IdSalida:  -Math.floor(Math.random() * 1000000),
+            PrecioCompra: entrada?.PrecioCompra || 0,
+            PrecioVenta: entrada?.PrecioVenta || 0,
+            ISV: entrada?.ISV || 0,
+            PorcentajeGanancia: entrada?.PorcentajeGanancia || 0,
+            Stock: inventario[0]?.TotalUnidades || 0,
+            CantidadSalida: 0,
+            SubTotal: 0,
+            ISVQty: 0,
+            Total: 0,
+        };
+
+
+        setProductosSeleccionados(prev => [...prev, nuevoProducto]);
+        setCodigoEscaneado('');
+    };
+
+    const eliminarProducto = useCallback((idSalida) => {
+        setProductosSeleccionados(prev => {
+            const filtrados = prev.filter(p => p.IdSalida !== idSalida);
+            return filtrados;
+        });
+    }, []);
+
+    const handleCellEdit = (rowData, field, newValue) => {
+        const cantidad = parseFloat(newValue) || 0;
+        setProductosSeleccionados(prev =>
+            prev.map(item => {
+            if (item.IdSalida === rowData.IdSalida) {
+                const precio = parseFloat(item.PrecioVenta) || 0;
+                const subTotal = cantidad * precio;
+                const total = subTotal;
+
+                return {
+                    ...item,
+                    [field]: cantidad,
+                    SubTotal: subTotal,
+                    Total: total,
+                };
+            }
+            return item;
+            })
+        );
+    };
+
+    const columns = useMemo(() => [
+        { field: 'IdSalida', Header: 'ID', className: 'Small', frozen: true, },
+        { field: 'Code', Header: 'Código', className: 'Small' },
+        { field: 'Name', Header: 'Nombre', className: 'Large' },
+        { field: 'UnitName', Header: 'Unidad', className: 'XxxSmall' },
+        {
+            field: 'Stock',
+            Header: 'Cantidad Disponible',
+            className: 'XxSmall',
+            format: 'number',
+            center: true,
+        },
+        {
+            field: 'CantidadSalida',
+            Header: 'Cantidad',
+            className: 'Small',
+            format: 'number',
+            editable: true,
+        },
+        {
+            field: 'PrecioVenta',
+            Header: 'Precio Venta',
+            className: 'Small',
+            format: 'number',
+            prefix: 'L ',
+        },
+        {
+            field: 'SubTotal',
+            Header: 'SubTotal',
+            className: 'Small',
+            format: 'number',
+            summary: true,
+            prefix: 'L '
+        },
+        {
+            field: 'Total',
+            Header: 'Total',
+            className: 'Small',
+            format: 'number',
+            summary: true,
+            prefix: 'L '
+        },
+        {
+            field: '',
+            Header: '',
+            className: 'XxxSmall',
+            isIconColumn: true,
+            frozen: true,
+            icon: 'pi pi-trash',
+            onClick: (rowData) => {
+                eliminarProducto(rowData.IdSalida);
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    ], [productosSeleccionados]);
+
+
+    const onHide = () => {
+        setShowDialog(false);
+        setSelected([]);
+    };
+
+    useEffect(() => {
+        if (showDialog) {
+            getValoresIniciales();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showDialog]);
+
+    return (
+        <>
+            <Dialog visible={showDialog} onHide={onHide} style={{ width: '80%' }} header={'Nueva Salida'}>
+                <Toast ref={toast} />
+                <Card style={{ border: '1px solid #ccc', boxShadow: 'none', background: 'transparent' }}>
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <Dropdown
+                                    id="IdTipoSalida"
+                                    value={values.IdTipoSalida}
+                                    options={tiposSalida}
+                                    onChange={(e) => handleChange('IdTipoSalida', e.value)}
+                                    placeholder="Seleccione un tipo de Salida"
+                                    required
+                                    optionLabel="TipoSalida"
+                                    optionValue="IdTipoSalida"
+                                    className={errors.IdTipoSalida ? 'p-invalid' : ''}
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                />
+                                <label htmlFor="IdTipoSalida">Tipo de salida</label>
+                            </FloatLabel>
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <Dropdown
+                                    id="IdCliente"
+                                    value={values.IdCliente}
+                                    options={clientes}
+                                    onChange={(e) => handleChange('IdCliente', e.value)}
+                                    placeholder="Seleccione un cliente"
+                                    required
+                                    optionLabel="NombreCompleto"
+                                    optionValue="IdCliente"
+                                    className={errors.IdCliente ? 'p-invalid' : ''}
+                                    style={{ width: '100%' }}
+                                    disabled={!editable}
+                                />
+                                <label htmlFor="IdCliente">Cliente</label>
+                            </FloatLabel>
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                            <FloatLabel>
+                                <InputText
+                                    id="CodigoProducto"
+                                    value={codigoEscaneado}
+                                    onChange={(e) => setCodigoEscaneado(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleAgregarProductoPorCodigo();
+                                            e.preventDefault();
+                                        }
+                                    }}
+                                    style={{ width: '100%' }}
+                                    autoFocus
+                                />
+                                <label htmlFor="CodigoProducto">Escanear o ingresar código</label>
+                            </FloatLabel>
+                        </div>
+                    </div>
+                </Card>
+                
+                <div style={{marginTop: '1rem'}}></div>
+                <Table columns={columns} data={productosSeleccionados} onCellEdit={handleCellEdit}/>
+
+
+                {/* Botones */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
+                    <Button label="Cancelar" className="p-button-secondary" onClick={onHide} disabled={loading} />
+                    <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />
+                </div>
+            </Dialog>
+
+
+            {showDialogClientes && (
+              <ClientesCRUD
+                showDialog={showDialogClientes}
+                setShowDialog={setShowDialogClientes}
+                setSelected={() => {}}
+                selected={[]}
+                getInfo={getValoresIniciales}
+                editable={true}
+                setActiveIndex={() => {}}
+              />
+            )}
+        </>
+
+    );
+}
+
+export default CRUDSalidaMultiple;

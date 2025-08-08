@@ -324,7 +324,7 @@ body[data-theme='light'] {
 body[data-theme='dark'] {
   --table-bg: #2a2a3d;
   --table-text: #eee;
-  --table-border: #444;
+  --table-border: #2f2f3d
 }
 
 /* Aplica el fondo dinámico a toda la tabla */

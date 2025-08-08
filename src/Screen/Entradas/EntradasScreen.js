@@ -310,6 +310,7 @@ export default function EntradasScreen() {
       frozen: true,
       className: 'XxSmall',
       filterMatchMode: 'equals',
+      hidden: user?.IdRol === 1
     },
     {
       field: 'Date',
