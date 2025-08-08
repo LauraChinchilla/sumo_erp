@@ -28,7 +28,7 @@ export default function CajaMovimientosScreen() {
   const getInfo = async () => {
     setLoading(true);
 
-    let query = supabase.from('vta_cajamovimientos').select('*');
+    let query = supabase.from('vta_cajamovimientos').select('*').eq('IdStatus', 8);
 
     if (rangeDates && rangeDates[0] && rangeDates[1]) {
       const from = new Date(rangeDates[0]);
