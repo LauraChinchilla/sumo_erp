@@ -19,6 +19,20 @@ import RetirosScreen from './Screen/Retiros/RetirosScreen';
 import CajaMovimientosScreen from './Screen/CajaMovimientos/CajaMovimientosScreen';
 import PersonalScreen from './Screen/Personal/PersonalScreen';
 import { ThemeProvider } from './context/ThemeContext';
+import { Navigate } from 'react-router-dom';
+import Home from './Screen/Home';
+
+function PrivateRoute({ children }) {
+  const { user, loading } = useUser();
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+
 
 function AppContent() {
   const { logout } = useUser();
@@ -31,130 +45,161 @@ function AppContent() {
 
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Home />} />
       <Route
         path="/Dashboard"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <Dashboard />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <Dashboard />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
       <Route
         path="/products"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <ProductsScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <ProductsScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
       <Route
         path="/inventory"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <InventarioScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <InventarioScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
       <Route
         path="/entradas"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <EntradasScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <EntradasScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
       <Route
         path="/salidas"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <SalidasScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <SalidasScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
       <Route
         path="/config"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <Configuraciones />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <Configuraciones />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
       <Route
         path="/stockBajo"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <StockBajoScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <StockBajoScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
       <Route
         path="/caja"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <FlujoCajaScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <FlujoCajaScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
       <Route
         path="/movimientos"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <MovimientosScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <MovimientosScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
 
       <Route
         path="/KPIs"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <KPIsScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <KPIsScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
       <Route
         path="/Maestros"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <MaestrosScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <MaestrosScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
 
       <Route
         path="/creditos"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <CreditosScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <CreditosScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
 
       <Route
         path="/retiros"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <RetirosScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <RetirosScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
 
       <Route
         path="/cajamovimientos"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <CajaMovimientosScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <CajaMovimientosScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
 
       <Route
         path="/personal"
         element={
-          <MainLayout onLogout={handlerLogout}>
-            <PersonalScreen />
-          </MainLayout>
+          <PrivateRoute>
+            <MainLayout onLogout={handlerLogout}>
+              <PersonalScreen />
+            </MainLayout>
+          </PrivateRoute>
         }
       />
     </Routes>

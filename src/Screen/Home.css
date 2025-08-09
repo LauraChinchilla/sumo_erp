@@ -1,0 +1,436 @@
+.page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to bottom, #f9fbfd, #eef4ff);
+  min-height: 100vh;
+}
+
+/* HERO */
+.hero {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(to bottom, #a7bcd1, #5e88d4);
+  justify-content: space-between;
+  padding: 60px 80px;
+  flex-wrap: wrap;
+  gap: 40px;
+  min-height: 600px; /* evita que sea muy pequeño */
+}
+
+/* Media query para pantallas pequeñas */
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column;
+    padding: 40px 20px;
+    min-height: auto;
+  }
+  .hero-images {
+    max-width: 100%;
+    margin-top: 40px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    height: auto;
+  }
+  .hero-images .hero-image:first-child,
+  .hero-images .hero-image:nth-child(2),
+  .hero-images .hero-image:nth-child(3) {
+    max-height: 300px;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
+
+/* Contenido */
+.hero-content {
+  flex: 1;
+  margin-top: 5px;
+  min-width: 300px;
+  color: #08314d;
+}
+
+.hero-logo {
+  width: 400px;
+  margin-bottom: 25px;
+}
+
+.hero-title {
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  color: #4a5a6a;
+  margin-bottom: 25px;
+  max-width: 500px;
+}
+
+/* Botones */
+.button-container {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.button {
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.login-button {
+  background-color: #08314d;
+  color: white;
+}
+
+.register-button {
+  background-color: #00bfff;
+  color: white;
+}
+
+/* Beneficios */
+.benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #4a5a6a;
+}
+.hero-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 50px;
+  max-width: 950px; /* un poco más pequeño */
+  width: 100%;
+  margin-top: 90px;
+  margin-bottom: 80px;
+  align-items: center;
+  /* elimina la altura fija */
+  /* height: 640px; */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer; /* opcional: cambia el cursor para indicar que es interactivo */
+}
+
+.hero-image:hover {
+  transform: scale(1.05); /* agranda la imagen un 5% */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); /* sombra más visible */
+  z-index: 10; /* para que se muestre por encima */
+}
+
+.hero-image {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  max-width: 100%;
+  border-radius: 15px;
+  display: block;
+}
+
+.hero-image:hover {
+  transform: scale(1.05);
+}
+
+/* Tooltip hexagonal */
+.hero-image::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: #08314d;
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: transform 0.3s ease;
+  z-index: 10;
+
+  clip-path: polygon(
+    25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%
+  );
+  transform-origin: bottom center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-image:hover::after {
+  transform: translateX(-50%) scale(1);
+}
+
+.hero-images .hero-image:first-child {
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
+  width: 100%;
+  max-height: 600px; /* máximo alto pero sin forzar */
+  object-fit: cover;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+}
+
+.hero-images .hero-image:nth-child(2),
+.hero-images .hero-image:nth-child(3) {
+  grid-column: 2 / 3;
+  width: 100%;
+  max-height: 290px; /* un poco menos que la grande */
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+}
+
+
+
+
+
+
+/* -------------------------------------------------------------------------- */
+/* Barra Fija */
+.contact-banner {
+  position: fixed; /* en vez de absolute */
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 5px 20px;
+  border-radius: 50px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  z-index: 9999; /* asegúrate que quede encima */
+}
+
+.app-avatar {
+  width: 70px;
+  height: 70px;
+  margin-right: -20px;
+  border-radius: 50%;
+}
+
+.contact-banner span {
+  white-space: nowrap;
+}
+
+.social-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: 12px;
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+/* Íconos PrimeIcons */
+.social-icons a i {
+  font-size: 44px !important;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Colores reales */
+.social-icons a[aria-label="WhatsApp"] i {
+  color: #25D366;
+}
+.social-icons a[aria-label="WhatsApp"]:hover i {
+  color: #1eb15a;
+}
+.social-icons a[aria-label="Facebook"] i {
+  color: #3b5998;
+}
+.social-icons a[aria-label="Facebook"]:hover i {
+  color: #2d4373;
+}
+.social-icons a[aria-label="Instagram"] i {
+  color: #E1306C;
+}
+.social-icons a[aria-label="Instagram"]:hover i {
+  color: #b02f5a;
+}
+
+
+/* ------------------------------------------------------------------------------ */
+/* Modules Section */
+.modules-section {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.modules-header {
+  font-size: 28px;
+  color: #007acc;
+  margin-bottom: 40px;
+}
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  padding: 0 20px;
+}
+
+.module-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 30px 25px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e0e0e0;
+}
+
+.module-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.module-icon {
+  font-size: 40px;
+  margin-bottom: 15px;
+  color: #007acc;
+}
+
+.module-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #007acc;
+  margin-bottom: 12px;
+}
+
+.module-description {
+  font-size: 16px;
+  color: #555;
+  line-height: 1.6;
+}
+
+
+/* ----------------------------------------------------------------------------------------------- */
+/* Footer */
+.footer-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #0a3a6e;
+  color: white;
+  font-size: 14px;
+  padding: 1px 20px;
+  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.35);
+  z-index: 9999;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 25px;
+}
+
+.footer-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+  color: #a9c7ff;
+  margin-top: 10px;
+  font-size: 13px;
+  text-align: center;
+  user-select: none;
+}
+
+.footer-qr-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.footer-contact p {
+  margin: 4px 0;
+  color: #cfdfff;
+}
+
+.footer-links a {
+  margin: 0 15px;
+  color: #a9c7ff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 600;
+}
+
+.footer-links a:hover {
+  color: #00bfff;
+}
+
+.footer-socials a {
+  margin-left: 15px;
+  color: white;
+  font-size: 24px;
+  transition: color 0.3s ease;
+}
+
+.footer-socials a:hover {
+  color: #00bfff;
+}
+
+.footer-copy {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 12px;
+  opacity: 0.75;
+  color: #cfdfff;
+  user-select: none;
+}
+
+/* Responsive: en pantallas muy pequeñas apila en columnas */
+@media (max-width: 720px) {
+  .footer-content {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .footer-links {
+    order: 3;
+  }
+
+  .footer-socials {
+    order: 4;
+  }
+
+  .footer-qr {
+    order: 1;
+    margin-bottom: 10px;
+  }
+
+  .footer-contact {
+    order: 2;
+    text-align: center;
+  }
+}
