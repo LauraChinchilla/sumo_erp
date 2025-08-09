@@ -2,6 +2,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(to bottom, #f9fbfd, #eef4ff);
   min-height: 100vh;
+  padding-bottom: 80px; 
 }
 
 /* HERO */
@@ -59,7 +60,7 @@
 }
 
 .hero-subtitle {
-  font-size: 18px;
+  font-size: 20px;
   color: #4a5a6a;
   margin-bottom: 25px;
   max-width: 500px;
@@ -269,10 +270,11 @@
 
 
 /* ------------------------------------------------------------------------------ */
-/* Modules Section */
+/* Primera seccion */
 .modules-section {
   padding: 60px 20px;
   text-align: center;
+  margin-bottom: 50px;
 }
 
 .modules-header {
@@ -282,47 +284,115 @@
 }
 
 .modules-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 30px;
-  padding: 0 20px;
+  justify-content: center;
+  margin-top: 20px;
 }
 
-.module-card {
-  background-color: #ffffff;
-  border-radius: 20px;
-  padding: 30px 25px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+.module-inventario.horizontal {
+  background: linear-gradient(145deg, #0a3a6e, #0056b3);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 800px;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.module-inventario.horizontal:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+}
+
+.module-inventario.horizontal .module-image {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.module-text h3 {
+  font-size: 30px;
+  margin-bottom: 8px;
+  font-weight: bold;
+};
+
+.module-text p {
+  font-size: 20px;
+  line-height: 1.5;
+  color: #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .module-inventario.horizontal {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .module-inventario.horizontal .module-image {
+    margin-bottom: 10px;
+  }
+}
+
+.modules-row {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+/* Esto mantiene el Inventario ancho completo */
+.modules-row:first-child .module-inventario {
+  width: 800px;
+}
+
+/* Ya tienes estos estilos */
+.module-card.vertical {
+  background: linear-gradient(145deg, #d4e0ec, #d4e0ec);
+  border-radius: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: 15px;
+  width: 350px;
+  color: rgb(19, 18, 18);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid #e0e0e0;
 }
 
-.module-card:hover {
+.module-card.vertical:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.35);
 }
 
-.module-icon {
-  font-size: 40px;
-  margin-bottom: 15px;
-  color: #007acc;
+.module-card.vertical h1 {
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.module-title {
-  font-size: 22px;
-  font-weight: 600;
-  color: #007acc;
-  margin-bottom: 12px;
+.module-card.vertical .module-image {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
 }
 
-.module-description {
-  font-size: 16px;
-  color: #555;
-  line-height: 1.6;
+.module-card.vertical p {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #e0e0e0;
+  text-align: center;
 }
+
+
+
 
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -332,10 +402,10 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  background: #0a3a6e;
+  background: #17304e;
   color: white;
   font-size: 14px;
-  padding: 1px 20px;
+  padding: 1px 8px;
   box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.35);
   z-index: 9999;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -358,6 +428,7 @@
   min-width: 120px;
   color: #a9c7ff;
   margin-top: 10px;
+  margin-left: -200px;
   font-size: 13px;
   text-align: center;
   user-select: none;
@@ -401,7 +472,6 @@
 
 .footer-copy {
   text-align: center;
-  margin-top: 12px;
   font-size: 12px;
   opacity: 0.75;
   color: #cfdfff;

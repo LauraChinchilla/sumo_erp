@@ -1,6 +1,7 @@
 import React from "react";
 import "./Home.css";
 import { Button } from "primereact/button";
+import { useNavigate } from "react-router-dom";
 
 const modules = [
   { icon: "📦", title: "Inventario", description: "Control total en tiempo real. Visualiza tu inventario disponible al instante, evita quiebres de stock y toma decisiones inteligentes con información precisa." },
@@ -19,8 +20,11 @@ const modules = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   return (
     <div className="page">
+
+      {/* BARRA FIJA */}
       <div className="contact-banner">
         <img
           src="https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo/Avatar2.png"
@@ -41,6 +45,7 @@ export default function Home() {
         </div>
       </div>
       
+      {/* PRIMERA SECCION */}
       <div className="hero">
         {/* Contenido izquierdo */}
         <div className="hero-content">
@@ -56,7 +61,7 @@ export default function Home() {
           </p>
 
           <div className="button-container">
-            <Button className="button login-button" label="Iniciar Sesión" icon="pi pi-sign-in" />
+            <Button className="button login-button" label="Iniciar Sesión" icon="pi pi-sign-in" onClick={() => navigate('./login')}/>
             <Button className="button register-button" label="Registrarse" icon="pi pi-user-plus" />
           </div>
 
@@ -85,18 +90,70 @@ export default function Home() {
         </div>
       </div>
 
+      {/* SEGUNDA SECCION */}
       <div className="modules-section">
         <h2 className="modules-header">🚀 Módulos que transforman tu negocio</h2>
-        <div className="modules-grid">
-          {modules.map((mod, index) => (
-            <div key={index} className="module-card">
-              <div className="module-icon">{mod.icon}</div>
-              <h3 className="module-title">{mod.title}</h3>
-              <p className="module-description">{mod.description}</p>
+
+        {/* Fila 1: Inventario */}
+        <div className="modules-row">
+          <div className="module-inventario horizontal">
+            <img
+              src="https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo/Inv.png"
+              alt="Inventario"
+              className="module-image"
+            />
+            <div className="module-text">
+              <h1>Inventario</h1>
+              <p>
+                Control total en tiempo real. Visualiza tu inventario disponible al instante, evita quiebres de stock y toma decisiones inteligentes con información precisa.
+              </p>
             </div>
-          ))}
+          </div>
+        </div>
+
+        {/* Fila 2: Entradas y Ventas */}
+        <div className="modules-row">
+          <div className="module-card vertical">
+            <h1>Entradas</h1>
+            <img
+              src="https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo/Entradas.png"
+              alt="Entradas"
+              className="module-image"
+            />
+            <p style={{color: '#0a3a6e', fontStyle: 'oblique', fontWeight: 'bold' }}>
+              Registra fácilmente el ingreso de productos y materiales, manteniendo un control exacto y actualizado de todas tus entradas.
+            </p>
+          </div>
+
+          <div className="module-card vertical">
+            <h1>Ventas</h1>
+            <img
+              src="https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo/Ventas.png"
+              alt="Ventas"
+              className="module-image"
+            />
+            <p style={{color: '#0a3a6e', fontStyle: 'oblique', fontWeight: 'bold' }}>
+              Gestiona tus ventas con rapidez y precisión, con reportes en tiempo real para optimizar la toma de decisiones.
+            </p>
+          </div>
+
+          <div className="module-card vertical">
+            <h1>Personal</h1>
+            <img
+              src="https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo/Personal.png"
+              alt="Personal"
+              className="module-image"
+            />
+            <p style={{color: '#0a3a6e', fontStyle: 'oblique', fontWeight: 'bold' }}>
+              Gestión de talento simplificada. Administra pagos, sueldos y beneficios de tus empleados. Ideal para pymes que buscan eficiencia sin complicaciones.
+            </p>
+          </div>
         </div>
       </div>
+
+
+
+
 
       <footer className="footer-fixed">
         <div className="footer-content">
@@ -120,7 +177,7 @@ export default function Home() {
             <a href="/support">Soporte</a>
           </div>
 
-          <div className="footer-socials">
+          <div className="footer-socials" style={{marginRight: '-150px'}}>
             <a href="https://wa.me/50499999999" aria-label="WhatsApp"><i className="pi pi-whatsapp"></i></a>
             <a href="https://facebook.com/sumoerp" aria-label="Facebook"><i className="pi pi-facebook"></i></a>
             <a href="https://instagram.com/sumoerp" aria-label="Instagram"><i className="pi pi-instagram"></i></a>
