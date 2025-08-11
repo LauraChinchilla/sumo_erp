@@ -122,8 +122,6 @@
   margin-top: 90px;
   margin-bottom: 80px;
   align-items: center;
-  /* elimina la altura fija */
-  /* height: 640px; */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer; /* opcional: cambia el cursor para indicar que es interactivo */
 }
@@ -713,9 +711,6 @@
 
 
 
-
-
-
 /* -------------------------------------------------------------------------- */
 /* Barra Fija */
 .contact-banner {
@@ -824,17 +819,11 @@
   user-select: none;
 }
 
-.footer-qr-image {
-  width: 100px;
-  height: 100px;
-  border-radius: 12px;
-  margin-bottom: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
 .footer-contact p {
   margin: 4px 0;
+  margin-top: 10px;
   color: #cfdfff;
+  margin-left: -250px;
 }
 
 .footer-links a {
@@ -893,4 +882,59 @@
     order: 2;
     text-align: center;
   }
+}
+
+/* ------------------------------------------------------------------------------- */
+/* BOTONES FLOTANTES */
+.floating-buttons {
+  position: fixed;
+  bottom: 120px; 
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 11000; /* más alto que el footer (9999) */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.floating-buttons {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+
+
+.floating-buttons.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.floating-btn {
+  background-color: #08314d;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  transition: background-color 0.3s ease;
+}
+
+.floating-btn:hover {
+  background-color: #0056b3;
+}
+
+.register-btn {
+  background-color: #00bfff;
+}
+
+.register-btn:hover {
+  background-color: #008fcc;
 }

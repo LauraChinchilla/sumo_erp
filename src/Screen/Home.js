@@ -1,5 +1,6 @@
 import "./Home.css";
 import { Button } from "primereact/button";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
@@ -17,6 +18,20 @@ export default function Home() {
 
   const valoresDuplicados = [...valores, ...valores];
 
+    const [showButtons, setShowButtons] = useState(false);
+
+    useEffect(() => {
+      function handleScroll() {
+        if (window.scrollY > 300) {
+          setShowButtons(true);
+        } else {
+          setShowButtons(false);
+        }
+      }
+
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
   return (
     <div className="page">
@@ -41,6 +56,15 @@ export default function Home() {
           </a>
         </div>
       </div>
+
+      {/* BBOTONES FLOTANTES */}
+      {showButtons && (
+        <div className="floating-buttons">
+          <button className="floating-btn login-btn" onClick={() => navigate('./login')}>
+            <i className="pi pi-sign-in"></i> Iniciar Sesión
+          </button>
+        </div>
+      )}
       
       {/* PRIMERA SECCION */}
       <div className="hero">
@@ -59,7 +83,6 @@ export default function Home() {
 
           <div className="button-container">
             <Button className="button login-button" label="Iniciar Sesión" icon="pi pi-sign-in" onClick={() => navigate('./login')}/>
-            <Button className="button register-button" label="Registrarse" icon="pi pi-user-plus" />
           </div>
 
         </div>
@@ -241,14 +264,6 @@ export default function Home() {
 
       <footer className="footer-fixed">
         <div className="footer-content">
-          <div className="footer-qr">
-            <img
-              src="https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo/QRWaths.png"
-              alt="Código QR"
-              className="footer-qr-image"
-            />
-          </div>
-
           <div className="footer-contact">
             <p>📍 La Encarnacion, Ocotepeque, Honduras.</p>
             <p>📞 +504 8804-7361</p>

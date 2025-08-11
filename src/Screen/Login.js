@@ -35,16 +35,6 @@ export default function Login() {
   return (
     <div
       className="login-wrapper"
-      style={{
-        backgroundImage:
-          'url(https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo//fondo-tecnologia-digital-alambre-malla-red_1017-27428.avif)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
     >
       <Card className="login-card">
         <div className="login-header" style={{ textAlign: 'center' }}>
