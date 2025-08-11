@@ -1,26 +1,23 @@
-import React from "react";
 import "./Home.css";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 
-const modules = [
-  { icon: "📦", title: "Inventario", description: "Control total en tiempo real. Visualiza tu inventario disponible al instante, evita quiebres de stock y toma decisiones inteligentes con información precisa." },
-  { icon: "🏷️", title: "Productos", description: "Gestión sin complicaciones. Crea, edita y organiza tus productos con facilidad. Mantén tu catálogo actualizado y optimizado para ventas y logística." },
-  { icon: "🔄", title: "Entradas", description: "Agiliza el ingreso de mercancía. Registra nuevas adquisiciones al inventario de forma rápida y segura. Ideal para compras, devoluciones o ajustes." },
-  { icon: "📤", title: "Salidas", description: "Controla tus ventas y bajas. Documenta cada salida de productos, ya sea por venta, merma o transferencia. Mantén tu inventario siempre al día." },
-  { icon: "💰", title: "Flujo de Caja", description: "Tu salud financiera en un vistazo. Monitorea ingresos y egresos en tiempo real. Toma decisiones estratégicas con datos claros y confiables." },
-  { icon: "📋", title: "Movimientos de Caja", description: "Transparencia total. Consulta el historial completo de cada movimiento en caja. Ideal para auditorías y control interno." },
-  { icon: "⚠️", title: "Stock Bajo", description: "Evita quiebres y pérdidas. Identifica productos con inventario crítico o agotado. Actúa antes de que afecte tus ventas." },
-  { icon: "💳", title: "Créditos", description: "Gestión inteligente de cuentas por cobrar. Administra los créditos otorgados a tus clientes, controla vencimientos y mejora tu flujo de efectivo." },
-  { icon: "🔍", title: "Movimientos", description: "Todo el historial en un solo lugar. Revisa entradas, salidas y ajustes con filtros avanzados. Ideal para trazabilidad y análisis." },
-  { icon: "📈", title: "KPIs", description: "Mide lo que importa. Visualiza indicadores clave de rendimiento para tomar decisiones estratégicas." },
-  { icon: "⚙️", title: "Maestros", description: "Administra tu ecosistema empresarial. Gestiona clientes, proveedores, usuarios, datos de empresa y más desde un solo módulo centralizado." },
-  { icon: "👜", title: "Retiros", description: "Control de utilidades y capital. Registra retiros por ganancias o aportes de capital. Mantén la contabilidad clara y ordenada." },
-  { icon: "👥", title: "Personal", description: "Gestión de talento simplificada. Administra pagos, sueldos y beneficios de tus empleados. Ideal para pymes que buscan eficiencia sin complicaciones." },
-];
-
 export default function Home() {
   const navigate = useNavigate();
+
+  const valores = [
+    { img: "https://cdn-icons-png.flaticon.com/512/190/190411.png", alt: "Innovación", text: "Innovación" },
+    { img: "https://cdn-icons-png.flaticon.com/512/942/942748.png", alt: "Compromiso", text: "Compromiso" },
+    { img: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png", alt: "Trabajo en equipo", text: "Trabajo en equipo" },
+    { img: "https://cdn-icons-png.flaticon.com/512/942/942751.png", alt: "Transparencia", text: "Transparencia" },
+    { img: "https://cdn-icons-png.flaticon.com/512/2965/2965567.png", alt: "Adaptabilidad", text: "Adaptabilidad" },
+    { img: "https://cdn-icons-png.flaticon.com/512/2917/2917993.png", alt: "Empoderamiento Empresarial", text: "Empoderamiento Empresarial" },
+    { img: "https://cdn-icons-png.flaticon.com/512/2917/2917963.png", alt: "Trazabilidad", text: "Trazabilidad" },
+  ];
+
+  const valoresDuplicados = [...valores, ...valores];
+
+
   return (
     <div className="page">
 
@@ -104,7 +101,7 @@ export default function Home() {
             />
             <div className="module-text">
               <h1>Inventario</h1>
-              <p>
+              <p style={{ fontStyle: 'oblique', fontWeight: 'bold' }}>
                 Control total en tiempo real. Visualiza tu inventario disponible al instante, evita quiebres de stock y toma decisiones inteligentes con información precisa.
               </p>
             </div>
@@ -149,10 +146,97 @@ export default function Home() {
             </p>
           </div>
         </div>
+
+        {/* Fila 3: Imagen con texto afuera */}
+        <div className="modules-row">
+          <div className="module-card-only-image">
+            <img
+              src="https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo/StockBajo.png"
+              alt="Stock Bajo"
+              className="module-image"
+            />
+          </div>
+
+          <div className="module-text-outside">
+            <h1>Stock Bajo</h1>
+            <p style={{ fontStyle: 'oblique', fontWeight: 'bold', color: '#0a3a6e' }}>
+              Evita quiebres y pérdidas. Identifica productos con inventario crítico o agotado. Actúa antes de que afecte tus ventas.
+            </p>
+          </div>
+        </div>
+
+        {/* Fila 4: Imagen con texto afuera */}
+        <div className="modules-row">
+
+          <div className="module-text-outside">
+            <h1>KPIs</h1>
+            <p style={{ fontStyle: 'oblique', fontWeight: 'bold', color: '#0a3a6e' }}>
+              Mide lo que importa. Visualiza indicadores clave de rendimiento para tomar decisiones estratégicas.
+            </p>
+          </div>
+
+
+          <div className="module-card-only-image">
+            <img
+              src="https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo/KPIs.png"
+              alt="KPIs"
+              className="module-image"
+            />
+          </div>
+        </div>
+
       </div>
 
+      {/* TERCERA SECCION */}
+      <div className="about-section-alt">
+        <h2 className="about-title-alt">Conócenos</h2>
 
+        {/* Breve Historia */}
+        <div className="about-history">
+          <div className="history-image"></div>
+          <div className="history-text">
+            <h3>Nuestra Historia</h3>
+            <p>
+              SUMO ERP nació en julio de 2025, desde una idea gestada en casa pero con una visión clara: traer orden, eficiencia y trazabilidad a los negocios locales. En un entorno donde muchas empresas operan con procesos dispersos y poco integrados, SUMO surge como una solución modular, intuitiva y centrada en el usuario.
+            </p>
+            <p>
+              Desde su primer módulo de inventario hasta sus funciones de retiros financieros, cada componente de SUMO ha sido diseñado con propósito, cuidando tanto la lógica como la estética. El objetivo es claro: que cada negocio, sin importar su tamaño, pueda operar con la misma precisión y transparencia que una gran empresa.
+              SUMO está creciendo, y con él, la comunidad de usuarios que creen en el poder de la organización inteligente. Porque cuando hay orden, hay espacio para crecer.
+            </p>
+          </div>
+        </div>
 
+        {/* Mision - Vision */}
+        <div className="about-row">
+          <div className="about-card">
+            <div className="about-icon">🎯</div>
+            <h3>Misión</h3>
+            <p>
+              Facilitar orden y control en los negocios locales mediante una plataforma modular, intuitiva y visualmente coherente que integra procesos clave y promueve decisiones claras.
+            </p>
+          </div>
+
+          <div className="about-card">
+            <div className="about-icon">🚀</div>
+            <h3>Visión</h3>
+            <p>
+              Ser el sistema de gestión preferido por negocios dinámicos, reconocido por su simplicidad, adaptabilidad y capacidad para transformar procesos en resultados sostenibles.
+            </p>
+          </div>
+        </div>
+
+        {/* Valores */}
+        <div className="ticker-wrapper">
+          <div className="ticker">
+            {valoresDuplicados.map(({ img, alt, text }, i) => (
+              <div className="value-item" key={i}>
+                <img src={img} alt={alt} />
+                <span>{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
 
       <footer className="footer-fixed">
@@ -167,8 +251,8 @@ export default function Home() {
 
           <div className="footer-contact">
             <p>📍 La Encarnacion, Ocotepeque, Honduras.</p>
-            <p>📞 +504 9999-9999</p>
-            <p>✉ soporte@sumoerp.com</p>
+            <p>📞 +504 8804-7361</p>
+            <p>✉ sumosuport115@gmail.com</p>
           </div>
 
           <div className="footer-links">
@@ -178,7 +262,7 @@ export default function Home() {
           </div>
 
           <div className="footer-socials" style={{marginRight: '-150px'}}>
-            <a href="https://wa.me/50499999999" aria-label="WhatsApp"><i className="pi pi-whatsapp"></i></a>
+            <a href="https://wa.me/50488047361" aria-label="WhatsApp"><i className="pi pi-whatsapp"></i></a>
             <a href="https://facebook.com/sumoerp" aria-label="Facebook"><i className="pi pi-facebook"></i></a>
             <a href="https://instagram.com/sumoerp" aria-label="Instagram"><i className="pi pi-instagram"></i></a>
           </div>
