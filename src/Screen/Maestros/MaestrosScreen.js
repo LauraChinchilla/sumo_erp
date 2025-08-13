@@ -539,6 +539,8 @@ export default function MaestrosScreen() {
 
     const imageUrl = urlData?.publicUrl;
 
+    console.log('.>>>>>',imageUrl)
+
     if (fileUploadRef.current) fileUploadRef.current.clear();
 
     const { error: updateError } = await supabase.from('InformacionEmpresa').update({ Logo: imageUrl }).eq('IdEmpresa', 1);

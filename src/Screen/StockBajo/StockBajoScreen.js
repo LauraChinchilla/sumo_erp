@@ -6,6 +6,7 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import ModalImage from '../../components/ModalImage';
 import { Toast } from 'primereact/toast';
+import StockBajoReporte from './StockBajoReporte';
 
 export default function StockBajoScreen() {
   const [data, setData] = useState([]);
@@ -16,8 +17,9 @@ export default function StockBajoScreen() {
   const [selected, setSelected] = useState([]);
   const [showDialogImage, setShowDialogImage] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
+  const [showDialogReporte, setShowDialogReporte] = useState(false);
 
-  const getInventario = async () => {
+  const getInfo = async () => {
     setLoading(true);
     const { data, error } = await supabase
     .from('vta_productos_bajo_stock')
@@ -90,7 +92,7 @@ export default function StockBajoScreen() {
   ];
 
   useEffect(() => {
-    getInventario();
+    getInfo();
   }, []);
 
   useEffect(() => {
@@ -128,11 +130,22 @@ export default function StockBajoScreen() {
 
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <Button
-                icon="pi pi-refresh"
+                icon="pi pi-print"
                 className="p-button-success"
-                onClick={getInventario}
+                onClick={()=> setShowDialogReporte(true)}
                 disabled={loading}
                 severity="primary"
+                tooltip='Imprimir'
+                tooltipOptions={{position: 'left'}}
+              />
+              <Button
+                icon="pi pi-refresh"
+                className="p-button-success"
+                onClick={getInfo}
+                disabled={loading}
+                severity="primary"
+                tooltip='Recargar'
+                tooltipOptions={{position: 'left'}}
               />
             </div>
           </div>
@@ -146,6 +159,14 @@ export default function StockBajoScreen() {
           setSelected={setSelected}
           showDialogImage={showDialogImage}
           setShowDialogImage={setShowDialogImage}
+        />
+      )}
+
+      {showDialogReporte && (
+        <StockBajoReporte
+          showDialog={showDialogReporte}
+          setShowDialog={setShowDialogReporte}
+          data={data}
         />
       )}
     </>

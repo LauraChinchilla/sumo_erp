@@ -22,6 +22,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
     const [tiposSalida, setTiposSalida] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [showDialogClientes, setShowDialogClientes] = useState(false)
+    const [imprimir, setImprimir] = useState(true)
 
     const initialValues = {
         IdSalida: -1,

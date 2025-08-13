@@ -1,12 +1,13 @@
 import React, { useRef } from 'react';
 import { Menu } from 'primereact/menu';
 import { Button } from 'primereact/button';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import 'primeicons/primeicons.css';
 
 export default function Navbar({ onLogout }) {
   const menuRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const menuItems = [
     { label: 'Inicio', icon: 'pi pi-home', command: () => navigate('/Dashboard') },
@@ -34,15 +35,17 @@ export default function Navbar({ onLogout }) {
 
       {/* Botones y menú */}
       <div className="navbar-right">
-        <Button 
-          label="Dashboard" 
-          icon="pi pi-home" 
-          severity='primary'
-          onClick={(e) => {
-            e.stopPropagation(); 
-            window.open('/Dashboard', '_blank');
-          }}
-        />
+        {location.pathname !== '/Dashboard' && (
+          <Button 
+            label="Dashboard" 
+            icon="pi pi-home" 
+            severity='primary'
+            onClick={(e) => {
+              e.stopPropagation(); 
+              window.open('/Dashboard', '_blank');
+            }}
+          />
+        )}
 
         <Menu model={menuItems} popup ref={menuRef} />
         <Button
