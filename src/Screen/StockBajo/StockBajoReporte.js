@@ -3,6 +3,8 @@ import { Dialog } from "primereact/dialog";
 import { supabase } from "../../supabaseClient";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
+import formatNumber from "../../utils/funcionesFormatNumber";
+
 
 pdfMake.vfs = pdfFonts.pdfMake?.vfs || pdfFonts.vfs;
 
@@ -69,7 +71,11 @@ export default function StockBajoReporte({ showDialog, setShowDialog, data }) {
 
       footer: (currentPage, pageCount) => {
         const fecha = new Date();
-        const fechaFormateada = fecha.toLocaleDateString("es-HN", { day: "2-digit", month: "2-digit", year: "numeric"});
+        const fechaFormateada = fecha.toLocaleDateString("es-HN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
 
         return {
           columns: [
@@ -77,13 +83,13 @@ export default function StockBajoReporte({ showDialog, setShowDialog, data }) {
               text: `Fecha de impresión: ${fechaFormateada}`,
               alignment: "left",
               margin: [40, 0, 0, 0],
-              style: 'footer',
+              style: "footer",
             },
             {
               text: `Página ${currentPage} de ${pageCount}`,
               alignment: "right",
               margin: [0, 0, 40, 0],
-              style: 'footer',
+              style: "footer",
             },
           ],
         };
@@ -91,9 +97,27 @@ export default function StockBajoReporte({ showDialog, setShowDialog, data }) {
 
       content: [
         {
-          margin: [0, 20, 0, 0],
-          text: "Hola",
-          style: "header",
+          table: {
+            widths: ["15%", "*", "15%", "12%", "12%"],
+            body: [
+              [
+                { text: "Codigo", style: "headerTable" },
+                { text: "Producto", style: "headerTable" },
+                { text: "Categoria", style: "headerTable" },
+                { text: "Unidad", style: "headerTable" },
+                { text: "Cantidad", style: "headerTable" },
+              ],
+              ...(data || []).map((item) => [
+                {text: item.Code, style: 'table', alignment: 'center'},
+                {text: item.Name, style: 'table'},
+                {text: item.categoryname, style: 'table'},
+                {text: item.UnitName, style: 'table'},
+                {text: formatNumber(item.TotalUnidades), style: 'table', alignment: 'right'},
+              ]),
+            ],
+          },
+          margin: [0, 30, 0, 0],
+          layout: 'lightHorizontalLines'
         },
       ],
 
@@ -120,6 +144,15 @@ export default function StockBajoReporte({ showDialog, setShowDialog, data }) {
         footer: {
           fontSize: 10,
         },
+        table: {
+          fontSize: 10,
+        },
+        headerTable: {
+          fontSize: 10,
+          bold: true,
+          alignment: 'center',
+        },
+
       },
     };
 
