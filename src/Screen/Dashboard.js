@@ -111,7 +111,7 @@ export default function Dashboard() {
       }}
     >
       <div className="dashboard-container">
-        <h2 style={{ color: '#403f8bff' }}>
+        <h2 style={{ color: '#08314d' }}>
           Bienvenido, {user?.UserName}
         </h2>
         <div className="card-grid">
