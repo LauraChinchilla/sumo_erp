@@ -21,9 +21,7 @@ export default function StockBajoScreen() {
 
   const getInfo = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-    .from('vta_productos_bajo_stock')
-    .select('*')
+    const { data, error } = await supabase.from('vta_productos_bajo_stock').select('*')
     
     if (!error) {
       setData(data);

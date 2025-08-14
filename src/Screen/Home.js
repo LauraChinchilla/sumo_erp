@@ -51,7 +51,7 @@ export default function Home() {
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
             <i className="pi pi-facebook"></i>
           </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <a href="https://www.instagram.com/sumoerp?igsh=NGQ5bnY3NGt6enB6&utm_source=qr" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <i className="pi pi-instagram"></i>
           </a>
         </div>

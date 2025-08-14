@@ -15,6 +15,7 @@ import { InputText } from "primereact/inputtext";
 import { FileUpload } from "primereact/fileupload";
 import UnidadesCRUD from "./UnidadesCRUD";
 import useForm from "../../components/useForm";
+import getLocalDateTimeString from "../../utils/funciones";
 
 export default function MaestrosScreen() {
   const [dataClientes, setDataClientes] = useState([]);
@@ -34,15 +35,13 @@ export default function MaestrosScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [editable, setEditable] = useState(false);
 
-  const { values, setValues, handleChange, errors } = useForm({});
+  const { values, setValues, handleChange, errors, validateForm } = useForm({});
   
 
   const getInfo = async () => {
     setLoading(true);
     if (activeIndex === 0) {
-      const { data, error } = await supabase
-        .from("InformacionEmpresa")
-        .select("*");
+      const { data, error } = await supabase.from("InformacionEmpresa").select("*");
       if (!error) {
         setValues(data[0])
       }
@@ -621,6 +620,40 @@ export default function MaestrosScreen() {
     }
   };
 
+  const rules = {
+    NombreCorto: { required: true },
+    NombreLargo: { required: true },
+  };
+
+
+  const GuardarInformacion = async (e) => {
+    e.preventDefault();
+    if (!validateForm(rules)) {
+      console.log('Formulario con errores', errors);
+      return;
+    }
+
+    const datos = {
+      NombreCorto: values?.NombreCorto,
+      NombreLargo: values?.NombreLargo,
+      RTN: values?.RTN,
+      Eslogan: values?.Eslogan,
+      DateEdit: getLocalDateTimeString(),
+      IdUserEdit: user?.IdUser,
+    };
+
+    await supabase.from('InformacionEmpresa').update(datos).eq('IdEmpresa', 1);
+
+    toast.current?.show({
+      severity: 'success',
+      summary: 'Guardada',
+      detail: 'Informacion guardada correctamente.',
+      life: 4000
+    });
+    setLoading(false);
+    getInfo()
+  }
+
   useEffect(() => {
     getInfo();
     setSelected([])
@@ -653,9 +686,12 @@ export default function MaestrosScreen() {
                 <h3>Informacion de mi Empresa</h3>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Button icon="pi pi-refresh"  className="p-button-success" severity='primary' onClick={getInfo} disabled={loading} />
-                <Button icon="pi pi-pencil"  className="p-button-success" severity='primary' onClick={() => { setEditable(!editable)}} disabled={loading} />
+              <div style={{ gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <Button icon="pi pi-save" tooltip="Guardar" tooltipOptions={{position: 'left'}} className="p-button-success" severity='primary' onClick={GuardarInformacion} disabled={loading} />
+                  <Button icon="pi pi-refresh" tooltip="Recargar" tooltipOptions={{position: 'left'}} className="p-button-success" severity='primary' onClick={getInfo} disabled={loading} />
+                  <Button icon="pi pi-pencil" tooltip="Editar" tooltipOptions={{position: 'left'}} className="p-button-success" severity='primary' onClick={() => { setEditable(!editable)}} disabled={loading} />
+                </div>
               </div>
             </div>
 

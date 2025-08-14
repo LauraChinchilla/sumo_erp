@@ -11,6 +11,7 @@ import CRUDSalidas from "./CRUDSalidas";
 import { confirmDialog } from "primereact/confirmdialog";
 import getLocalDateTimeString from "../../utils/funciones";
 import CRUDSalidaMultiple from "./CRUDSalidaMultiple";
+import SalidasReporte from "./SalidasReporte";
 
 export default function SalidasScreen() {
   const [data, setData] = useState([]);
@@ -29,6 +30,7 @@ export default function SalidasScreen() {
   const [globalFilter, setGlobalFilter] = useState("");
   const inputRef = useRef(null);
   const toast = useRef(null);
+  const [showDialogReporte, setShowDialogReporte] = useState(false);
 
   const getInfo = async () => {
     setLoading(true);
@@ -360,6 +362,15 @@ export default function SalidasScreen() {
               disabled={loading}
             />
             <Button
+              icon="pi pi-print"
+              className="p-button-success"
+              onClick={()=> setShowDialogReporte(true)}
+              disabled={loading}
+              severity="primary"
+              tooltip='Imprimir'
+              tooltipOptions={{position: 'left'}}
+            />
+            <Button
               icon="pi pi-external-link"
               label="Ver Creditos"
               className="p-button-success"
@@ -417,6 +428,17 @@ export default function SalidasScreen() {
           getInfo={getInfo}
         />
       )}
+
+      {showDialogReporte && (
+        <SalidasReporte
+          showDialog={showDialogReporte}
+          setShowDialog={setShowDialogReporte}
+          data={data}
+          rangeDates={rangeDates}
+        />
+      )}
+
+
     </>
   );
 }
