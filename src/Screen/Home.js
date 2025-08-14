@@ -83,6 +83,7 @@ export default function Home() {
 
           <div className="button-container">
             <Button className="button login-button" label="Iniciar Sesión" icon="pi pi-sign-in" onClick={() => navigate('./login')}/>
+            {/* <Button className="button register-button" label="Registrarse" icon="pi pi-user-plus" /> */}
           </div>
 
         </div>
