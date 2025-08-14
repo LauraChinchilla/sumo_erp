@@ -33,7 +33,6 @@ export default function EntradasScreen() {
   const [showDialogProveedores, setShowDialogProveedores] = useState(false);
   const [showDialogStatus, setShowDialogStatus] = useState(false);
   const [selected, setSelected] = useState([]);
-  const [selected1, setSelected1] = useState([]);
   const [loading, setLoading] = useState(false);
   const [rangeDates, setRangeDates] = useState(() => {
     const now = new Date();

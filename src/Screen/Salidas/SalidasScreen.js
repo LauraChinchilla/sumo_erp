@@ -272,7 +272,7 @@ export default function SalidasScreen() {
             }
             // Si es venta, también actualizar el movimiento de caja
             if (rowData?.IdTipoSalida === 1) {
-              const { data: data5, error: movError } = await supabase
+              const {error: movError } = await supabase
                 .from("CajaMovimientos")
                 .update({
                   IdStatus: 9,
