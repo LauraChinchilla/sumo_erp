@@ -336,68 +336,6 @@ export default function PersonalScreen() {
             </div>
             <Table columns={colums2} data={data} />
           </TabPanel>
-
-          {/* <TabPanel header="Usuarios">
-            {loading && <Loading message="Cargando..." />}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-              <Button
-                icon="pi pi-refresh"
-                className="p-button-success"
-                onClick={getInfo}
-                disabled={loading}
-                severity="primary"
-              />
-            </div>
-            <Table columns={columnsUsers} data={dataUsers} />
-          </TabPanel>
-
-          <TabPanel header="Categorias">
-            {loading && <Loading message="Cargando..." />}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-              <Button
-                icon="pi pi-refresh"
-                className="p-button-success"
-                onClick={getInfo}
-                disabled={loading}
-                severity="primary"
-              />
-              <Button
-                icon="pi pi-plus"
-                label="Nueva Categoria"
-                severity='primary'
-                className="p-button-success"
-                onClick={() => {
-                  setSelected([])
-                  setShowDialogCategorias(true)
-                }}
-              />
-            </div>
-            <Table columns={columnsCat} data={dataCategorias} />
-          </TabPanel>
-
-          <TabPanel header="Unidades">
-            {loading && <Loading message="Cargando..." />}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-              <Button
-                icon="pi pi-refresh"
-                className="p-button-success"
-                onClick={getInfo}
-                disabled={loading}
-                severity="primary"
-              />
-              <Button
-                icon="pi pi-plus"
-                label="Nueva Unidad"
-                severity='primary'
-                className="p-button-success"
-                onClick={() => {
-                  setSelected([])
-                  setShowDialogUnits(true)
-                }}
-              />
-            </div>
-            <Table columns={columnsUnits} data={dataUnidades} />
-          </TabPanel> */}
         </TabView>
 
         {showDialog && (

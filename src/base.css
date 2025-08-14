@@ -599,3 +599,56 @@ body[data-theme='dark'] .p-menu .p-menuitem-link:hover {
 body[data-theme='dark'] .p-menu .p-menuitem-icon {
   color: var(--text-color);
 }
+
+/* TabView - Modo Claro */
+body[data-theme='light'] .p-tabview {
+  background-color: var(--dialog-bg);
+  color: var(--dialog-text);
+}
+
+body[data-theme='light'] .p-tabview-nav {
+  background-color: var(--dropdown-bg);
+  border-bottom: 1px solid var(--input-border);
+}
+
+body[data-theme='light'] .p-tabview-nav li .p-tabview-nav-link {
+  color: var(--dropdown-text);
+  background-color: var(--dropdown-bg);
+}
+
+body[data-theme='light'] .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background-color: var(--dropdown-hover);
+  color: var(--dropdown-text);
+}
+
+/* TabView - Modo Oscuro */
+body[data-theme='dark'] .p-tabview {
+  background-color: var(--dialog-bg);
+  color: var(--dialog-text);
+}
+
+body[data-theme='dark'] .p-tabview-nav {
+  background-color: var(--dropdown-bg);
+  border-bottom: 1px solid var(--input-border);
+}
+
+body[data-theme='dark'] .p-tabview-nav li .p-tabview-nav-link {
+  color: var(--dropdown-text);
+  background-color: var(--dropdown-bg);
+}
+
+body[data-theme='dark'] .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background-color: var(--dropdown-hover);
+  color: var(--dropdown-text);
+}
+
+/* Contenido de las pestañas */
+body[data-theme='light'] .p-tabview-panels {
+  background-color: var(--dialog-bg);
+  color: var(--dialog-text);
+}
+
+body[data-theme='dark'] .p-tabview-panels {
+  background-color: var(--dialog-bg);
+  color: var(--dialog-text);
+}
