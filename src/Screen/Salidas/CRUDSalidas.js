@@ -13,6 +13,8 @@ import { Dropdown } from 'primereact/dropdown';
 import getLocalDateTimeString from '../../utils/funciones';
 import formatNumber from '../../utils/funcionesFormatNumber';
 import ClientesCRUD from '../Maestros/ClientesCRUD';
+import { confirmDialog } from 'primereact/confirmdialog';
+import ReciboPago from './ReciboPago';
 
 const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo, editable = true }) => {
     const toast = useRef(null);
@@ -22,7 +24,8 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
     const [tiposSalida, setTiposSalida] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [showDialogClientes, setShowDialogClientes] = useState(false)
-    const [imprimir, setImprimir] = useState(true)
+    const [showDialogRecibo, setShowDialogRecibo] = useState(false)
+    
 
     const initialValues = {
         IdSalida: -1,
@@ -49,18 +52,9 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
         if (selected?.length > 0) {
             const producto = selected[0];
 
-            const { data: entrada } = await supabase
-                .from('vta_entradas')
-                .select('*')
-                .eq('IdProduct', producto.IdProduct)
-                .eq('IdStatus', 3)
-                .order('Date', { ascending: false })
-                .limit(1)
-                .maybeSingle();
-            const { data: inventario } = await supabase
-                .from('vta_inventario')
-                .select('*')
-                .eq('IdProduct', producto.IdProduct)
+            const { data: entrada } = await supabase.from('vta_entradas').select('*').eq('IdProduct', producto.IdProduct).eq('IdStatus', 3).order('Date', { ascending: false }).limit(1).maybeSingle();
+            
+            const { data: inventario } = await supabase.from('vta_inventario').select('*').eq('IdProduct', producto.IdProduct)
 
 
             setValues({
@@ -76,19 +70,9 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
     };
 
     const buscarProdcutoEnEntradas = async (producto) => {
-        const { data: entrada } = await supabase
-            .from('vta_entradas')
-            .select('*')
-            .eq('IdProduct', producto.IdProduct)
-            .eq('IdStatus', 3)
-            .order('Date', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        const { data: entrada } = await supabase.from('vta_entradas').select('*').eq('IdProduct', producto.IdProduct).eq('IdStatus', 3).order('Date', { ascending: false }).limit(1).maybeSingle();
 
-            const { data: inventario } = await supabase
-                .from('vta_inventario')
-                .select('*')
-                .eq('IdProduct', producto.IdProduct)
+        const { data: inventario } = await supabase.from('vta_inventario').select('*').eq('IdProduct', producto.IdProduct)
 
         setValues({
             ...producto,
@@ -122,10 +106,10 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
 
         if (values?.Stock < values?.CantidadSalida) {
             toast.current?.show({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No hay suficientes unidades disponibles para realizar la salida.',
-            life: 4000
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No hay suficientes unidades disponibles para realizar la salida.',
+                life: 4000
             });
             return;
         }
@@ -150,11 +134,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             PagoCredito: values?.IdTipoSalida === 3 ? false : true,
         };
 
-        const { data: salidaInsertada, error: errorEntrada } = await supabase
-            .from('Salidas')
-            .insert([Datos])
-            .select()
-            .single();
+        const { data: salidaInsertada, error: errorEntrada } = await supabase.from('Salidas').insert([Datos]).select().single();
 
         if (errorEntrada) {
             console.error('Error al guardar salida:', errorEntrada.message);
@@ -184,14 +164,14 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             const { error } = await supabase.from('CajaMovimientos').insert([datos]);
 
             if (error) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Se realizó la salida, pero no se registró el movimiento en caja. Comuníquese con soporte.',
-                life: 4000
-            });
-            setLoading(false);
-            return;
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Se realizó la salida, pero no se registró el movimiento en caja. Comuníquese con soporte.',
+                    life: 4000
+                });
+                setLoading(false);
+                return;
             }
         }
 
@@ -202,11 +182,24 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             life: 4000
         });
 
-        setTimeout(() => {
-            getInfo();
-            setShowDialog(false);
-            setLoading(false);
-        }, 800);
+        confirmDialog({
+            message: '¿Desea generar el Recibo de pago?',
+            header: 'Confirmación',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sí',
+            rejectLabel: 'No',
+            accept: ()=> {
+                console.log('Antes de abrir')
+                setShowDialogRecibo(true)
+                console.log('Despues de abrir')
+
+            },
+        });
+
+        getInfo();
+        setShowDialog(false);
+        setLoading(false);
+
     };
 
     const onHide = () => {
@@ -494,7 +487,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '1rem' }}>
                     {/* Botón a la izquierda */}
                     <div>
                         <Button
@@ -517,7 +510,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
 
 
                 {/* Botones */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '0.5rem' }}>
                     <Button label="Cancelar" className="p-button-secondary" onClick={onHide} disabled={loading} />
                     <Button label="Guardar" onClick={guardarDatos} loading={loading} disabled={loading} />
                 </div>
@@ -534,6 +527,13 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
                 editable={true}
                 setActiveIndex={() => {}}
               />
+            )}
+
+            {showDialogRecibo &&(
+                <ReciboPago
+                    showDialog={showDialogRecibo}
+                    setShowDialog={setShowDialogRecibo}
+                />
             )}
         </>
 

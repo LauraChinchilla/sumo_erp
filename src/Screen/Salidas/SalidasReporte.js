@@ -11,7 +11,6 @@ export default function SalidasReporte({ showDialog, setShowDialog, data, rangeD
   const [pdfUrl, setPdfUrl] = useState(null);
 
   const getInfo = async (data) => {
-    console.log(rangeDates)
     const { data: infoEmpresa, error } = await supabase.from("InformacionEmpresa").select("*");
 
     const logoUrl = infoEmpresa[0]?.Logo;
