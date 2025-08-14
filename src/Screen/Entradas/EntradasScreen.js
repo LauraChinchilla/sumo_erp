@@ -20,6 +20,7 @@ import { useUser } from '../../context/UserContext';
 import CRUDProducts from '../Products/CRUDProducts';
 import CRUDEntradas from './CRUDEntradas';
 import ProveedoresCRUD from '../Maestros/ProveedoresCRUD';
+import EntradasReporte from './EntradasReporte';
 
 export default function EntradasScreen() {
   const [data, setData] = useState([]);
@@ -45,6 +46,8 @@ export default function EntradasScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef(null);
   const toast = useRef(null);
+  const [showDialogReporte, setShowDialogReporte] = useState(false);
+  
 
   const getInfo = async () => {
     setLoading(true);
@@ -310,7 +313,7 @@ export default function EntradasScreen() {
       frozen: true,
       className: 'XxSmall',
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1
+      hidden: user?.IdRol !== 1
     },
     {
       field: 'Date',
@@ -356,7 +359,7 @@ export default function EntradasScreen() {
       format: 'number',
       className: 'Small',
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
       prefix: 'L '
     },
     {
@@ -367,7 +370,7 @@ export default function EntradasScreen() {
       format: 'number',
       className: 'Small',
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
       suffix: ' %',
     },
     {
@@ -379,7 +382,7 @@ export default function EntradasScreen() {
       suffix: ' %',
       className: 'Small',
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
     },
     {
       field: 'PrecioVenta',
@@ -428,7 +431,7 @@ export default function EntradasScreen() {
       summary: true,
       className: 'Small',
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
       prefix: 'L '
     },
     {
@@ -440,7 +443,7 @@ export default function EntradasScreen() {
       className: 'Small',
       summary: true,
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
       prefix: 'L '
     },
     {
@@ -523,7 +526,7 @@ export default function EntradasScreen() {
       format: 'number',
       className: 'Small',
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
       prefix: 'L '
     },
     {
@@ -534,7 +537,7 @@ export default function EntradasScreen() {
       format: 'number',
       className: 'Small',
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
       suffix: ' %',
     },
     {
@@ -546,7 +549,16 @@ export default function EntradasScreen() {
       suffix: ' %',
       className: 'Small',
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
+    },
+    {
+      field: 'UserNameCreate',
+      Header: 'Usuario Creacion',
+      center: false,
+      frozen: false,
+      format: 'text',
+      className: 'Small',
+      filterMatchMode: 'contains',
     },
     {
       field: 'PrecioVenta',
@@ -557,15 +569,6 @@ export default function EntradasScreen() {
       className: 'Small',
       filterMatchMode: 'equals',
       prefix: 'L '
-    },
-    {
-      field: 'UserNameCreate',
-      Header: 'Usuario Creacion',
-      center: false,
-      frozen: false,
-      format: 'text',
-      className: 'Small',
-      filterMatchMode: 'contains',
     },
     {
       field: 'Cantidad',
@@ -595,7 +598,7 @@ export default function EntradasScreen() {
       summary: true,
       className: 'Small',
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
       prefix: 'L '
     },
     {
@@ -607,7 +610,7 @@ export default function EntradasScreen() {
       className: 'Small',
       summary: true,
       filterMatchMode: 'equals',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
       prefix: 'L '
     },
     {
@@ -700,6 +703,15 @@ export default function EntradasScreen() {
                 />
 
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <Button
+                    icon="pi pi-print"
+                    className="p-button-success"
+                    onClick={()=> setShowDialogReporte(true)}
+                    disabled={loading}
+                    severity="primary"
+                    tooltip='Imprimir'
+                    tooltipOptions={{position: 'top'}}
+                  />
                   <Button
                     icon="pi pi-refresh"
                     className="p-button-success"
@@ -877,6 +889,15 @@ export default function EntradasScreen() {
           selected={selected}
           getInfo={getInfo}
           editable={true}
+        />
+      )}
+
+      {showDialogReporte && (
+        <EntradasReporte
+          showDialog={showDialogReporte}
+          setShowDialog={setShowDialogReporte}
+          data={data}
+          rangeDates={rangeDates}
         />
       )}
 

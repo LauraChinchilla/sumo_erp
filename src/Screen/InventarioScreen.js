@@ -58,20 +58,12 @@ export default function InventarioScreen() {
       className: 'XxxSmall',
       filterMatchMode: 'contains',
     },
-    // {
-    //   field: 'CostoPromedio',
-    //   Header: 'Costo Promedio',
-    //   format: 'number',
-    //   className: 'Small',
-    //   hidden: user?.IdRol === 1 && user?.IdRol === 2,
-    //   summary: true,
-    // },
     {
       field: 'UltimoPrecioCompra',
       Header: 'Últ. Precio Compra',
       format: 'number',
       className: 'Small',
-      hidden: user?.IdRol === 1 && user?.IdRol === 2,
+      hidden: user?.IdRol !== 1 && user?.IdRol !== 2,
     },
     {
       field: 'PrecioVenta',
