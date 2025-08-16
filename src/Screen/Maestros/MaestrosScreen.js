@@ -640,6 +640,9 @@ export default function MaestrosScreen() {
       Eslogan: values?.Eslogan,
       DateEdit: getLocalDateTimeString(),
       IdUserEdit: user?.IdUser,
+      Direccion: values?.Direccion,
+      Telefono: values?.Telefono,
+      Email: values?.Email,
     };
 
     await supabase.from('InformacionEmpresa').update(datos).eq('IdEmpresa', 1);
@@ -650,6 +653,7 @@ export default function MaestrosScreen() {
       detail: 'Informacion guardada correctamente.',
       life: 4000
     });
+    setEditable(false)
     setLoading(false);
     getInfo()
   }
@@ -753,6 +757,53 @@ export default function MaestrosScreen() {
                   <label htmlFor="Eslogan">Eslogan</label>
                 </FloatLabel>
               </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', gap: '2rem' }}>
+              <div style={{ flex: 1 }}>
+                <FloatLabel>
+                  <InputText
+                    id="Telefono"
+                    value={values?.Telefono}
+                    onChange={(e) => handleChange('Telefono', e.target.value)}
+                    style={{ width: '100%' }}
+                    disabled={!editable}
+                    className={errors.Telefono ? 'p-invalid' : ''}
+                  />
+                  <label htmlFor="Telefono">Telefono</label>
+                </FloatLabel>
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <FloatLabel>
+                  <InputText
+                    id="Email"
+                    value={values?.Email}
+                    onChange={(e) => handleChange('Email', e.target.value)}
+                    style={{ width: '100%' }}
+                    disabled={!editable}
+                    className={errors.Email ? 'p-invalid' : ''}
+                  />
+                  <label htmlFor="Email">Email</label>
+                </FloatLabel>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', gap: '2rem' }}>
+              <div style={{ flex: 1 }}>
+                <FloatLabel>
+                  <InputText
+                    id="Direccion"
+                    value={values?.Direccion}
+                    onChange={(e) => handleChange('Direccion', e.target.value)}
+                    style={{ width: '100%' }}
+                    disabled={!editable}
+                    className={errors.Direccion ? 'p-invalid' : ''}
+                  />
+                  <label htmlFor="Direccion">Direccion</label>
+                </FloatLabel>
+              </div>
+
             </div>
 
             <div style={{ flex: 1, marginTop: '2rem' }}>

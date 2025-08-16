@@ -1,17 +1,21 @@
-import { Dialog } from 'primereact/dialog';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useForm from '../../components/useForm';
+import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { FloatLabel } from 'primereact/floatlabel';
-import { supabase } from '../../supabaseClient';
 import { Toast } from 'primereact/toast';
-import { useUser } from '../../context/UserContext';
 import { Dropdown } from 'primereact/dropdown';
+import { Card } from 'primereact/card';
+import { confirmDialog } from 'primereact/confirmdialog';
+
+import useForm from '../../components/useForm';
+import Table from '../../components/Table';
+
+import { supabase } from '../../supabaseClient';
+import { useUser } from '../../context/UserContext';
 import getLocalDateTimeString from '../../utils/funciones';
 import ClientesCRUD from '../Maestros/ClientesCRUD';
-import { Card } from 'primereact/card';
-import Table from '../../components/Table';
+import ReciboPago from './ReciboPago';
 
 const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, getInfo, editable = true }) => {
     const toast = useRef(null);
@@ -23,6 +27,8 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
     const [showDialogClientes, setShowDialogClientes] = useState(false)
     const [productosSeleccionados, setProductosSeleccionados] = useState([]);
     const [codigoEscaneado, setCodigoEscaneado] = useState('');
+    const [showDialogRecibo, setShowDialogRecibo] = useState(false)
+    
 
     const initialValues = {
         IdSalidaEnc: -1,
@@ -192,11 +198,23 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
             life: 4000
         });
 
-        setTimeout(() => {
-            getInfo();
-            setShowDialog(false);
-            setLoading(false);
-        }, 800);
+
+        confirmDialog({
+            message: '¿Desea generar el Recibo de pago?',
+            header: 'Confirmación',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sí',
+            rejectLabel: 'No',
+            accept: () => {
+                setShowDialogRecibo(true);
+                setLoading(false);
+            },
+            reject: () => {
+                setShowDialog(false);
+                getInfo()
+                setLoading(false);
+            }
+        });
     };
 
     const handleAgregarProductoPorCodigo = async () => {
@@ -462,6 +480,15 @@ const CRUDSalidaMultiple = ({ setShowDialog, showDialog, setSelected, selected, 
                 editable={true}
                 setActiveIndex={() => {}}
               />
+            )}
+
+            {showDialogRecibo &&(
+                <ReciboPago
+                    showDialog={showDialogRecibo}
+                    setShowDialog={setShowDialogRecibo}
+                    setShowDialogPrincipal={setShowDialog}
+                    getInfoPrincipal={getInfo}
+                />
             )}
         </>
 

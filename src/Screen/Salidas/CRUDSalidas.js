@@ -187,17 +187,16 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             icon: 'pi pi-exclamation-triangle',
             acceptLabel: 'Sí',
             rejectLabel: 'No',
-            accept: ()=> {
-                console.log('Antes de abrir')
-                setShowDialogRecibo(true)
-                console.log('Despues de abrir')
-
+            accept: () => {
+                setShowDialogRecibo(true);
+                setLoading(false);
             },
+            reject: () => {
+                setShowDialog(false);
+                getInfo()
+                setLoading(false);
+            }
         });
-
-        getInfo();
-        setShowDialog(false);
-        setLoading(false);
 
     };
 
@@ -535,6 +534,8 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
                 <ReciboPago
                     showDialog={showDialogRecibo}
                     setShowDialog={setShowDialogRecibo}
+                    setShowDialogPrincipal={setShowDialog}
+                    getInfoPrincipal={getInfo}
                 />
             )}
         </>

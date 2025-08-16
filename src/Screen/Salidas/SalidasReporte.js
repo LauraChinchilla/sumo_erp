@@ -114,35 +114,35 @@ export default function SalidasReporte({ showDialog, setShowDialog, data, rangeD
       
       content: [
         {
-            table: {
-            widths: ["15%", "*", "25%", "12%", "12%"],
-            body: [
-                [
-                { text: "Codigo", style: "headerTable" },
-                { text: "Producto", style: "headerTable" },
-                { text: "Cliente", style: "headerTable" },
-                { text: "Cantidad", style: "headerTable" },
-                { text: "Total", style: "headerTable" },
-                ],
-                ...(data || []).map((item) => [
-                { text: item.Code, style: "table", alignment: "center" },
-                { text: item.Name, style: "table" },
-                { text: item.NombreCompleto, style: "table" },
-                { text: `${formatNumber(item.CantidadSalida)} ${item?.UnitSymbol}`, style: "table", alignment: "right" },
-                { text: `L ${formatNumber(item.Total)}`, style: "table", alignment: "right" },
-                ]),
-                // Fila de total general
-                [
-                { text: "TOTAL", style: "headerTable", alignment: "right" },
-                { text: "", border: [false, false, false, false] },
-                { text: "", border: [false, false, false, false] },
-                { text: "", border: [false, false, false, false] },
-                { text: `L ${formatNumber(totalGeneral)}`, style: "headerTable", alignment: "right" },
-                ],
+          table: {
+          widths: ["15%", "*", "25%", "12%", "18%"],
+          body: [
+            [
+              { text: "Codigo", style: "headerTable" },
+              { text: "Producto", style: "headerTable" },
+              { text: "Cliente", style: "headerTable" },
+              { text: "Cantidad", style: "headerTable" },
+              { text: "Total", style: "headerTable" },
             ],
-            },
-            margin: [0, 30, 0, 0],
-            layout: "lightHorizontalLines",
+              ...(data || []).map((item) => [
+              { text: item.Code, style: "table", alignment: "center" },
+              { text: item.Name, style: "table" },
+              { text: item.NombreCompleto, style: "table" },
+              { text: `${formatNumber(item.CantidadSalida)} ${item?.UnitSymbol}`, style: "table", alignment: "right" },
+              { text: `L ${formatNumber(item.Total)}`, style: "table", alignment: "right" },
+              ]),
+              // Fila de total general
+              [
+              { text: "TOTAL", style: "headerTable", alignment: "right" },
+              { text: "", border: [false, false, false, false] },
+              { text: "", border: [false, false, false, false] },
+              { text: "", border: [false, false, false, false] },
+              { text: `L ${formatNumber(totalGeneral)}`, style: "headerTable", alignment: "right" },
+              ],
+          ],
+          },
+          margin: [0, 30, 0, 0],
+          layout: "lightHorizontalLines",
         },
       ],
 
