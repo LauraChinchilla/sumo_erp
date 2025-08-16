@@ -73,6 +73,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
         const { data: entrada } = await supabase.from('vta_entradas').select('*').eq('IdProduct', producto.IdProduct).eq('IdStatus', 3).order('Date', { ascending: false }).limit(1).maybeSingle();
 
         const { data: inventario } = await supabase.from('vta_inventario').select('*').eq('IdProduct', producto.IdProduct)
+        const montoISV = (entrada?.PrecioCompra * (entrada?.ISV/100))
 
         setValues({
             ...producto,
@@ -82,7 +83,7 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             Description: producto.Description,
             categoryname: producto.categoryname,
             PrecioVenta: entrada?.PrecioVenta || 0,
-            PrecioCompra: entrada?.PrecioCompra || 0,
+            PrecioCompra: (entrada?.PrecioCompra + montoISV) || 0,
             ISV: entrada?.ISV || 0,
             PorcentajeGanancia: entrada?.PorcentajeGanancia || 0,
             Stock: inventario[0]?.TotalUnidades,
@@ -92,7 +93,6 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
     const guardarDatos = async (e) => {
         e.preventDefault();
 
-        // Condición: si el tipo de salida es 3, se requiere IdCliente
         if (values?.IdTipoSalida === 3) {
             rules.IdCliente = { required: true, message: 'Debe seleccionar un cliente' };
         } else {
@@ -148,7 +148,6 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
             return;
         }
 
-        // Solo registra movimiento en caja si es tipo de salida = 1 (venta)
         if (values?.IdTipoSalida === 1) {
             const datos = {
                 IdTipoMovimiento: 2,
@@ -216,20 +215,21 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
 
 
     useEffect(() => {
-        const cantidad = parseFloat(values?.CantidadSalida) || 0;
-        const precioVentaConISV = parseFloat(values?.PrecioVenta) || 0;
-        const isv = parseFloat(values?.ISV) || 0;
-        const precioUnitarioSinISV = values?.Excento ? precioVentaConISV : precioVentaConISV / (1 + isv / 100);
+        const CantidadSalida = parseFloat(values?.CantidadSalida) || 0;
+        const PrecioVenta = values?.PrecioVenta || 0;
+        const ISV = (values?.ISV /100)|| 0;
 
-        const subTotal = cantidad * precioUnitarioSinISV;
-        const isvTotal = values?.Excento ? 0 : subTotal * (isv / 100);
-        const total = precioVentaConISV * cantidad;
+        const montoISV = PrecioVenta * ISV
+
+        const SubTotal = (PrecioVenta - montoISV) * CantidadSalida
+        const Total = PrecioVenta * CantidadSalida
+        const MontoISV = montoISV * CantidadSalida
 
         setValues({
             ...values,
-            SubTotal: subTotal,
-            ISVQty: isvTotal,
-            Total: total,
+            SubTotal: SubTotal,
+            ISVQty: MontoISV,
+            Total: Total,
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values?.CantidadSalida]);
@@ -481,6 +481,8 @@ const CRUDSalidas = ({ setShowDialog, showDialog, setSelected, selected, getInfo
                                 disabled={!values?.IdProduct}
                                 suffix={` ${values?.UnitName}`}
                                 className={errors.CantidadSalida ? 'p-invalid' : ''}
+                                minFractionDigits={2}
+                                maxFractionDigits={2}
                             />
                             <label htmlFor="CantidadSalida">Cantidad</label>
                         </FloatLabel>

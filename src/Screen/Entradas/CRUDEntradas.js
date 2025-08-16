@@ -163,10 +163,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
         const precioCompra = parseFloat(values.PrecioCompra) || 0;
         const isv = parseFloat(values.ISV) || 0;
         const ganancia = parseFloat(values.PorcentajeGanancia) || 0;
-
-        const montoGanancia = precioCompra * (ganancia / 100);
         const montoISV = values.Excento ? 0 : precioCompra * (isv / 100);
-
+        const montoGanancia = (precioCompra + montoISV) * (ganancia / 100);
         const precioVenta = precioCompra + montoGanancia + montoISV;
 
         setValues(prev => ({ ...prev, PrecioVenta: precioVenta.toFixed(2) }));
@@ -213,8 +211,6 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
         <Dialog visible={showDialog} onHide={onHide} style={{ width: '60%' }} header={'Nueva Entrada'}>
             <Toast ref={toast} />
             {/* Código y Nombre */}
-
-
             {selected?.length > 0 ? (
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                     <div style={{ flex: 1 }}>
@@ -255,6 +251,7 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                                 id="IdProduct"
                                 value={values.IdProduct}
                                 options={productos}
+                                filter
                                 onChange={(e) => {
                                 const selectedProduct = productos.find(p => p.IdProduct === e.value);
                                     if (selectedProduct) {
@@ -305,6 +302,7 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                     <FloatLabel>
                         <Dropdown
                             id="IdVendor"
+                            filter
                             value={values.IdVendor}
                             options={proveedores}
                             onChange={(e) => handleChange('IdVendor', e.value)}
@@ -399,6 +397,8 @@ const CRUDEntradas = ({setShowDialog, showDialog, setSelected, selected, getInfo
                             style={{ width: '100%' }}
                             disabled={!editable}
                             className={errors.PrecioVenta ? 'p-invalid' : ''}
+                            minFractionDigits={2}
+                            maxFractionDigits={2}
                         />
                         <label htmlFor="PrecioVenta">Precio Venta</label>
                     </FloatLabel>

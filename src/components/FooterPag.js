@@ -57,7 +57,7 @@ export default function FooterPag({ onLogout }) {
             className="p-button-text p-button-rounded"
             onClick={toggleTheme}
             tooltip="Cambiar tema"
-            tooltipOptions={{ position: 'top' }}
+            tooltipOptions={{ position: 'left' }}
           />
 
           {(user?.IdRol === 1 || user?.IdRol === 2) && (
@@ -66,7 +66,7 @@ export default function FooterPag({ onLogout }) {
               className="p-button-text p-button-rounded p-button-secondary"
               onClick={() => setShowDialog(true)}
               tooltip="Resumen de Caja"
-              tooltipOptions={{ position: 'top' }}
+              tooltipOptions={{ position: 'left' }}
             />
           )}
 
@@ -75,7 +75,7 @@ export default function FooterPag({ onLogout }) {
             className="p-button-text p-button-rounded p-button-danger"
             onClick={confirmCerrarSesion}
             tooltip="Cerrar sesión"
-            tooltipOptions={{ position: 'top' }}
+            tooltipOptions={{ position: 'left' }}
           />
         </div>
       </footer>
