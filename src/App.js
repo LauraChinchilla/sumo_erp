@@ -21,6 +21,7 @@ import PersonalScreen from './Screen/Personal/PersonalScreen';
 import { ThemeProvider } from './context/ThemeContext';
 import { Navigate } from 'react-router-dom';
 import Home from './Screen/Home';
+import NotFound from './Screen/NotFound/NotFound';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useUser();
@@ -202,6 +203,7 @@ function AppContent() {
           </PrivateRoute>
         }
       />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
