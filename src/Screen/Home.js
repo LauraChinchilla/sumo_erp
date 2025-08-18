@@ -389,6 +389,8 @@ export default function Home() {
           style={{ width: "60%", height: "80%" }}
           header="Políticas de Privacidad"
           modal
+          className="dialog-politicas"
+          baseZIndex={10000}
         >
           <div style={{ maxHeight: "65vh", overflowY: "auto", paddingRight: "1rem" }}>
             <p><strong>Última actualización:</strong> Agosto 2025</p>
@@ -468,6 +470,8 @@ export default function Home() {
           header="Términos y Condiciones"
           modal
           contentStyle={{ overflowY: "auto", maxHeight: "70vh" }}
+          className="dialog-politicas"
+          baseZIndex={10000}
         >
           <div style={{ paddingRight: "1rem" }}>
             <p><strong>Última actualización:</strong> Agosto 2025</p>
@@ -545,6 +549,8 @@ export default function Home() {
           header="Soporte"
           modal
           contentStyle={{ overflowY: "auto", maxHeight: "60vh" }}
+          className="dialog-politicas"
+          baseZIndex={10000}
         >
           <div style={{ paddingRight: "1rem" }}>
             <p>

@@ -905,25 +905,23 @@
 .register-btn:hover {
   background-color: #008fcc;
 }
-
 /* Overlay del modal encima de todo */
-.p-dialog-mask {
+.dialog-politicas .p-dialog-mask {
   background-color: rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(4px);
-  z-index: 9999 !important; /* 👈 más alto que navbar/footer */
+  z-index: 9999 !important; /* más alto que navbar/footer */
 }
 
 /* Contenedor principal del dialog */
-.p-dialog {
-  z-index: 10000 !important; /* 👈 aún más alto que el overlay */
+.dialog-politicas.p-dialog {
+  z-index: 10000 !important; /* aún más alto que el overlay */
   border-radius: 16px !important;
   box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.25);
   overflow: hidden;
 }
 
-
 /* Encabezado */
-.p-dialog .p-dialog-header {
+.dialog-politicas .p-dialog-header {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white !important;
   font-size: 1.25rem;
@@ -933,18 +931,18 @@
 }
 
 /* Botón de cerrar */
-.p-dialog .p-dialog-header-icon {
+.dialog-politicas .p-dialog-header-icon {
   color: white !important;
   transition: transform 0.2s ease, background 0.2s ease;
 }
-.p-dialog .p-dialog-header-icon:hover {
+.dialog-politicas .p-dialog-header-icon:hover {
   transform: scale(1.1);
   background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
 }
 
 /* Contenido */
-.p-dialog .p-dialog-content {
+.dialog-politicas .p-dialog-content {
   padding: 1.5rem !important;
   background-color: #f9fafb;
   font-size: 0.95rem;
@@ -955,7 +953,7 @@
 }
 
 /* Subtítulos */
-.p-dialog .p-dialog-content h4 {
+.dialog-politicas .p-dialog-content h4 {
   color: #2563eb;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
@@ -964,17 +962,17 @@
 }
 
 /* Listas */
-.p-dialog .p-dialog-content ul {
+.dialog-politicas .p-dialog-content ul {
   padding-left: 1.2rem;
   margin-bottom: 1rem;
 }
-.p-dialog .p-dialog-content li {
+.dialog-politicas .p-dialog-content li {
   margin-bottom: 0.5rem;
   list-style: disc;
 }
 
 /* Footer si lo usas */
-.p-dialog .p-dialog-footer {
+.dialog-politicas .p-dialog-footer {
   border-top: none;
   background: #f3f4f6;
   padding: 1rem;
