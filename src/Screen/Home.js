@@ -45,7 +45,7 @@ export default function Home() {
           alt="Avatar App"
           className="app-avatar"
         />
-        <h2>Contáctanos</h2>
+        <h2 className="text-contactanos">Contáctanos</h2>
         <div className="social-icons">
           <a
             href="https://wa.me/50488047361"
@@ -74,7 +74,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* BBOTONES FLOTANTES */}
+      {/* BOTONES FLOTANTES */}
       {showButtons && (
         <div className="floating-buttons">
           <button
