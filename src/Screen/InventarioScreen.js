@@ -145,13 +145,11 @@ export default function InventarioScreen() {
                 icon="pi pi-refresh"
                 className="p-button-success"
                 onClick={getInfo}
-                disabled={loading}
-                severity="primary"
               />
             </div>
           </div>
         <Table columns={columns} data={filteredData} />
-        {loading && <Loading message="Cargando inventario..." />}
+        {loading && <Loading message="Cargando..." />}
       </div>
 
 

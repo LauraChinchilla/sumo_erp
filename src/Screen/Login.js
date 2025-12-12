@@ -72,7 +72,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 toggleMask
                 feedback={false}
-                className="login-input"
+                className="login-pass"
                 style={{ width: 280 }}
               />
             </div>

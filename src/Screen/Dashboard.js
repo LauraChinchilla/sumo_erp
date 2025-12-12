@@ -103,7 +103,6 @@ export default function Dashboard() {
   return (
     <div
       style={{
-        // backgroundImage: 'url(https://mdexqdspobjpmzactfow.supabase.co/storage/v1/object/public/fondosumo//Fonfo2.avif)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         minHeight: '87.9vh',
@@ -111,7 +110,7 @@ export default function Dashboard() {
       }}
     >
       <div className="dashboard-container">
-        <h2 style={{ color: '#08314d' }}>
+        <h2 style={{ color: 'var(--text-description)'}}>
           Bienvenido, {user?.UserName}
         </h2>
         <div className="card-grid">
